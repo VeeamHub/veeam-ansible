@@ -2,10 +2,9 @@
 
 This collection contains all of the Ansible Roles built for automating Veeam deployment/configuration of various Veeam solutions housed in [VeeamHub](https://github.com/VeeamHub/veeam-ansible). The following Veeam software is currently supported:
 
-* [veeam_vas](https://github.com/VeeamHub/veeam-ansible/tree/master/veeam_vas)
-  * Veeam Backup & Replication
-  * Veeam Backup Enterprise Manager
-  * Veeam ONE
+* Veeam Backup & Replication
+* Veeam Backup Enterprise Manager
+* Veeam ONE
 
 ## Tested On
 

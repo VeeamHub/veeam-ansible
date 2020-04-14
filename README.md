@@ -8,7 +8,7 @@ This repository contains sample code for automating Veeam deployment/configurati
 
 Documentation, including usage instructions, can be found with each Ansible role.
 
-The roles in this repository are part of a [collection in Ansible Galaxy](https://galaxy.ansible.com/VeeamHub/veeam). Easiest method to install them in your environment is using [Ansible Galaxy](https://docs.ansible.com/ansible/latest/user_guide/collections_using.html):
+The roles in this repository are part of a [collection in Ansible Galaxy](https://galaxy.ansible.com/carceneaux/veeam). Easiest method to install them in your environment is using [Ansible Galaxy](https://docs.ansible.com/ansible/latest/user_guide/collections_using.html):
 
 `ansible-galaxy collection install carceneaux.veeam`
 

@@ -42,7 +42,7 @@ A big thanks to Markus Kraus ([@vMarkus_K](https://twitter.com/vMarkus_K))! I us
 
 ## How to use this Role
 
-This role is part of a collection of all roles in this repository. Easiest method to insatll it is using [Ansible Galaxy](https://docs.ansible.com/ansible/latest/user_guide/collections_using.html):
+This role is part of a [collection](https://galaxy.ansible.com/carceneaux/veeam) of all roles in this repository. Easiest method to insatll it is using [Ansible Galaxy](https://docs.ansible.com/ansible/latest/user_guide/collections_using.html):
 
 `ansible-galaxy collection install carceneaux.veeam`
 

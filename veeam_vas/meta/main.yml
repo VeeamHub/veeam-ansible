@@ -22,4 +22,7 @@ galaxy_info:
     - server
     - system
     - backup
+    - vbr
+    - vem
+    - em
 dependencies: []

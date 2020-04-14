@@ -1,7 +1,7 @@
 ---
 namespace: "carceneaux"
 name: "veeam"
-version: "1.0.0"
+version: "1.0.1"
 readme: "readme_galaxy.md"
 authors:
   - "Chris Arceneaux (https://www.arsano.ninja/)"
@@ -21,5 +21,8 @@ tags:
   - server
   - system
   - backup
+  - vbr
+  - vem
+  - em
 repository: "https://github.com/VeeamHub/veeam-ansible"
 issues: "https://github.com/VeeamHub/veeam-ansible/issues/new/choose"
