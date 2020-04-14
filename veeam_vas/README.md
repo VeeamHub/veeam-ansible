@@ -1,4 +1,4 @@
-# veeamhub.veeam_vas
+# VeeamHub.veeam.veeam_vas
 
 An Ansible Role to administer the [Veeam Availability Suite](https://www.veeam.com/data-center-availability-suite.html). Here are products included in the Veeam Availability Suite:
 
@@ -8,7 +8,7 @@ An Ansible Role to administer the [Veeam Availability Suite](https://www.veeam.c
 
 A big thanks to Markus Kraus ([@vMarkus_K](https://twitter.com/vMarkus_K))! I used his [code](https://github.com/mycloudrevolution/veeam_setup) as a starting point for this project.
 
-- [veeamhub.veeam_vas](#veeamhubveeamvas)
+- [VeeamHub.veeam.veeam_vas](#veeamhubveeamveeamvas)
   - [How to use this Role](#how-to-use-this-role)
   - [Requirements](#requirements)
     - [Ansible](#ansible)
@@ -42,11 +42,11 @@ A big thanks to Markus Kraus ([@vMarkus_K](https://twitter.com/vMarkus_K))! I us
 
 ## How to use this Role
 
-Easiest method to use this role is to install it using [Ansible Galaxy](https://docs.ansible.com/ansible/latest/galaxy/user_guide.html#installing-roles-from-galaxy):
+This role is part of a collection of all roles in this repository. Easiest method to insatll it is using [Ansible Galaxy](https://docs.ansible.com/ansible/latest/user_guide/collections_using.html):
 
-`ansible-galaxy install veeamhub.veeam_vas`
+`ansible-galaxy collection install VeeamHub.veeam`
 
-You can also copy the role directly from this repository and put it in your Ansible Roles folder (default: `~/.ansible/roles/`).
+You can also copy the role directly from this repository and put it in your Ansible Roles folder (default: `~/.ansible/roles/`). _Note that using this method will require slight changes to the sample playbooks listed in this document._
 
 ## Requirements
 
@@ -111,9 +111,11 @@ Please note there are more configurations than the examples shown below. If you 
 ```yaml
 - name: Veeam Backup & Replication Install
   hosts: veeam
+  collections:
+    - VeeamHub.veeam
   tasks:
     - include_role:
-        name: veeamhub.veeam_vas
+        name: veeam_vas
         tasks_from: vbr_install
       vars:
         iso_download: true
@@ -131,9 +133,11 @@ Please note there are more configurations than the examples shown below. If you 
 ```yaml
 - name: Veeam Backup & Replication Install
   hosts: veeam
+  collections:
+    - VeeamHub.veeam
   tasks:
     - include_role:
-        name: veeamhub.veeam_vas
+        name: veeam_vas
         tasks_from: vbr_install
       vars:
         iso_download: true
@@ -153,9 +157,11 @@ Please note there are more configurations than the examples shown below. If you 
 ```yaml
 - name: Veeam Backup & Replication Install with Remote SQL Server
   hosts: veeam
+  collections:
+    - VeeamHub.veeam
   tasks:
     - include_role:
-        name: veeamhub.veeam_vas
+        name: veeam_vas
         tasks_from: vbr_install
       vars:
         license: true
@@ -172,9 +178,11 @@ Please note there are more configurations than the examples shown below. If you 
 ```yaml
 - name: Veeam Backup & Replication Install
   hosts: veeam
+  collections:
+    - VeeamHub.veeam
   tasks:
     - include_role:
-        name: veeamhub.veeam_vas
+        name: veeam_vas
         tasks_from: vbr_install
       vars:
         destination: "C:\\install\\"
@@ -193,9 +201,11 @@ Please note there are more configurations than the examples shown below. If you 
 ```yaml
 - name: Veeam Backup & Replication Upgrade
   hosts: veeam
+  collections:
+    - VeeamHub.veeam
   tasks:
     - include_role:
-        name: veeamhub.veeam_vas
+        name: veeam_vas
         tasks_from: vbr_upgrade
       vars:
         iso_download: true
@@ -208,9 +218,11 @@ Please note there are more configurations than the examples shown below. If you 
 ```yaml
 - name: Veeam Backup & Replication (Cloud Connect) Upgrade
   hosts: veeam
+  collections:
+    - VeeamHub.veeam
   tasks:
     - include_role:
-        name: veeamhub.veeam_vas
+        name: veeam_vas
         tasks_from: vbr_upgrade
       vars:
         iso_download: true
@@ -224,9 +236,11 @@ Please note there are more configurations than the examples shown below. If you 
 ```yaml
 - name: Veeam Backup & Replication Patch
   hosts: veeam
+  collections:
+    - VeeamHub.veeam
   tasks:
     - include_role:
-        name: veeamhub.veeam_vas
+        name: veeam_vas
         tasks_from: vbr_patch
       vars:
         source: "C:\\install\\"
@@ -239,9 +253,11 @@ Please note there are more configurations than the examples shown below. If you 
 - name: Veeam Backup Enterprise Manager Install
   gather_facts: no
   hosts: veeam
+  collections:
+    - VeeamHub.veeam
   tasks:
     - include_role:
-        name: veeamhub.veeam_vas
+        name: veeam_vas
         tasks_from: em_install
       vars:
         destination: "C:\\install\\"
@@ -263,9 +279,11 @@ Please note there are more configurations than the examples shown below. If you 
 - name: Veeam Backup Enterprise Manager Install
   gather_facts: no
   hosts: veeam
+  collections:
+    - VeeamHub.veeam
   tasks:
     - include_role:
-        name: veeamhub.veeam_vas
+        name: veeam_vas
         tasks_from: em_install
       vars:
         iso_download: true
@@ -284,9 +302,11 @@ Please note there are more configurations than the examples shown below. If you 
 - name: Veeam Backup Enterprise Manager Install including Cloud Connect Portal
   gather_facts: no
   hosts: veeam
+  collections:
+    - VeeamHub.veeam
   tasks:
     - include_role:
-        name: veeamhub.veeam_vas
+        name: veeam_vas
         tasks_from: em_install
       vars:
         iso_download: true
@@ -307,9 +327,11 @@ Please note there are more configurations than the examples shown below. If you 
 ```yaml
 - name: Backup Enterprise Manager Upgrade
   hosts: veeam
+  collections:
+    - VeeamHub.veeam
   tasks:
     - include_role:
-        name: veeamhub.veeam_vas
+        name: veeam_vas
         tasks_from: em_upgrade
       vars:
         iso_download: true
@@ -327,9 +349,11 @@ Please note there are more configurations than the examples shown below. If you 
 ```yaml
 - name: Veeam Backup Enterprise Manager Patch
   hosts: veeam
+  collections:
+    - VeeamHub.veeam
   tasks:
     - include_role:
-        name: veeamhub.veeam_vas
+        name: veeam_vas
         tasks_from: em_patch
       vars:
         source: "C:\\install\\"
@@ -347,6 +371,8 @@ Please note there are more configurations than the examples shown below. If you 
 - name: Installing Veeam ONE Install (Typical Deployment)
   gather_facts: no
   hosts: veeam
+  collections:
+    - VeeamHub.veeam
   vars:
     iso_download: false #this way ISO is only downloaded once
     license: true
@@ -360,17 +386,17 @@ Please note there are more configurations than the examples shown below. If you 
   tasks:
     - name: Veeam ONE Server installation tasks
       include_role:
-        name: veeamhub.veeam_vas
+        name: veeam_vas
         tasks_from: one_server_install
       vars:
         iso_download: true #this way ISO is only downloaded once
     - name: Veeam ONE Web UI installation tasks
       include_role:
-        name: veeamhub.veeam_vas
+        name: veeam_vas
         tasks_from: one_web_ui_install
     - name: Veeam ONE Monitoring Client installation tasks
       include_role:
-        name: veeamhub.veeam_vas
+        name: veeam_vas
         tasks_from: one_client_install
 ```
 
@@ -380,6 +406,8 @@ Please note there are more configurations than the examples shown below. If you 
 - name: Installing Veeam ONE Install (Typical Deployment)
   gather_facts: no
   hosts: veeam
+  collections:
+    - VeeamHub.veeam
   vars:
     iso_download: false #this way ISO is only downloaded once
     sql_service_username: "svc_sql"
@@ -391,17 +419,17 @@ Please note there are more configurations than the examples shown below. If you 
   tasks:
     - name: Veeam ONE Server installation tasks
       include_role:
-        name: veeamhub.veeam_vas
+        name: veeam_vas
         tasks_from: one_server_install
       vars:
         iso_download: true #this way ISO is only downloaded once
     - name: Veeam ONE Web UI installation tasks
       include_role:
-        name: veeamhub.veeam_vas
+        name: veeam_vas
         tasks_from: one_web_ui_install
     - name: Veeam ONE Monitoring Client installation tasks
       include_role:
-        name: veeamhub.veeam_vas
+        name: veeam_vas
         tasks_from: one_client_install
 ```
 
@@ -411,10 +439,12 @@ Please note there are more configurations than the examples shown below. If you 
 - name: Veeam ONE Advanced Deployment - Veeam ONE Server
   gather_facts: no
   hosts: server
+  collections:
+    - VeeamHub.veeam
   tasks:
     - name: Veeam ONE Server installation tasks
       include_role:
-        name: veeamhub.veeam_vas
+        name: veeam_vas
         tasks_from: one_server_install
       vars:
         iso_download: true
@@ -429,12 +459,14 @@ Please note there are more configurations than the examples shown below. If you 
         # https://docs.ansible.com/ansible/latest/user_guide/playbooks_vault.html#single-encrypted-variable
 
 - name: Veeam ONE Advanced Deployment - Veeam Web UI
-  hosts: web
   gather_facts: no
+  hosts: web
+  collections:
+    - VeeamHub.veeam
   tasks:
     - name: Veeam ONE Web UI installation tasks
       include_role:
-        name: veeamhub.veeam_vas
+        name: veeam_vas
         tasks_from: one_web_ui_install
       vars:
         iso_download: true
@@ -446,12 +478,14 @@ Please note there are more configurations than the examples shown below. If you 
         # https://docs.ansible.com/ansible/latest/user_guide/playbooks_vault.html#single-encrypted-variable
 
 - name: Veeam ONE Advanced Deployment - Monitoring Client
-  hosts: client
   gather_facts: no
+  hosts: client
+  collections:
+    - VeeamHub.veeam
   tasks:
     - name: Veeam ONE Monitoring Client installation tasks
       include_role:
-        name: veeamhub.veeam_vas
+        name: veeam_vas
         tasks_from: one_client_install
       vars:
         iso_download: true
@@ -464,6 +498,8 @@ Please note there are more configurations than the examples shown below. If you 
 - name: Installing Veeam ONE Install (Typical Deployment)
   gather_facts: no
   hosts: veeam
+  collections:
+    - VeeamHub.veeam
   vars:
     iso_download: false #this way ISO is only downloaded once
     license: true
@@ -477,17 +513,17 @@ Please note there are more configurations than the examples shown below. If you 
   tasks:
     - name: Veeam ONE Server installation tasks
       include_role:
-        name: veeamhub.veeam_vas
+        name: veeam_vas
         tasks_from: one_server_install
       vars:
         iso_download: true #this way ISO is only downloaded once
     - name: Veeam ONE Web UI installation tasks
       include_role:
-        name: veeamhub.veeam_vas
+        name: veeam_vas
         tasks_from: one_web_ui_install
     - name: Veeam ONE Monitoring Client installation tasks
       include_role:
-        name: veeamhub.veeam_vas
+        name: veeam_vas
         tasks_from: one_client_install
 ```
 
@@ -495,7 +531,10 @@ Please note there are more configurations than the examples shown below. If you 
 
 ```yaml
 - name: Veeam ONE Upgrade
+  gather_facts: no
   hosts: veeam
+  collections:
+    - VeeamHub.veeam
   vars:
     iso_download: false  #this way ISO is only downloaded once
     license: true
@@ -506,17 +545,17 @@ Please note there are more configurations than the examples shown below. If you 
   tasks:
     - name: Veeam ONE Server upgrade tasks
       include_role:
-        name: veeamhub.veeam_vas
+        name: veeam_vas
         tasks_from: one_server_upgrade
       vars:
         iso_download: true  #this way ISO is only downloaded once
     - name: Veeam ONE Web UI upgrade tasks
       include_role:
-        name: veeamhub.veeam_vas
+        name: veeam_vas
         tasks_from: one_web_ui_upgrade
     - name: Veeam ONE Monitoring Client upgrade tasks
       include_role:
-        name: veeamhub.veeam_vas
+        name: veeam_vas
         tasks_from: one_client_upgrade
     - name: Rebooting server now to complete upgrade
       win_reboot:
@@ -528,9 +567,11 @@ Please note there are more configurations than the examples shown below. If you 
 ```yaml
 - name: Veeam Backup & Replication Patch
   hosts: veeam
+  collections:
+    - VeeamHub.veeam
   tasks:
     - include_role:
-        name: veeamhub.veeam_vas
+        name: veeam_vas
         tasks_from: one_patch
       vars:
         source: "C:\\install\\"
