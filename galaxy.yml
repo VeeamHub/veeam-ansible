@@ -1,7 +1,7 @@
 ---
 namespace: "carceneaux"
 name: "veeam"
-version: "1.0.1"
+version: "1.0.2"
 readme: "readme_galaxy.md"
 authors:
   - "Chris Arceneaux (https://www.arsano.ninja/)"
