@@ -15,4 +15,4 @@ This collection contains all of the Ansible Roles built for automating Veeam dep
 
 Documentation, including usage instructions, can be found with each Ansible Role:
 
-* [veeam_vas](https://github.com/VeeamHub/veeam-ansible/tree/master/veeam_vas)
+* [veeam_vas](https://github.com/VeeamHub/veeam-ansible/tree/master/roles/veeam_vas)
