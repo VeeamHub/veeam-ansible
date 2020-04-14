@@ -1,0 +1,36 @@
+---
+- hosts: localhost
+  connection: local
+  gather_facts: false
+
+  vars:
+    # This should be set via the command line at runtime.
+    tag: ''
+
+  pre_tasks:
+    - name: Ensure the ANSIBLE_GALAXY_TOKEN environment variable is set.
+      fail:
+        msg: ANSIBLE_GALAXY_TOKEN is not set.
+      when: "lookup('env','ANSIBLE_GALAXY_TOKEN') == ''"
+
+    - name: Ensure the ~/.ansible directory exists.
+      file:
+        path: ~/.ansible
+        state: directory
+
+    - name: Write the Galaxy token to ~/.ansible/galaxy_token
+      copy:
+        content: |
+          token: {{ lookup('env','ANSIBLE_GALAXY_TOKEN') }}
+        dest: ~/.ansible/galaxy_token
+
+  tasks:
+    - name: Build the collection.
+      command: >
+        ansible-galaxy collection build
+        chdir=../
+
+    - name: Publish the collection.
+      command: >
+        ansible-galaxy collection publish ./VeeamHub-veeam-{{ tag }}.tar.gz
+        chdir=../

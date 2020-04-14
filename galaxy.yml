@@ -1,0 +1,26 @@
+---
+namespace: "VeeamHub"
+name: "veeam"
+version: "1.0.0"
+readme: "README.md"
+authors:
+  - "Chris Arceneaux (https://www.arsano.ninja/)"
+  - "Markus Kraus (https://mycloudrevolution.com/)"
+description: Administer Veeam Software
+license: GPL-3.0-only
+license_file: "LICENSE"
+tags:
+  - veeam
+  - veeam availability suite
+  - veeam backup & replication
+  - veeam backup enterprise manager
+  - veeam one
+  - veeam enterprise manager
+  - enterprise manager
+  - server
+  - system
+  - backup
+dependencies: []
+repository: "https://github.com/VeeamHub/veeam-ansible"
+documentation: "https://github.com/VeeamHub/veeam-ansible"
+issues: "https://github.com/VeeamHub/veeam-ansible/issues/new/choose"
