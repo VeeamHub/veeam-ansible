@@ -1,0 +1,66 @@
+# one_patch tasks file for veeamhub.veeam_vas
+
+## PRE-INSTALL TASKS
+- name: Including version-specific variables
+  include_vars:
+    file: "vars/one_v{{ version }}.yml"
+  when: not (patch | bool)
+- name: Setting patch folder (from ISO)
+  set_fact:
+    patch_folder: "Updates\\"
+  when: patch | bool
+- name: Setting patch folder (not from ISO)
+  set_fact:
+    patch_folder: ""
+  when: not (patch | bool)
+- name: Print Patch Configuration
+  debug:
+    msg:
+      - "Patch Source: '{{ source }}{{ patch_folder }}{{ patch_file }}'"
+      - "Patch Logs Folder: '{{ destination }}logs'"
+- name: Create logs directory
+  win_file:
+    path: "{{ destination }}logs"
+    state: directory
+  when: not (patch | bool)
+- name: Stopping all Veeam services prior to applying ONE patch
+  win_shell: |
+    Stop-Process -Name "Veeam.Backup.Shell" -Force -ErrorAction SilentlyContinue
+    Get-Service veeam* | Stop-Service
+- name: Ensure the required NuGet package provider version is installed
+  win_shell: |
+    [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+    Find-PackageProvider -Name Nuget -ForceBootstrap -IncludeDependencies -Force
+  when:
+    - sql_instance != '(local)\\VEEAMSQL2016'
+    - not (patch | bool)
+- name: Installing SqlServer PowerShell module
+  win_psmodule:
+    name: SqlServer
+    skip_publisher_check: yes
+    state: present
+  when:
+    - sql_instance != '(local)\\VEEAMSQL2016'
+    - not (patch | bool)
+- name: Start adhoc ONE database backup
+  win_shell: |
+    $secureString = ConvertTo-SecureString "{{ one_password }}" -AsPlainText -Force
+    $credential = New-Object System.Management.Automation.PSCredential ("{{ one_username }}", $secureString)
+    Backup-SqlDatabase -ServerInstance "{{ sql_instance }}" -Database "{{ sql_database }}" -Credential $credential
+  no_log: true
+  when: not (patch | bool)
+
+## INSTALLING PATCH
+- name: Install ONE patch
+  win_package:
+    path: "{{ source }}{{ patch_folder }}{{ patch_file }}"
+    product_id: "Veeam ONE Update"
+    arguments: '/log "{{ destination }}logs\\{{ patch_file }}.log" /silent /noreboot VM_ONE_SERVICEPASSWORD="{{ one_password }}"'
+  register: patch_results
+
+## POST-INSTALL TASKS
+- name: Rebooting server now to complete Veeam ONE patch installation
+  win_reboot:
+    msg: Reboot initiated by Ansible to complete Veeam ONE patch installation
+  when:
+    - not (patch | bool)

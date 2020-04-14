@@ -1,0 +1,163 @@
+---
+# one_server_install tasks file for veeamhub.veeam_vas
+- name: Including version-specific variables
+  include_vars:
+    file: "vars/one_v{{ version }}.yml"
+
+# PRE-INSTALL TASKS
+- name: Veeam ONE ISO Tasks
+  include_tasks: mount_iso.yml
+- name: Print Installation Configuration
+  debug:
+    msg:
+      - "Installation Source: '{{ source }}'"
+      - "Installation Logs Folder: '{{ destination }}logs'"
+      - "Version: {{ version }}"
+      - "Download ISO?: {{ iso_download }}"
+      - "ISO Source: {{ iso_url }}"
+      - "ISO File Destination: {{ destination }}{{ destination_iso_file }}"
+      - "Use license?: {{ license }}"
+      - "License Source: {{ source_license }}"
+      - "License File Destination: {{ destination }}{{ destination_license_file }}"
+      - "Install SQL Express?: {{ sql_express_setup }}"
+      - "SQL Instance: {{ sql_instance }}"
+      - "SQL Database: {{ sql_database }}"
+      - "SQL Service Account: {{ sql_service_username | default('not specified') }}"
+      - "Veeam ONE Service Account: {{ one_username }}"
+      - "Veeam ONE SQL Account: {{ one_username }}"
+      - "Veeam ONE Installation Type: {{ one_installation_type }}"
+- name: Copy license file
+  win_copy:
+    src: "{{source_license}}"
+    dest: "{{ destination }}{{destination_license_file}}"
+  when: license | bool
+- name: Including Veeam ONE Common Pre-Install tasks
+  include_tasks: one_install_pretasks.yml
+- name: Create SQL Service Account User
+  win_user:
+    name: "{{ sql_service_username }}"
+    password: "{{ sql_service_password }}"
+    password_never_expires: yes
+    state: present
+    groups:
+      - Users
+  when: sql_express_setup | bool
+- name: Check if MS SQL service is installed
+  win_service:
+    name: MSSQL$VEEAMSQL2016
+  when: sql_express_setup | bool
+  register: service
+- name: Install SQL Express
+  win_package:
+    path: "{{ sql_express_file }}"
+    product_id: SQL 2016 Express
+    arguments:
+      - '/q'
+      - '/ACTION=Install'
+      - '/IACCEPTSQLSERVERLICENSETERMS'
+      - '/FEATURES=SQL'
+      - '/INSTANCENAME=VEEAMSQL2016'
+      - '/SQLSVCACCOUNT={{ sql_service_username }}'
+      - '/SQLSVCPASSWORD={{ sql_service_password }}'
+      - '/ADDCURRENTUSERASSQLADMIN'
+      - '/UPDATEENABLED=1'
+      - '/TCPENABLED=1'
+      - '/NPENABLED=1'
+  become: yes
+  become_flags: logon_type=batch
+  vars:
+    ansible_become_method: runas
+    ansible_become_user: "{{ one_username }}"
+    ansible_become_pass: "{{ one_password }}"
+  when:
+    - sql_express_setup | bool
+    - not (service.exists | bool)
+
+# INSTALLING VEEAM SOFTWARE
+## ONE Monitor Server
+- name: Install ONE Monitor Server with license file
+  win_package:
+    path: "{{ source }}Monitor\\VeeamONE.Monitor.Server.x64.msi"
+    state: present
+    arguments: '/L*v "{{ destination }}logs\\VeeamONE.Monitor.Server.x64.log" EDITLICFILEPATH="{{ destination }}{{destination_license_file}}" ACCEPT_THIRDPARTY_LICENSES=1 ACCEPT_EULA=1 VM_MN_SERVICEACCOUNT="{{ one_username }}" VM_MN_SERVICEPASSWORD="{{ one_password }}" VM_MN_SQL_SERVER="{{ sql_instance }}" VM_MN_SQL_DATABASE="{{ sql_database }}" VM_MN_SQL_AUTHENTICATION=0 VM_MN_SQL_USER="{{ one_username }}" VM_MN_SQL_PASSWORD="{{ one_password }}" VM_BACKUP_ADD_LATER=1 VM_VC_SELECTED_TYPE=2 VO_INSTALLATION_TYPE="{{ one_installation_type }}"'
+  when: license | bool
+  register: monitor_server
+- name: Install ONE Monitor Server without license file
+  win_package:
+    path: "{{ source }}Monitor\\VeeamONE.Monitor.Server.x64.msi"
+    state: present
+    arguments: '/L*v "{{ destination }}logs\\VeeamONE.Monitor.Server.x64.log" ACCEPT_THIRDPARTY_LICENSES=1 ACCEPT_EULA=1 VM_MN_SERVICEACCOUNT="{{ one_username }}" VM_MN_SERVICEPASSWORD="{{ one_password }}" VM_MN_SQL_SERVER="{{ sql_instance }}" VM_MN_SQL_DATABASE="{{ sql_database }}" VM_MN_SQL_AUTHENTICATION=0 VM_MN_SQL_USER="{{ one_username }}" VM_MN_SQL_PASSWORD="{{ one_password }}" VM_BACKUP_ADD_LATER=1 VM_VC_SELECTED_TYPE=2 VO_INSTALLATION_TYPE="{{ one_installation_type }}"'
+  when: not (license | bool)
+  register: monitor_server
+## ONE Reporter Server
+- name: Install ONE Reporter Server with license file
+  win_package:
+    path: "{{ source }}Reporter\\VeeamONE.Reporter.Server.x64.msi"
+    state: present
+    arguments: '/L*v "{{ destination }}logs\\VeeamONE.Reporter.Server.x64.log" EDITLICFILEPATH="{{ destination }}{{destination_license_file}}" ACCEPT_THIRDPARTY_LICENSES=1 ACCEPT_EULA=1 VM_RP_SERVICEACCOUNT="{{ one_username }}" VM_RP_SERVICEPASSWORD="{{ one_password }}" VM_RP_SQL_SERVER="{{ sql_instance }}" VM_RP_SQL_DATABASE="{{ sql_database }}" VM_RP_SQL_AUTHENTICATION=0 VM_RP_SQL_USER="{{ one_username }}" VM_RP_SQL_PASSWORD="{{ one_password }}" VM_BACKUP_ADD_LATER=1 VM_VC_SELECTED_TYPE=2 VO_INSTALLATION_TYPE="{{ one_installation_type }}"'
+  when: license | bool
+  register: reporter_server
+- name: Install ONE Reporter Server without license file
+  win_package:
+    path: "{{ source }}Reporter\\VeeamONE.Reporter.Server.x64.msi"
+    state: present
+    arguments: '/L*v "{{ destination }}logs\\VeeamONE.Reporter.Server.x64.log" ACCEPT_THIRDPARTY_LICENSES=1 ACCEPT_EULA=1 VM_RP_SERVICEACCOUNT="{{ one_username }}" VM_RP_SERVICEPASSWORD="{{ one_password }}" VM_RP_SQL_SERVER="{{ sql_instance }}" VM_RP_SQL_DATABASE="{{ sql_database }}" VM_RP_SQL_AUTHENTICATION=0 VM_RP_SQL_USER="{{ one_username }}" VM_RP_SQL_PASSWORD="{{ one_password }}" VM_BACKUP_ADD_LATER=1 VM_VC_SELECTED_TYPE=2 VO_INSTALLATION_TYPE="{{ one_installation_type }}"'
+  when: not (license | bool)
+  register: reporter_server
+## Setting Veeam ONE Administrator
+- name: Add Veeam ONE service user to local Veeam Administrators group
+  win_group_membership:
+    name: Veeam ONE Administrators
+    members:
+      - "{{ one_username }}"
+    state: present
+- name: Rebooting server to ensure Veeam ONE Agent installation success
+  win_reboot:
+    msg: Reboot initiated by Ansible to ensure Veeam ONE Agent installation success
+  when:
+    - monitor_server.changed | bool
+    - reporter_server.changed | bool
+- name: Mount ISO
+  win_disk_image:
+    image_path: "{{ destination }}{{ destination_iso_file }}"
+    state: present
+  when:
+    - monitor_server.changed | bool
+    - reporter_server.changed | bool
+  register: disk_image_out
+- name: Set Source Fact
+  set_fact:
+    source: "{{ disk_image_out.mount_paths[0] }}"
+  when:
+    - monitor_server.changed | bool
+    - reporter_server.changed | bool
+## ONE Agent Server
+- name: Install ONE Agent Server
+  win_package:
+    path: "{{ source }}Agent\\VeeamONE.Agent.x64.msi"
+    state: present
+    arguments: '/L*v "{{ destination }}logs\\VeeamONE.Agent.x64.log" ACCEPT_THIRDPARTY_LICENSES=1 ACCEPT_EULA=1 VO_AGENT_TYPE=1 VO_BUNDLE_INSTALLATION=1 VO_AGENT_SERVICE_ACCOUNT_NAME="{{ one_username }}" VO_AGENT_SERVICE_ACCOUNT_PASSWORD="{{ one_password }}"'
+## Patches
+- name: Finding file(s) in '{{ source }}Updates' directory
+  win_find:
+    paths: "{{ source }}Updates"
+    recurse: no
+    file_type: file
+  ignore_errors: yes
+  register: file
+- name: Does Veeam ONE need to be patched?
+  set_fact:
+    patch: "{{ not (file.failed) }}"
+- name: Setting patch filename
+  set_fact:
+    patch_file: "{{ file.files[0].filename }}"
+  when: patch | bool
+- name: Including Veeam ONE patch tasks
+  include_tasks: one_patch.yml
+  when: patch | bool
+
+# POST-INSTALL TASKS
+- name: Unmount ISO
+  win_disk_image:
+    image_path: "{{ destination }}{{ destination_iso_file }}"
+    state: absent

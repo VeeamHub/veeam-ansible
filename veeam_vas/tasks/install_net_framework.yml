@@ -1,0 +1,23 @@
+---
+# install_net_framework tasks file for veeamhub.veeam_vas
+- name: Install/Update .NET Framework
+  win_package:
+    path: "{{ net_framework_file }}"
+    product_id: Install .NET Framework
+    state: present
+    arguments: '/q /norestart'
+  register: software
+- name: Rebooting server to complete .NET Framework installation
+  win_reboot:
+    msg: Reboot initiated by Ansible to complete .NET Framework installation
+  when: software.reboot_required | bool
+- name: Mount ISO
+  win_disk_image:
+    image_path: "{{ destination }}{{ destination_iso_file }}"
+    state: present
+  when: software.reboot_required | bool
+  register: disk_image_out
+- name: Set Source Fact
+  set_fact:
+    source: "{{ disk_image_out.mount_paths[0] }}"
+  when: software.reboot_required | bool

@@ -1,29 +1,21 @@
-# VeeamHub Repository Template
+# Ansible Sample Code
 
-Here are instructions on how to use this template:
+This repository contains sample code for automating Veeam deployment/configuration of various Veeam solutions using Ansible.
 
-* Navigate to the [main page of this repository](https://github.com/VeeamHub/veeamhub-template)
-* Follow instructions for [creating a repository from a template](https://help.github.com/en/articles/creating-a-repository-from-a-template)
-  * _Repository names **must** have the prefix:_ **veeam-**
-  * Example: _veeam-repo-name_
-* Replace **all** repository-specific links
-  * `issues` link in _README.md_
-  * `create an issue` link in _README.md_
-  * `opening a new issue` link in _CONTRIBUTING.md_
-* Remove the instructions from this section and replace it with information describing this repository.
+[Ansible](https://www.ansible.com/) is a radically simple IT automation engine that automates cloud provisioning, configuration management, application deployment, intra-service orchestration, and many other IT needs. Avoid writing scripts or custom code to deploy and update your applications — automate in a language that approaches plain English, using SSH, with no agents to install on remote systems. There are both [paid](https://www.ansible.com/products/pricing) and [open-source](https://github.com/ansible/ansible) versions of Terraform.
 
 ## 📗 Documentation
 
-_Place documentation or links to documentation here._
+Documentation, including usage instructions, can be found with each automation.
 
 ## ✍ Contributions
 
-We welcome contributions from the community! We encourage you to create [issues](https://github.com/VeeamHub/{repo-name}/issues/new/choose) for Bugs & Feature Requests and submit Pull Requests. For more detailed information, refer to our [Contributing Guide](CONTRIBUTING.md).
+We welcome contributions from the community! We encourage you to create [issues](https://github.com/VeeamHub/veeam-ansible/issues/new/choose) for Bugs & Feature Requests and submit Pull Requests. For more detailed information, refer to our [Contributing Guide](CONTRIBUTING.md).
 
 ## 🤝🏾 License
 
-* [MIT License](LICENSE)
+* [GNU GPLv3 License](LICENSE)
 
 ## 🤔 Questions
 
-If you have any questions or something is unclear, please don't hesitate to [create an issue](https://github.com/VeeamHub/{repo-name}/issues/new/choose) and let us know!
+If you have any questions or something is unclear, please don't hesitate to [create an issue](https://github.com/VeeamHub/veeam-ansible/issues/new/choose) and let us know!

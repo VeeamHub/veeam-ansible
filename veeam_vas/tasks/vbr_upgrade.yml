@@ -1,0 +1,208 @@
+---
+# vbr_upgrade tasks file for veeamhub.veeam_vas
+- name: Checking to see if Veeam Backup & Replication Server is installed
+  veeam_software_check:
+    name: "Veeam Backup & Replication Server"
+  register: software
+- name: Is Veeam Backup & Replication Server installed?
+  fail:
+    msg: "Veeam Backup & Replication Server must be installed on this server in order to upgrade it."
+  when: not (software.installed | bool)
+- name: Is the correct version of Veeam Backup & Replication Server installed?
+  fail:
+    msg: "You're trying to upgrade from an unsupported version. Please check Veeam documentation for more information: U(https://helpcenter.veeam.com/docs/backup/vsphere/upgrade_vbr.html?ver=100)"
+  when:
+    - software.version != '9.5.0.1536' # 9.5 U3
+    - software.version != '9.5.0.1922' # 9.5 U3a
+    - software.version != '9.5.4.2399' # 9.5 U4 RTM
+    - software.version != '9.5.4.2615' # 9.5 U4 GA
+    - software.version != '9.5.4.2753' # 9.5 U4a GA
+    - software.version != '9.5.4.2866' # 9.5 U4b GA
+- name: Including version-specific variables
+  include_vars:
+    file: "vars/vbr_v{{ version }}.yml"
+
+# PRE-UPGRADE TASKS
+- name: Enable Cloud Connect Maintenance Mode
+  veeam_cloud_connect_maintenance:
+    state: enable
+  when: cloud_connect | bool
+- name: VBR ISO Tasks
+  include_tasks: mount_iso.yml
+- name: Print Upgrade Configuration
+  debug:
+    msg:
+      - "Upgrade Source: '{{ source }}'"
+      - "Upgrade Logs Folder: '{{ destination }}logs'"
+      - "Version: {{ version }}"
+      - "Download ISO?: {{ iso_download }}"
+      - "ISO Source: {{ iso_url }}"
+      - "ISO File Destination: {{ destination }}{{ destination_iso_file }}"
+      - "Use license?: {{ license }}"
+      - "License Source: {{ source_license }}"
+      - "License File Destination: {{ destination }}{{ destination_license_file }}"
+- name: Create logs directory
+  win_file:
+    path: "{{ destination }}logs"
+    state: directory
+- name: Copy license file
+  win_copy:
+    src: "{{source_license}}"
+    dest: "{{ destination }}{{destination_license_file}}"
+  when: license | bool
+- name: Start adhoc VBR configuration backup job
+  veeam_config_backup:
+    state: adhoc
+- name: Stopping and disabling all backup jobs
+  veeam_upgrade_job_prep:
+    state: disable
+    jobs_file: "{{ vbr_jobs_file }}"
+  when: not (cloud_connect | bool)
+  register: jobs
+- name: Print Backup Jobs backup file name
+  debug:
+    var: jobs
+  when: not (cloud_connect | bool)
+- name: Stopping all Veeam services prior to upgrade
+  win_shell: |
+    Stop-Process -Name "Veeam.Backup.Shell" -Force -ErrorAction SilentlyContinue
+    Get-Service veeam* | Stop-Service
+- name: .NET Framework
+  include_tasks: install_net_framework.yml
+
+# UPGRADING VEEAM SOFTWARE
+- name: Upgrade Veeam Backup Catalog
+  win_package:
+    path: "{{ source }}Catalog\\VeeamBackupCatalog64.msi"
+    state: present
+    arguments: '/L*v "{{ destination }}logs\\VeeamBackupCatalog64.log" /norestart /qn ACCEPTEULA="YES" ACCEPT_THIRDPARTY_LICENSES="1"'
+- name: Upgrade Veeam Backup & Replication Server with license
+  win_package:
+    path: "{{ source }}Backup\\Server.x64.msi"
+    state: present
+    arguments: '/L*v "{{ destination }}logs\\BackupServer.log" /norestart /qn" ACCEPTEULA="YES" ACCEPT_THIRDPARTY_LICENSES="1" VBR_LICENSE_FILE="{{ destination }}{{destination_license_file}}" VBR_AUTO_UPGRADE="YES"'
+  when: license | bool
+- name: Upgrade Veeam Backup & Replication Server without license
+  win_package:
+    path: "{{ source }}Backup\\Server.x64.msi"
+    state: present
+    arguments: '/L*v "{{ destination }}logs\\BackupServer.log" /norestart /qn" ACCEPTEULA="YES" ACCEPT_THIRDPARTY_LICENSES="1" VBR_AUTO_UPGRADE="YES"'
+  when: not license | bool
+- name: Upgrade Veeam Backup & Replication Console
+  win_package:
+    path: "{{ source }}Backup\\Shell.x64.msi"
+    state: present
+    arguments: '/L*v "{{ destination }}logs\\Shell.x64.log" /norestart /qn ACCEPTEULA="YES" ACCEPT_THIRDPARTY_LICENSES="1"'
+- name: Upgrade Veeam Explorer for ActiveDirectory
+  win_package:
+    path: "{{ source }}Explorers\\VeeamExplorerForActiveDirectory.msi"
+    state: present
+    arguments: '/L*v "{{ destination }}logs\\VeeamExplorerForActiveDirectory.log" /norestart /qn ACCEPT_EULA="1" ACCEPT_THIRDPARTY_LICENSES="1"'
+- name: Upgrade Veeam Explorer for Exchange
+  win_package:
+    path: "{{ source }}Explorers\\VeeamExplorerForExchange.msi"
+    state: present
+    arguments: '/L*v "{{ destination }}logs\\VeeamExplorerForExchange.log" /norestart /qn ACCEPT_EULA="1" ACCEPT_THIRDPARTY_LICENSES="1"'
+- name: Upgrade Veeam Explorer for Oracle
+  win_package:
+    path: "{{ source }}Explorers\\VeeamExplorerForOracle.msi"
+    state: present
+    arguments: '/L*v "{{ destination }}logs\\VeeamExplorerForOracle.log" /norestart /qn ACCEPT_EULA="1" ACCEPT_THIRDPARTY_LICENSES="1"'
+- name: Upgrade Veeam Explorer for SharePoint
+  win_package:
+    path: "{{ source }}Explorers\\VeeamExplorerForSharePoint.msi"
+    state: present
+    arguments: '/L*v "{{ destination }}logs\\VeeamExplorerForSharePoint.log" /norestart /qn ACCEPT_EULA="1" ACCEPT_THIRDPARTY_LICENSES="1"'
+- name: Upgrade Veeam Explorer for SQL
+  win_package:
+    path: "{{ source }}Explorers\\VeeamExplorerForSQL.msi"
+    state: present
+    arguments: '/L*v "{{ destination }}logs\\VeeamExplorerForSQL.log" /norestart /qn ACCEPT_EULA="1" ACCEPT_THIRDPARTY_LICENSES="1"'
+- name: Upgrade Veeam Distribution Service
+  win_package:
+    path: "{{ source }}Packages\\VeeamDistributionSvc.msi"
+    state: present
+    arguments: '/L*v "{{ destination }}logs\\VeeamDistributionSvc.log" /norestart /qn ACCEPTEULA="YES" ACCEPT_THIRDPARTY_LICENSES="1"'
+- name: Upgrade Veeam Installer Service
+  win_package:
+    path: "{{ source }}Packages\\VeeamInstallerSvc.msi"
+    state: present
+    arguments: '/L*v "{{ destination }}logs\\VeeamInstallerSvc.log" /norestart /qn ACCEPTEULA="YES" ACCEPT_THIRDPARTY_LICENSES="1"'
+- name: Upgrade Veeam Agent for Linux Redistributable
+  win_package:
+    path: "{{ source }}Packages\\VALRedist.msi"
+    state: present
+    arguments: '/L*v "{{ destination }}logs\\VALRedist.log" /norestart /qn ACCEPTEULA="YES" ACCEPT_THIRDPARTY_LICENSES="1"'
+- name: Upgrade Veeam Agent for Microsoft Windows Redistributable
+  win_package:
+    path: "{{ source }}Packages\\VAWRedist.msi"
+    state: present
+    arguments: '/L*v "{{ destination }}logs\\VAWRedist.log" /norestart /qn ACCEPTEULA="YES" ACCEPT_THIRDPARTY_LICENSES="1"'
+- name: Upgrade Veeam Mount Service
+  win_package:
+    path: "{{ source }}Packages\\VeeamMountService.msi"
+    state: present
+    arguments: '/L*v "{{ destination }}logs\\VeeamMountService.log" /norestart /qn ACCEPTEULA="YES" ACCEPT_THIRDPARTY_LICENSES="1"'
+- name: Upgrade Veeam Backup Transport
+  win_package:
+    path: "{{ source }}Packages\\VeeamTransport.msi"
+    state: present
+    arguments: '/L*v "{{ destination }}logs\\VeeamTransport.log" /norestart /qn ACCEPTEULA="YES" ACCEPT_THIRDPARTY_LICENSES="1"'
+- name: Upgrade Veeam Backup vPowerNFS
+  win_package:
+    path: "{{ source }}Packages\\VPowerNFS.msi"
+    state: present
+    arguments: '/L*v "{{ destination }}logs\\VPowerNFS.log" /norestart /qn ACCEPTEULA="YES" ACCEPT_THIRDPARTY_LICENSES="1"'
+- name: Checking to see if Veeam Backup Cloud Gateway is installed
+  veeam_software_check:
+    name: "Veeam Backup Cloud Gateway"
+  register: software
+- name: Upgrade Veeam Backup Cloud Gateway
+  win_package:
+    path: "{{ source }}Packages\\VeeamGateSvc.msi"
+    state: present
+    arguments: '/L*v "{{ destination }}logs\\VeeamGateSvc.log" /norestart /qn ACCEPTEULA="YES" ACCEPT_THIRDPARTY_LICENSES="1"'
+  when: software.installed | bool
+- name: Finding file(s) in '{{ source }}Updates' directory
+  win_find:
+    paths: "{{ source }}Updates"
+    recurse: no
+    file_type: file
+  ignore_errors: yes
+  register: file
+- name: Does VBR need to be patched?
+  set_fact:
+    patch: "{{ not (file.failed) }}"
+- name: Setting patch filename
+  set_fact:
+    patch_file: "{{ file.files[0].filename }}"
+  when: patch | bool
+- name: Including VBR patch tasks
+  include_tasks: vbr_patch.yml
+  when: patch | bool
+
+# POST-UPGRADE TASKS
+- name: Starting all Veeam services to kick off upgrade of repo/proxy servers
+  win_shell: |
+    Get-Service veeam* | Where-Object {$_.Name -ne "VeeamMBPDeploymentService"} | Start-Service
+- name: Disable Cloud Connect Maintenance Mode
+  veeam_cloud_connect_maintenance:
+    state: disable
+  when: cloud_connect | bool
+- name: Enabling all backup jobs in specified file
+  veeam_upgrade_job_prep:
+    state: enable
+    jobs_file: "{{ vbr_jobs_file }}"
+  when: not (cloud_connect | bool)
+- name: Stopping all Veeam services (this may take a while)
+  win_shell: |
+    Add-PSSnapin VeeamPSSnapin | Out-Null
+    Get-VBRJob | Stop-VBRJob | Out-Null
+    Get-Service veeam* | Stop-Service
+- name: Unmount ISO
+  win_disk_image:
+    image_path: "{{ destination }}{{ destination_iso_file }}"
+    state: absent
+- name: Rebooting server now to complete upgrade
+  win_reboot:
+    msg: Reboot initiated by Ansible to complete VBR upgrade

@@ -1,0 +1,161 @@
+---
+# one_server_upgrade tasks file for veeamhub.veeam_vas
+## ONE Monitor Server
+- name: Checking to see if Veeam ONE Monitor Server is installed
+  veeam_software_check:
+    name: "Veeam ONE Monitor Server"
+  register: monitor_server
+- name: Is Veeam ONE Monitor Server installed?
+  fail:
+    msg: "Veeam ONE Monitor Server must be installed on this server in order to upgrade it."
+  when: not (monitor_server.installed | bool)
+- name: Is the correct version of Veeam installed?
+  fail:
+    msg: "You're trying to upgrade from an unsupported version. Please check Veeam documentation for more information: U(https://helpcenter.veeam.com/docs/one/deployment/upgrade.html?ver=100)"
+  when:
+    - monitor_server.version != '9.5.0.3801' # 9.5 U3
+    - monitor_server.version != '9.5.4.4566' # 9.5 U4
+    - monitor_server.version != '9.5.4.4587' # 9.5 U4a
+## ONE Reporter Server
+- name: Checking to see if Veeam ONE Reporter Server is installed
+  veeam_software_check:
+    name: "Veeam ONE Reporter Server"
+  register: reporter_server
+- name: Is Veeam ONE Reporter Server installed?
+  fail:
+    msg: "Veeam ONE Reporter Server must be installed on this server in order to upgrade it."
+  when: not (reporter_server.installed | bool)
+- name: Is the correct version of Veeam installed?
+  fail:
+    msg: "You're trying to upgrade from an unsupported version. Please check Veeam documentation for more information: U(https://helpcenter.veeam.com/docs/one/deployment/upgrade.html?ver=100)"
+  when:
+    - reporter_server.version != '9.5.0.3801' # 9.5 U3
+    - reporter_server.version != '9.5.4.4566' # 9.5 U4
+    - reporter_server.version != '9.5.4.4587' # 9.5 U4a
+## ONE Agent Server
+- name: Checking to see if Veeam ONE Agent is installed
+  veeam_software_check:
+    name: "Veeam ONE Agent"
+  register: agent_server
+- name: Is Veeam ONE Agent installed?
+  fail:
+    msg: "Veeam ONE Agent must be installed on this server in order to upgrade it."
+  when: not (agent_server.installed | bool)
+- name: Is the correct version of Veeam installed?
+  fail:
+    msg: "You're trying to upgrade from an unsupported version. Please check Veeam documentation for more information: U(https://helpcenter.veeam.com/docs/one/deployment/upgrade.html?ver=100)"
+  when:
+    - agent_server.version != '9.5.0.3801' # 9.5 U3
+    - agent_server.version != '9.5.4.4566' # 9.5 U4
+    - agent_server.version != '9.5.4.4587' # 9.5 U4a
+- name: Including version-specific variables
+  include_vars:
+    file: "vars/one_v{{ version }}.yml"
+
+# PRE-UPGRADE TASKS
+- name: Veeam ONE ISO Tasks
+  include_tasks: mount_iso.yml
+- name: Print Upgrade Configuration
+  debug:
+    msg:
+      - "Upgrade Source: '{{ source }}'"
+      - "Upgrade Logs Folder: '{{ destination }}logs'"
+      - "Version: {{ version }}"
+      - "Download ISO?: {{ iso_download }}"
+      - "ISO Source: {{ iso_url }}"
+      - "ISO File Destination: {{ destination }}{{ destination_iso_file }}"
+      - "Use license?: {{ license }}"
+      - "License Source: {{ source_license }}"
+      - "License File Destination: {{ destination }}{{ destination_license_file }}"
+      - "Veeam ONE Service Account: {{ one_username | default('not specified') }}"
+- name: Create logs directory
+  win_file:
+    path: "{{ destination }}logs"
+    state: directory
+- name: Copy license file
+  win_copy:
+    src: "{{source_license}}"
+    dest: "{{ destination }}{{destination_license_file}}"
+  when: license | bool
+- name: Stopping all Veeam services prior to upgrade
+  win_shell: |
+    Get-Service veeam* | Stop-Service
+- name: Ensure the required NuGet package provider version is installed
+  win_shell: |
+    [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+    Find-PackageProvider -Name Nuget -ForceBootstrap -IncludeDependencies -Force
+  when: sql_instance != '(local)\\VEEAMSQL2016'
+- name: Installing SqlServer PowerShell module
+  win_psmodule:
+    name: SqlServer
+    skip_publisher_check: yes
+    state: present
+  when: sql_instance != '(local)\\VEEAMSQL2016'
+- name: Start adhoc Veeam ONE database backup
+  win_shell: |
+    Backup-SqlDatabase -ServerInstance "{{ sql_instance }}" -Database "{{ sql_database }}"
+  become: yes
+  become_flags: logon_type=batch
+  vars:
+    ansible_become_method: runas
+    ansible_become_user: "{{ one_username }}"
+    ansible_become_pass: "{{ one_password }}"
+- name: .NET Framework
+  include_tasks: install_net_framework.yml
+
+# UPGRADING VEEAM SOFTWARE
+## ONE Monitor Server
+- name: Upgrade ONE Monitor Server with license file
+  win_package:
+    path: "{{ source }}Monitor\\VeeamONE.Monitor.Server.x64.msi"
+    state: present
+    arguments: '/L*v "{{ destination }}logs\\VeeamONE.Monitor.Server.x64.log" EDITLICFILEPATH="{{ destination }}{{destination_license_file}}" ACCEPT_THIRDPARTY_LICENSES=1 ACCEPT_EULA=1 VM_MN_SERVICEACCOUNT="{{ one_username }}" VM_MN_SERVICEPASSWORD="{{ one_password }}"'
+  when: license | bool
+- name: Upgrade ONE Monitor Server without license file
+  win_package:
+    path: "{{ source }}Monitor\\VeeamONE.Monitor.Server.x64.msi"
+    state: present
+    arguments: '/L*v "{{ destination }}logs\\VeeamONE.Monitor.Server.x64.log" ACCEPT_THIRDPARTY_LICENSES=1 ACCEPT_EULA=1 VM_MN_SERVICEACCOUNT="{{ one_username }}" VM_MN_SERVICEPASSWORD="{{ one_password }}"'
+  when: not (license | bool)
+## ONE Reporter Server
+- name: Upgrade ONE Reporter Server with license file
+  win_package:
+    path: "{{ source }}Reporter\\VeeamONE.Reporter.Server.x64.msi"
+    state: present
+    arguments: '/L*v "{{ destination }}logs\\VeeamONE.Reporter.Server.x64.log" EDITLICFILEPATH="{{ destination }}{{destination_license_file}}" ACCEPT_THIRDPARTY_LICENSES=1 ACCEPT_EULA=1 VM_RP_SERVICEACCOUNT="{{ one_username }}" VM_RP_SERVICEPASSWORD="{{ one_password }}"'
+  when: license | bool
+- name: Upgrade ONE Reporter Server without license file
+  win_package:
+    path: "{{ source }}Reporter\\VeeamONE.Reporter.Server.x64.msi"
+    state: present
+    arguments: '/L*v "{{ destination }}logs\\VeeamONE.Reporter.Server.x64.log" ACCEPT_THIRDPARTY_LICENSES=1 ACCEPT_EULA=1 VM_RP_SERVICEACCOUNT="{{ one_username }}" VM_RP_SERVICEPASSWORD="{{ one_password }}"'
+  when: not (license | bool)
+## ONE Agent Server
+- name: Upgrade ONE Agent Server
+  win_package:
+    path: "{{ source }}Agent\\VeeamONE.Agent.x64.msi"
+    state: present
+    arguments: '/L*v "{{ destination }}logs\\VeeamONE.Agent.x64.log" ACCEPT_THIRDPARTY_LICENSES=1 ACCEPT_EULA=1 VO_AGENT_SERVICE_ACCOUNT_NAME="{{ one_username }}" VO_AGENT_SERVICE_ACCOUNT_PASSWORD="{{ one_password }}"'
+- name: Finding file(s) in '{{ source }}Updates' directory
+  win_find:
+    paths: "{{ source }}Updates"
+    recurse: no
+    file_type: file
+  ignore_errors: yes
+  register: file
+- name: Does Veeam ONE need to be patched?
+  set_fact:
+    patch: "{{ not (file.failed) }}"
+- name: Setting patch filename
+  set_fact:
+    patch_file: "{{ file.files[0].filename }}"
+  when: patch | bool
+- name: Including Veeam ONE patch tasks
+  include_tasks: one_patch.yml
+  when: patch | bool
+
+# POST-UPGRADE TASKS
+- name: Unmount ISO
+  win_disk_image:
+    image_path: "{{ destination }}{{ destination_iso_file }}"
+    state: absent

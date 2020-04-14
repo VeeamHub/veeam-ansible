@@ -1,0 +1,32 @@
+---
+# mount_iso tasks file for veeamhub.veeam_vas
+
+## Downloading ISO (if necessary)
+- name: Create download directory
+  win_file:
+    path: "{{ destination }}"
+    state: directory
+  when: iso_download | bool
+- name: Download ISO
+  win_get_url:
+    url: "{{ iso_url }}"
+    dest: "{{ destination }}{{ destination_iso_file }}"
+    checksum: "{{ iso_checksum }}"
+    checksum_algorithm: sha256
+    force: true
+  when: iso_download | bool
+  register: win_get_url_out
+- name: Debug Download Result
+  debug:
+    var: win_get_url_out
+  when: iso_download | bool
+
+## Mounting ISO
+- name: Mount ISO
+  win_disk_image:
+    image_path: "{{ destination }}{{ destination_iso_file }}"
+    state: present
+  register: disk_image_out
+- name: Set Source Fact
+  set_fact:
+    source: "{{ disk_image_out.mount_paths[0] }}"

@@ -1,0 +1,10 @@
+---
+# EM v10 vars file for veeamhub.veeam_vas
+
+iso_url: "https://download2.veeam.com/VeeamBackup&Replication_10.0.0.4461_20200401.iso"
+iso_checksum: "02F345B6A950E6F11BA4671A0BD7A08D9AE7C8E1F8DC49832DE5C5BCEB8DF832"
+destination_iso_file: "vbr.iso"
+destination_license_file: "vbr-license.lic"
+sql_express_file: "{{ source }}Redistr\\x64\\SqlExpress\\2016SP2\\SQLEXPR_x64_ENU.exe"
+sql_database: "VeeamBackupReporting"
+net_framework_file: "{{ source }}Redistr\\NDP472-KB4054530-x86-x64-AllOS-ENU.exe"

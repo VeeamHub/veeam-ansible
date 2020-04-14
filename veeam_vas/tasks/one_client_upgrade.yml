@@ -1,0 +1,69 @@
+---
+# one_client_upgrade tasks file for veeamhub.veeam_vas
+- name: Checking to see if Veeam ONE Monitor Client is installed
+  veeam_software_check:
+    name: "Veeam ONE Monitor Client"
+  register: software
+- name: Is Veeam ONE Monitor Client installed?
+  fail:
+    msg: "Veeam ONE Monitor Client must be installed on this server in order to upgrade it."
+  when: not (software.installed | bool)
+- name: Is the correct version of Veeam ONE Monitor Client installed?
+  fail:
+    msg: "You're trying to upgrade from an unsupported version. Please check Veeam documentation for more information: U(https://helpcenter.veeam.com/docs/one/deployment/upgrade.html?ver=100)"
+  when:
+    - software.version != '9.5.0.3801' # 9.5 U3
+    - software.version != '9.5.4.4566' # 9.5 U4
+    - software.version != '9.5.4.4587' # 9.5 U4a
+- name: Including version-specific variables
+  include_vars:
+    file: "vars/one_v{{ version }}.yml"
+
+# PRE-UPGRADE TASKS
+- name: Veeam ONE ISO Tasks
+  include_tasks: mount_iso.yml
+- name: Print Upgrade Configuration
+  debug:
+    msg:
+      - "Upgrade Source: '{{ source }}'"
+      - "Upgrade Logs Folder: '{{ destination }}logs'"
+      - "Version: {{ version }}"
+      - "Download ISO?: {{ iso_download }}"
+      - "ISO Source: {{ iso_url }}"
+      - "ISO File Destination: {{ destination }}{{ destination_iso_file }}"
+- name: Create logs directory
+  win_file:
+    path: "{{ destination }}logs"
+    state: directory
+- name: .NET Framework
+  include_tasks: install_net_framework.yml
+
+# UPGRADING VEEAM SOFTWARE
+- name: Upgrade ONE Monitor Client
+  win_package:
+    path: "{{ source }}Monitor\\VeeamONE.Monitor.Client.x64.msi"
+    state: present
+    arguments: '/L*v "{{ destination }}logs\\VeeamONE.Monitor.Client.x64.log" ACCEPT_THIRDPARTY_LICENSES=1 ACCEPT_EULA=1 VM_CLN_SERVER_NAME="{{ one_server }}"'
+- name: Finding file(s) in '{{ source }}Updates' directory
+  win_find:
+    paths: "{{ source }}Updates"
+    recurse: no
+    file_type: file
+  ignore_errors: yes
+  register: file
+- name: Does Veeam ONE need to be patched?
+  set_fact:
+    patch: "{{ not (file.failed) }}"
+- name: Setting patch filename
+  set_fact:
+    patch_file: "{{ file.files[0].filename }}"
+  when: patch | bool
+- name: Including Veeam ONE patch tasks
+  include_tasks: one_patch.yml
+  when: patch | bool
+
+# POST-UPGRADE TASKS
+- name: Unmount ISO
+  win_disk_image:
+    image_path: "{{ destination }}{{ destination_iso_file }}"
+    state: absent

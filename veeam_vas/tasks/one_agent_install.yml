@@ -1,0 +1,53 @@
+---
+# one_agent_install tasks file for veeamhub.veeam_vas
+- name: Including version-specific variables
+  include_vars:
+    file: "vars/one_v{{ version }}.yml"
+
+# PRE-INSTALL TASKS
+- name: Veeam ONE ISO Tasks
+  include_tasks: mount_iso.yml
+- name: Print Installation Configuration
+  debug:
+    msg:
+      - "Installation Source: '{{ source }}'"
+      - "Installation Logs Folder: '{{ destination }}logs'"
+      - "Version: {{ version }}"
+      - "Download ISO?: {{ iso_download }}"
+      - "ISO Source: {{ iso_url }}"
+      - "ISO File Destination: {{ destination }}{{ destination_iso_file }}"
+      - "Veeam ONE Service Account: {{ one_username }}"
+- name: Create logs directory
+  win_file:
+    path: "{{ destination }}logs"
+    state: directory
+
+# INSTALLING VEEAM SOFTWARE
+- name: Install ONE Agent Server
+  win_package:
+    path: "{{ source }}Agent\\VeeamONE.Agent.x64.msi"
+    state: present
+    arguments: '/L*v "{{ destination }}logs\\VeeamONE.Agent.x64.log" ACCEPT_THIRDPARTY_LICENSES=1 ACCEPT_EULA=1 VO_AGENT_TYPE=0 VO_AGENT_SERVICE_ACCOUNT_NAME="{{ one_username }}" VO_AGENT_SERVICE_ACCOUNT_PASSWORD="{{ one_password }}"'
+- name: Finding file(s) in '{{ source }}Updates' directory
+  win_find:
+    paths: "{{ source }}Updates"
+    recurse: no
+    file_type: file
+  ignore_errors: yes
+  register: file
+- name: Does Veeam ONE need to be patched?
+  set_fact:
+    patch: "{{ not (file.failed) }}"
+- name: Setting patch filename
+  set_fact:
+    patch_file: "{{ file.files[0].filename }}"
+  when: patch | bool
+- name: Including Veeam ONE patch tasks
+  include_tasks: one_patch.yml
+  when: patch | bool
+
+# POST-INSTALL TASKS
+- name: Unmount ISO
+  win_disk_image:
+    image_path: "{{ destination }}{{ destination_iso_file }}"
+    state: absent

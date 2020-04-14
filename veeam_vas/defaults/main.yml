@@ -1,0 +1,25 @@
+---
+# defaults file for veeamhub.veeam_vas
+
+# Major version of Veeam software being installed
+version: "10" # "9.5" is also accepted
+
+# ISO & License files
+iso_download: false
+license: false
+destination: "C:\\install\\"
+
+# Default common variables
+patch: false
+sql_express_setup: true
+sql_instance: "(local)\\VEEAMSQL2016"
+
+# VBR/EM-specific default variables
+vbr_jobs_file: "{{ destination }}DisabledJobs{{ ansible_date_time.iso8601_basic_short }}.csv"
+cloud_connect: false # Is the server a Cloud Connect server? (If in doubt, 'false')
+
+# Veeam ONE-specific default variables
+one_create_service_account: true
+one_server: localhost
+# Installation Type: https://helpcenter.veeam.com/docs/one/deployment/silent_install_monitor_srv.html?ver=100
+one_installation_type: "2" # 1-Advanced | 2-Backup data only | 3-Typical

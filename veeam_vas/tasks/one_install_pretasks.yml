@@ -1,0 +1,69 @@
+---
+# one_install_pretasks tasks file for veeamhub.veeam_vas
+
+# PRE-INSTALL TASKS
+- name: Create logs directory
+  win_file:
+    path: "{{ destination }}logs"
+    state: directory
+- name: Create Local Veeam ONE Service Account User
+  win_user:
+    name: "{{ one_username }}"
+    password: "{{ one_password }}"
+    password_never_expires: yes
+    state: present
+    groups:
+      - Administrators
+  when: one_create_service_account | bool
+- name: Install 2012 System CLR Types
+  win_package:
+    path: "{{ source }}Redistr\\x64\\SQLSysClrTypes.msi"
+    state: present
+- name: Install 2012 Shared management objects
+  win_package:
+    path: "{{ source }}Redistr\\x64\\SharedManagementObjects.msi"
+    state: present
+- name: Install XML Parser
+  win_package:
+    path: "{{ source }}Redistr\\x64\\msxml6_x64.msi"
+    state: present
+- name: Install SQL Native Client
+  win_package:
+    path: "{{ source }}Redistr\\x64\\sqlncli.msi"
+    state: present
+    arguments: "IACCEPTSQLNCLILICENSETERMS=YES"
+- name: Install Microsoft Report Viewer Redistributable 2015
+  win_package:
+    path: "{{ source }}Redistr\\ReportViewer.msi"
+    state: present
+- name: .NET Framework
+  include_tasks: install_net_framework.yml
+- name: Enable Windows Feature - IIS Web Server Role
+  win_optional_feature:
+    name: IIS-WebServerRole
+    state: present
+- name: Enable Windows Feature - IIS Web Server
+  win_optional_feature:
+    name: IIS-WebServer
+    state: present
+- name: Enable Windows Feature - IIS Common HTTP Features
+  win_optional_feature:
+    name: IIS-CommonHttpFeatures
+    state: present
+- name: Enable Windows Feature - IIS Windows Authentication Component
+  win_optional_feature:
+    name: IIS-WindowsAuthentication
+    state: present
+- name: Enable Windows Feature - .NET Extended support for ASP.NET 4.5
+  win_optional_feature:
+    name: NetFx4Extended-ASPNET45
+    state: present
+- name: Enable Windows Feature - IIS .NET 4.5 Extensibility Component
+  win_optional_feature:
+    name: IIS-NetFxExtensibility45
+    state: present
+- name: Enable Windows Feature - IIS ASP.NET 4.5 Component
+  win_optional_feature:
+    name: IIS-ASPNET45
+    include_parent: true
+    state: present
