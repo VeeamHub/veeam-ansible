@@ -1,5 +1,5 @@
 ---
-namespace: "VeeamHub"
+namespace: "veeamhub"
 name: "veeam"
 version: "1.0.0"
 readme: "readme_galaxy.md"
