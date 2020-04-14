@@ -11,12 +11,13 @@ license: GPL-3.0-only
 license_file: "LICENSE"
 tags:
   - veeam
-  - veeam availability suite
-  - veeam backup & replication
-  - veeam backup enterprise manager
-  - veeam one
-  - veeam enterprise manager
-  - enterprise manager
+  - availability
+  - suite
+  - backup
+  - replication
+  - enterprise
+  - manager
+  - one
   - server
   - system
   - backup
