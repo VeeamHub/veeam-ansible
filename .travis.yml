@@ -1,15 +1,10 @@
 ---
 language: python
-python: "2.7"
 
-# Use the new container infrastructure
-sudo: false
-
-# Install ansible
-addons:
-  apt:
-    packages:
-    - python-pip
+env:
+  global:
+    - COLLECTION_NAMESPACE: VeeamHub
+    - COLLECTION_NAME: veeam
 
 install:
   # Install ansible
@@ -17,15 +12,19 @@ install:
 
   # Check ansible version
   - ansible --version
+  - ansible-galaxy --version
 
-  # Create ansible.cfg with correct roles_path
-  - printf '[defaults]\nroles_path=../' >ansible.cfg
+before_script:
+  # Move the collection into the required path to make ansible-test work.
+  - ls
+  - cd ../
+  - ls
+  - mkdir -p ansible_collections/$COLLECTION_NAMESPACE
+  - mv ansible-collection-$COLLECTION_NAME ansible_collections/$COLLECTION_NAMESPACE/$COLLECTION_NAME
+  - cd ansible_collections/$COLLECTION_NAMESPACE/$COLLECTION_NAME
 
 deploy:
   provider: script
   script: ansible-playbook -i 'localhost,' scripts/deploy.yml -e "tag=$TRAVIS_TAG"
   'on':
     tags: true
-
-notifications:
-  webhooks: https://galaxy.ansible.com/api/v1/notifications/
