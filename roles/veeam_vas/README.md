@@ -111,11 +111,9 @@ Please note there are more configurations than the examples shown below. If you 
 ```yaml
 - name: Veeam Backup & Replication Install
   hosts: veeam
-  collections:
-    - carceneaux.veeam
   tasks:
     - include_role:
-        name: veeam_vas
+        name: carceneaux.veeam.veeam_vas
         tasks_from: vbr_install
       vars:
         iso_download: true
@@ -133,11 +131,9 @@ Please note there are more configurations than the examples shown below. If you 
 ```yaml
 - name: Veeam Backup & Replication Install
   hosts: veeam
-  collections:
-    - carceneaux.veeam
   tasks:
     - include_role:
-        name: veeam_vas
+        name: carceneaux.veeam.veeam_vas
         tasks_from: vbr_install
       vars:
         iso_download: true
@@ -157,11 +153,9 @@ Please note there are more configurations than the examples shown below. If you 
 ```yaml
 - name: Veeam Backup & Replication Install with Remote SQL Server
   hosts: veeam
-  collections:
-    - carceneaux.veeam
   tasks:
     - include_role:
-        name: veeam_vas
+        name: carceneaux.veeam.veeam_vas
         tasks_from: vbr_install
       vars:
         license: true
@@ -178,11 +172,9 @@ Please note there are more configurations than the examples shown below. If you 
 ```yaml
 - name: Veeam Backup & Replication Install
   hosts: veeam
-  collections:
-    - carceneaux.veeam
   tasks:
     - include_role:
-        name: veeam_vas
+        name: carceneaux.veeam.veeam_vas
         tasks_from: vbr_install
       vars:
         destination: "C:\\install\\"
@@ -201,11 +193,9 @@ Please note there are more configurations than the examples shown below. If you 
 ```yaml
 - name: Veeam Backup & Replication Upgrade
   hosts: veeam
-  collections:
-    - carceneaux.veeam
   tasks:
     - include_role:
-        name: veeam_vas
+        name: carceneaux.veeam.veeam_vas
         tasks_from: vbr_upgrade
       vars:
         iso_download: true
@@ -218,11 +208,9 @@ Please note there are more configurations than the examples shown below. If you 
 ```yaml
 - name: Veeam Backup & Replication (Cloud Connect) Upgrade
   hosts: veeam
-  collections:
-    - carceneaux.veeam
   tasks:
     - include_role:
-        name: veeam_vas
+        name: carceneaux.veeam.veeam_vas
         tasks_from: vbr_upgrade
       vars:
         iso_download: true
@@ -236,11 +224,9 @@ Please note there are more configurations than the examples shown below. If you 
 ```yaml
 - name: Veeam Backup & Replication Patch
   hosts: veeam
-  collections:
-    - carceneaux.veeam
   tasks:
     - include_role:
-        name: veeam_vas
+        name: carceneaux.veeam.veeam_vas
         tasks_from: vbr_patch
       vars:
         source: "C:\\install\\"
@@ -253,11 +239,9 @@ Please note there are more configurations than the examples shown below. If you 
 - name: Veeam Backup Enterprise Manager Install
   gather_facts: no
   hosts: veeam
-  collections:
-    - carceneaux.veeam
   tasks:
     - include_role:
-        name: veeam_vas
+        name: carceneaux.veeam.veeam_vas
         tasks_from: em_install
       vars:
         destination: "C:\\install\\"
@@ -279,11 +263,9 @@ Please note there are more configurations than the examples shown below. If you 
 - name: Veeam Backup Enterprise Manager Install
   gather_facts: no
   hosts: veeam
-  collections:
-    - carceneaux.veeam
   tasks:
     - include_role:
-        name: veeam_vas
+        name: carceneaux.veeam.veeam_vas
         tasks_from: em_install
       vars:
         iso_download: true
@@ -302,11 +284,9 @@ Please note there are more configurations than the examples shown below. If you 
 - name: Veeam Backup Enterprise Manager Install including Cloud Connect Portal
   gather_facts: no
   hosts: veeam
-  collections:
-    - carceneaux.veeam
   tasks:
     - include_role:
-        name: veeam_vas
+        name: carceneaux.veeam.veeam_vas
         tasks_from: em_install
       vars:
         iso_download: true
@@ -327,11 +307,9 @@ Please note there are more configurations than the examples shown below. If you 
 ```yaml
 - name: Backup Enterprise Manager Upgrade
   hosts: veeam
-  collections:
-    - carceneaux.veeam
   tasks:
     - include_role:
-        name: veeam_vas
+        name: carceneaux.veeam.veeam_vas
         tasks_from: em_upgrade
       vars:
         iso_download: true
@@ -349,11 +327,9 @@ Please note there are more configurations than the examples shown below. If you 
 ```yaml
 - name: Veeam Backup Enterprise Manager Patch
   hosts: veeam
-  collections:
-    - carceneaux.veeam
   tasks:
     - include_role:
-        name: veeam_vas
+        name: carceneaux.veeam.veeam_vas
         tasks_from: em_patch
       vars:
         source: "C:\\install\\"
@@ -371,8 +347,7 @@ Please note there are more configurations than the examples shown below. If you 
 - name: Installing Veeam ONE Install (Typical Deployment)
   gather_facts: no
   hosts: veeam
-  collections:
-    - carceneaux.veeam
+
   vars:
     iso_download: false #this way ISO is only downloaded once
     license: true
@@ -386,17 +361,17 @@ Please note there are more configurations than the examples shown below. If you 
   tasks:
     - name: Veeam ONE Server installation tasks
       include_role:
-        name: veeam_vas
+        name: carceneaux.veeam.veeam_vas
         tasks_from: one_server_install
       vars:
         iso_download: true #this way ISO is only downloaded once
     - name: Veeam ONE Web UI installation tasks
       include_role:
-        name: veeam_vas
+        name: carceneaux.veeam.veeam_vas
         tasks_from: one_web_ui_install
     - name: Veeam ONE Monitoring Client installation tasks
       include_role:
-        name: veeam_vas
+        name: carceneaux.veeam.veeam_vas
         tasks_from: one_client_install
 ```
 
@@ -406,8 +381,7 @@ Please note there are more configurations than the examples shown below. If you 
 - name: Installing Veeam ONE Install (Typical Deployment)
   gather_facts: no
   hosts: veeam
-  collections:
-    - carceneaux.veeam
+
   vars:
     iso_download: false #this way ISO is only downloaded once
     sql_service_username: "svc_sql"
@@ -419,17 +393,17 @@ Please note there are more configurations than the examples shown below. If you 
   tasks:
     - name: Veeam ONE Server installation tasks
       include_role:
-        name: veeam_vas
+        name: carceneaux.veeam.veeam_vas
         tasks_from: one_server_install
       vars:
         iso_download: true #this way ISO is only downloaded once
     - name: Veeam ONE Web UI installation tasks
       include_role:
-        name: veeam_vas
+        name: carceneaux.veeam.veeam_vas
         tasks_from: one_web_ui_install
     - name: Veeam ONE Monitoring Client installation tasks
       include_role:
-        name: veeam_vas
+        name: carceneaux.veeam.veeam_vas
         tasks_from: one_client_install
 ```
 
@@ -439,12 +413,11 @@ Please note there are more configurations than the examples shown below. If you 
 - name: Veeam ONE Advanced Deployment - Veeam ONE Server
   gather_facts: no
   hosts: server
-  collections:
-    - carceneaux.veeam
+
   tasks:
     - name: Veeam ONE Server installation tasks
       include_role:
-        name: veeam_vas
+        name: carceneaux.veeam.veeam_vas
         tasks_from: one_server_install
       vars:
         iso_download: true
@@ -461,12 +434,11 @@ Please note there are more configurations than the examples shown below. If you 
 - name: Veeam ONE Advanced Deployment - Veeam Web UI
   gather_facts: no
   hosts: web
-  collections:
-    - carceneaux.veeam
+
   tasks:
     - name: Veeam ONE Web UI installation tasks
       include_role:
-        name: veeam_vas
+        name: carceneaux.veeam.veeam_vas
         tasks_from: one_web_ui_install
       vars:
         iso_download: true
@@ -480,12 +452,11 @@ Please note there are more configurations than the examples shown below. If you 
 - name: Veeam ONE Advanced Deployment - Monitoring Client
   gather_facts: no
   hosts: client
-  collections:
-    - carceneaux.veeam
+
   tasks:
     - name: Veeam ONE Monitoring Client installation tasks
       include_role:
-        name: veeam_vas
+        name: carceneaux.veeam.veeam_vas
         tasks_from: one_client_install
       vars:
         iso_download: true
@@ -498,8 +469,7 @@ Please note there are more configurations than the examples shown below. If you 
 - name: Installing Veeam ONE Install (Typical Deployment)
   gather_facts: no
   hosts: veeam
-  collections:
-    - carceneaux.veeam
+
   vars:
     iso_download: false #this way ISO is only downloaded once
     license: true
@@ -513,17 +483,17 @@ Please note there are more configurations than the examples shown below. If you 
   tasks:
     - name: Veeam ONE Server installation tasks
       include_role:
-        name: veeam_vas
+        name: carceneaux.veeam.veeam_vas
         tasks_from: one_server_install
       vars:
         iso_download: true #this way ISO is only downloaded once
     - name: Veeam ONE Web UI installation tasks
       include_role:
-        name: veeam_vas
+        name: carceneaux.veeam.veeam_vas
         tasks_from: one_web_ui_install
     - name: Veeam ONE Monitoring Client installation tasks
       include_role:
-        name: veeam_vas
+        name: carceneaux.veeam.veeam_vas
         tasks_from: one_client_install
 ```
 
@@ -533,8 +503,7 @@ Please note there are more configurations than the examples shown below. If you 
 - name: Veeam ONE Upgrade
   gather_facts: no
   hosts: veeam
-  collections:
-    - carceneaux.veeam
+
   vars:
     iso_download: false  #this way ISO is only downloaded once
     license: true
@@ -545,17 +514,17 @@ Please note there are more configurations than the examples shown below. If you 
   tasks:
     - name: Veeam ONE Server upgrade tasks
       include_role:
-        name: veeam_vas
+        name: carceneaux.veeam.veeam_vas
         tasks_from: one_server_upgrade
       vars:
         iso_download: true  #this way ISO is only downloaded once
     - name: Veeam ONE Web UI upgrade tasks
       include_role:
-        name: veeam_vas
+        name: carceneaux.veeam.veeam_vas
         tasks_from: one_web_ui_upgrade
     - name: Veeam ONE Monitoring Client upgrade tasks
       include_role:
-        name: veeam_vas
+        name: carceneaux.veeam.veeam_vas
         tasks_from: one_client_upgrade
     - name: Rebooting server now to complete upgrade
       win_reboot:
@@ -567,11 +536,9 @@ Please note there are more configurations than the examples shown below. If you 
 ```yaml
 - name: Veeam Backup & Replication Patch
   hosts: veeam
-  collections:
-    - carceneaux.veeam
   tasks:
     - include_role:
-        name: veeam_vas
+        name: carceneaux.veeam.veeam_vas
         tasks_from: one_patch
       vars:
         source: "C:\\install\\"
