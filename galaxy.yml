@@ -1,5 +1,5 @@
 ---
-namespace: "veeamhub"
+namespace: "carceneaux"
 name: "veeam"
 version: "1.0.0"
 readme: "readme_galaxy.md"
