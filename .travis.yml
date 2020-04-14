@@ -1,6 +1,9 @@
 ---
 language: python
 
+# require the branch name to be master and not a pull request
+if: branch = master and type != pull_request
+
 install:
   # Install ansible
   - pip install ansible
@@ -15,6 +18,5 @@ before_script:
   - VERSION=`grep 'version:' galaxy.yml | tail -n1 | awk '{ print $2}' | tr -d \"`
 
 script:
-  - echo "$COLLECTION_NAMESPACE-$COLLECTION_NAME-$VERSION.tar.gz"
-  # - ansible-galaxy collection build
-  # - ansible-galaxy collection publish ./$COLLECTION_NAMESPACE-$COLLECTION_NAME-$VERSION.tar.gz --api-key $ANSIBLE_GALAXY_TOKEN
+- ansible-galaxy collection build
+- ansible-galaxy collection publish ./$COLLECTION_NAMESPACE-$COLLECTION_NAME-$VERSION.tar.gz --api-key $ANSIBLE_GALAXY_TOKEN
