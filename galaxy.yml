@@ -2,7 +2,7 @@
 namespace: "VeeamHub"
 name: "veeam"
 version: "1.0.0"
-readme: "README.md"
+readme: "readme_galaxy.md"
 authors:
   - "Chris Arceneaux (https://www.arsano.ninja/)"
   - "Markus Kraus (https://mycloudrevolution.com/)"
@@ -20,7 +20,5 @@ tags:
   - server
   - system
   - backup
-dependencies: []
 repository: "https://github.com/VeeamHub/veeam-ansible"
-documentation: "https://github.com/VeeamHub/veeam-ansible"
 issues: "https://github.com/VeeamHub/veeam-ansible/issues/new/choose"
