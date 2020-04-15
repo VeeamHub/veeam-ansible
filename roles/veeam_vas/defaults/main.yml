@@ -7,6 +7,7 @@ version: "10" # "9.5" is also accepted
 # ISO & License files
 iso_download: false
 license: false
+source_license: ''
 destination: "C:\\install\\"
 
 # Default common variables
