@@ -24,7 +24,7 @@
 
 # PRE-UPGRADE TASKS
 - name: Enable Cloud Connect Maintenance Mode
-  veeam_cloud_connect_maintenance:
+  veeam_vbr_cloud_connect_maintenance:
     state: enable
   when: cloud_connect | bool
 - name: VBR ISO Tasks
@@ -51,10 +51,10 @@
     dest: "{{ destination }}{{destination_license_file}}"
   when: license | bool
 - name: Start adhoc VBR configuration backup job
-  veeam_config_backup:
+  veeam_vbr_config_backup:
     state: adhoc
 - name: Stopping and disabling all backup jobs
-  veeam_upgrade_job_prep:
+  veeam_vbr_upgrade_job_prep:
     state: disable
     jobs_file: "{{ vbr_jobs_file }}"
   when: not (cloud_connect | bool)
@@ -186,11 +186,11 @@
   win_shell: |
     Get-Service veeam* | Where-Object {$_.Name -ne "VeeamMBPDeploymentService"} | Start-Service
 - name: Disable Cloud Connect Maintenance Mode
-  veeam_cloud_connect_maintenance:
+  veeam_vbr_cloud_connect_maintenance:
     state: disable
   when: cloud_connect | bool
 - name: Enabling all backup jobs in specified file
-  veeam_upgrade_job_prep:
+  veeam_vbr_upgrade_job_prep:
     state: enable
     jobs_file: "{{ vbr_jobs_file }}"
   when: not (cloud_connect | bool)

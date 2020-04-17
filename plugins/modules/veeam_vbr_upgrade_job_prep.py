@@ -10,7 +10,7 @@ ANSIBLE_METADATA = {'metadata_version': '1.1',
 
 DOCUMENTATION = r'''
 ---
-module: veeam_upgrade_job_prep
+module: veeam_vbr_upgrade_job_prep
 short_description: Backup Job actions before/after upgrading
 description:
    - Stops all running backups jobs
@@ -44,11 +44,11 @@ EXAMPLES = r'''
   set_fact:
     jobs_file: "C:\\install\\DisabledJobs{{ ansible_date_time.iso8601_basic_short }}.csv"
 - name: Stopping and disabling all backup jobs
-  veeam_upgrade_job_prep:
+  veeam_vbr_upgrade_job_prep:
     state: disable
     jobs_file: "{{ jobs_file }}"
 - name: Enabling all backup jobs in specified file
-  veeam_upgrade_job_prep:
+  veeam_vbr_upgrade_job_prep:
     state: enable
     jobs_file: "{{ jobs_file }}"
 '''

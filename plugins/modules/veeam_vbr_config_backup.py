@@ -10,10 +10,11 @@ ANSIBLE_METADATA = {'metadata_version': '1.1',
 
 DOCUMENTATION = r'''
 ---
-module: veeam_cloud_connect_maintenance
-short_description: Manages VBR Cloud Connect maintenance mode
+module: veeam_vbr_config_backup
+short_description: Manages VBR configuration backup job
 description:
-   - Enables/Disables Veeam Cloud Connect maintenance mode
+   - Set VBR configuration backup job settings #TBD
+   - Start adhoc VBR configuration backup job
 requirements:
    - Windows Server 2019
    - Veeam Backup & Replication 9.5 Update 3
@@ -25,21 +26,18 @@ author:
 options:
   state:
     description:
-    - Set to C(enable) to enable Cloud Connect maintenance mode
-    - Set to C(disable) to disable Cloud Connect maintenance mode
+    - Set to C(present) to enable the VBR configuration backup job
+    - Set to C(absent) to disable the VBR configuration backup job
+    - Set to C(adhoc) to start a one-time VBR configuration backup job
     type: str
-    choices: [ enable, disable ]
+    choices: [ present, absent, adhoc ]
+    default: present
 '''
 
 EXAMPLES = r'''
-- name: Enable Cloud Connect Maintenance Mode
-  veeam_cloud_connect_maintenance:
-    state: enable
-
-
-- name: Disable Cloud Connect Maintenance Mode
-  veeam_cloud_connect_maintenance:
-    state: disable
+- name: Start adhoc VBR configuration backup job
+  veeam_vbr_config_backup:
+    state: adhoc
 '''
 
 RETURN = r'''
