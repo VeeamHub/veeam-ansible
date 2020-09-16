@@ -7,7 +7,6 @@ authors:
   - "Chris Arceneaux (https://www.arsano.ninja/)"
   - "Markus Kraus (https://mycloudrevolution.com/)"
 description: Administer Veeam Software
-license: GPL-3.0-only
 license_file: "LICENSE"
 tags:
   - veeam
