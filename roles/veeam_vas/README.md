@@ -8,7 +8,7 @@ An Ansible Role to administer the [Veeam Availability Suite](https://www.veeam.c
 
 A big thanks to Markus Kraus ([@vMarkus_K](https://twitter.com/vMarkus_K))! I used his [code](https://github.com/mycloudrevolution/veeam_setup) as a starting point for this project.
 
-- [veeamhub.veeam.veeam_vas](#veeamhubveeamveeamvas)
+- [veeamhub.veeam.veeam_vas](#veeamhubveeamveeam_vas)
   - [How to use this Role](#how-to-use-this-role)
   - [Requirements](#requirements)
     - [Ansible](#ansible)
@@ -54,7 +54,7 @@ Requirements listed are not complete and only include configurations tested duri
 
 ### Ansible
 
-- Ansible 2.8+
+- Ansible 2.9+
 
 ### OS
 

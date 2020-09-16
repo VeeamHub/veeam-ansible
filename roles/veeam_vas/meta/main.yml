@@ -4,7 +4,7 @@ galaxy_info:
   description: Administer Veeam Availability Suite (VBR/EM/ONE)
   company: VeeamHub
   license: GPL-3.0-only
-  min_ansible_version: 2.8
+  min_ansible_version: 2.9
   platforms:
   - name: Windows
     versions:
