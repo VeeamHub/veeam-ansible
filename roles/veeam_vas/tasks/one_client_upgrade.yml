@@ -8,13 +8,6 @@
   fail:
     msg: "Veeam ONE Monitor Client must be installed on this server in order to upgrade it."
   when: not (software.installed | bool)
-- name: Is the correct version of Veeam ONE Monitor Client installed?
-  fail:
-    msg: "You're trying to upgrade from an unsupported version. Please check Veeam documentation for more information: U(https://helpcenter.veeam.com/docs/one/deployment/upgrade.html?ver=100)"
-  when:
-    - software.version != '9.5.0.3801' # 9.5 U3
-    - software.version != '9.5.4.4566' # 9.5 U4
-    - software.version != '9.5.4.4587' # 9.5 U4a
 - name: Including version-specific variables
   include_vars:
     file: "vars/one_v{{ version }}.yml"
