@@ -8,16 +8,6 @@
   fail:
     msg: "Veeam Backup Enterprise Manager must be installed on this server in order to upgrade it."
   when: not (software.installed | bool)
-- name: Is the correct version of Veeam Backup Enterprise Manager installed?
-  fail:
-    msg: "You're trying to upgrade from an unsupported version. Please check Veeam documentation for more information: U(https://helpcenter.veeam.com/docs/backup/vsphere/upgrade_vbr.html?ver=100)"
-  when:
-    - software.version != '9.5.0.1536' # 9.5 U3
-    - software.version != '9.5.0.1922' # 9.5 U3a
-    - software.version != '9.5.4.2399' # 9.5 U4 RTM
-    - software.version != '9.5.4.2615' # 9.5 U4 GA
-    - software.version != '9.5.4.2753' # 9.5 U4a GA
-    - software.version != '9.5.4.2866' # 9.5 U4b GA
 - name: Checking to see if Veeam Backup & Replication Server is installed
   veeam_software_check:
     name: "Veeam Backup & Replication Server"
