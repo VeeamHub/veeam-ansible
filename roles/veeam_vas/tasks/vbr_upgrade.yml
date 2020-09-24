@@ -1,5 +1,13 @@
 ---
 # vbr_upgrade tasks file for veeamhub.veeam_vas
+- name: Checking OS for pending reboots
+  pending_reboot_check:
+  register: precheck
+- name: Is there an existing pending reboot?
+  fail:
+    msg: "This Windows server requires a reboot prior to beginning the Veeam Backup & Replication install. After rebooting this server, you can proceed with the installation."
+  when:
+    - precheck.pending_reboot | bool
 - name: Checking to see if Veeam Backup & Replication Server is installed
   veeam_software_check:
     name: "Veeam Backup & Replication Server"

@@ -1,5 +1,13 @@
 ---
 # vbr_install tasks file for veeamhub.veeam_vas
+- name: Checking OS for pending reboots
+  pending_reboot_check:
+  register: precheck
+- name: Is there an existing pending reboot?
+  fail:
+    msg: "This Windows server requires a reboot prior to beginning the Veeam Backup & Replication install. After rebooting this server, you can proceed with the installation."
+  when:
+    - precheck.pending_reboot | bool
 - name: Including version-specific variables
   include_vars:
     file: "vars/vbr_v{{ version }}.yml"
@@ -98,3 +106,9 @@
   win_disk_image:
     image_path: "{{ destination }}{{ destination_iso_file }}"
     state: absent
+- name: Installation Complete! Checking OS for pending reboots
+  pending_reboot_check:
+  register: postcheck
+- name: Rebooting server if necessary
+    win_reboot:
+    when: postcheck.pending_reboot | bool
