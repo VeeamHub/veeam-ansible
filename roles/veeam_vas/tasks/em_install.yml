@@ -113,6 +113,6 @@
   pending_reboot_check:
   register: postcheck
 - name: Rebooting server if necessary
-    win_reboot:
-      msg: Reboot initiated by Ansible to complete EM install
-    when: postcheck.pending_reboot | bool
+  win_reboot:
+    msg: Reboot initiated by Ansible to complete EM install
+  when: postcheck.pending_reboot | bool
