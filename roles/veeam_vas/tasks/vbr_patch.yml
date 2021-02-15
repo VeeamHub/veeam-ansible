@@ -19,7 +19,7 @@
       - "Patch Source: '{{ source }}{{ patch_folder }}{{ patch_file }}'"
       - "Patch Logs Folder: '{{ destination }}logs'"
 - name: Create logs directory
-  win_file:
+  ansible.windows.win_file:
     path: "{{ destination }}logs"
     state: directory
   when: not (patch | bool)
@@ -44,13 +44,13 @@
     var: jobs
   when: not (cloud_connect | bool)
 - name: Stopping all Veeam services prior to applying VBR patch
-  win_shell: |
+  ansible.windows.win_shell: |
     Stop-Process -Name "Veeam.Backup.Shell" -Force -ErrorAction SilentlyContinue
     Get-Service veeam* | Stop-Service
 
 ## INSTALLING PATCH
 - name: Install VBR patch
-  win_package:
+  ansible.windows.win_package:
     path: "{{ source }}{{ patch_folder }}{{ patch_file }}"
     product_id: "Veeam Backup & Replication Update"
     arguments: '/log "{{ destination }}logs\\{{ patch_file }}.log" /silent /noreboot VBR_AUTO_UPGRADE=1'
@@ -58,7 +58,7 @@
 
 ## POST-INSTALL TASKS
 - name: Starting all Veeam services
-  win_shell: |
+  ansible.windows.win_shell: |
     Get-Service veeam* | Where-Object {$_.Name -ne "VeeamMBPDeploymentService"} | Start-Service
 - name: Disable Cloud Connect Maintenance Mode
   veeam_vbr_cloud_connect_maintenance:
@@ -72,13 +72,13 @@
     - not (cloud_connect | bool)
     - not (patch | bool)
 - name: Stopping all Veeam services (this may take a while)
-  win_shell: |
+  ansible.windows.win_shell: |
     Add-PSSnapin VeeamPSSnapin | Out-Null
     Get-VBRJob | Stop-VBRJob | Out-Null
     Get-Service veeam* | Stop-Service
   when: not (patch | bool)
 - name: Rebooting server now to complete VBR patch installation
-  win_reboot:
+  ansible.windows.win_reboot:
     msg: Reboot initiated by Ansible to complete VBR patch installation
   when:
     - not (patch | bool)

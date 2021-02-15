@@ -25,7 +25,7 @@
       - "ISO Source: {{ iso_url }}"
       - "ISO File Destination: {{ destination }}{{ destination_iso_file }}"
 - name: Create logs directory
-  win_file:
+  ansible.windows.win_file:
     path: "{{ destination }}logs"
     state: directory
 - name: .NET Framework
@@ -33,12 +33,12 @@
 
 # UPGRADING VEEAM SOFTWARE
 - name: Upgrade ONE Monitor Client
-  win_package:
+  ansible.windows.win_package:
     path: "{{ source }}Monitor\\VeeamONE.Monitor.Client.x64.msi"
     state: present
     arguments: '/L*v "{{ destination }}logs\\VeeamONE.Monitor.Client.x64.log" ACCEPT_THIRDPARTY_LICENSES=1 ACCEPT_EULA=1 VM_CLN_SERVER_NAME="{{ one_server }}"'
 - name: Finding file(s) in '{{ source }}Updates' directory
-  win_find:
+  ansible.windows.win_find:
     paths: "{{ source }}Updates"
     recurse: no
     file_type: file
@@ -46,7 +46,7 @@
   register: file
 - name: Does Veeam ONE need to be patched?
   set_fact:
-    patch: "{{ not (file.failed) }}"
+    patch: "{{ file.matched }}"
 - name: Setting patch filename
   set_fact:
     patch_file: "{{ file.files[0].filename }}"
@@ -57,6 +57,6 @@
 
 # POST-UPGRADE TASKS
 - name: Unmount ISO
-  win_disk_image:
+  community.windows.win_disk_image:
     image_path: "{{ destination }}{{ destination_iso_file }}"
     state: absent

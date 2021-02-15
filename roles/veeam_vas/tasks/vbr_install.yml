@@ -18,68 +18,68 @@
 
 # INSTALLING VEEAM SOFTWARE
 - name: Install Veeam Backup Catalog
-  win_package:
+  ansible.windows.win_package:
     path: "{{ source }}Catalog\\VeeamBackupCatalog64.msi"
     state: present
     arguments: '/L*v "{{ destination }}logs\\VeeamBackupCatalog64.log" /norestart /qn ACCEPTEULA="YES" ACCEPT_THIRDPARTY_LICENSES="1"'
   register: win_package_vbr_catalog
 - name: Install Veeam Backup & Replication Server with license
-  win_package:
+  ansible.windows.win_package:
     path: "{{ source }}Backup\\Server.x64.msi"
     state: present
     arguments: '/L*v "{{ destination }}logs\\BackupServer.log" VBR_LICENSE_FILE="{{ destination }}{{destination_license_file}}" VBR_SQLSERVER_AUTHENTICATION=1 VBR_SQLSERVER_SERVER="{{ sql_instance }}" VBR_SQLSERVER_DATABASE="{{ sql_database }}" VBR_SQLSERVER_USERNAME="{{ sql_username }}" VBR_SQLSERVER_PASSWORD="{{ sql_password }}" ACCEPT_THIRDPARTY_LICENSES=1 ACCEPTEULA=YES'
   when: license | bool
   register: win_package_vbr_server
 - name: Install Veeam Backup & Replication Server without license
-  win_package:
+  ansible.windows.win_package:
     path: "{{ source }}Backup\\Server.x64.msi"
     state: present
     arguments: '/L*v "{{ destination }}logs\\BackupServer.log" VBR_SQLSERVER_AUTHENTICATION=1 VBR_SQLSERVER_SERVER="{{ sql_instance }}" VBR_SQLSERVER_DATABASE="{{ sql_database }}" VBR_SQLSERVER_USERNAME="{{ sql_username }}" VBR_SQLSERVER_PASSWORD="{{ sql_password }}" ACCEPT_THIRDPARTY_LICENSES=1 ACCEPTEULA=YES'
   when: not license | bool
   register: win_package_vbr_server
 - name: Install Veeam Backup & Replication Console
-  win_package:
+  ansible.windows.win_package:
     path: "{{ source }}Backup\\Shell.x64.msi"
     state: present
     arguments: '/L*v "{{ destination }}logs\\Shell.x64.log" /norestart /qn ACCEPTEULA="YES" ACCEPT_THIRDPARTY_LICENSES="1"'
   register: win_package_vbr_console
 - name: Install Veeam Explorer for Active Directory
-  win_package:
+  ansible.windows.win_package:
     path: "{{ source }}Explorers\\VeeamExplorerForActiveDirectory.msi"
     state: present
     arguments: '/L*v "{{ destination }}logs\\VeeamExplorerForActiveDirectory.log" /norestart /qn ACCEPT_EULA="1" ACCEPT_THIRDPARTY_LICENSES="1"'
 - name: Install Veeam Explorer for Exchange
-  win_package:
+  ansible.windows.win_package:
     path: "{{ source }}Explorers\\VeeamExplorerForExchange.msi"
     state: present
     arguments: '/L*v "{{ destination }}logs\\VeeamExplorerForExchange.log" /norestart /qn ACCEPT_EULA="1" ACCEPT_THIRDPARTY_LICENSES="1"'
 - name: Install Veeam Explorer for Oracle
-  win_package:
+  ansible.windows.win_package:
     path: "{{ source }}Explorers\\VeeamExplorerForOracle.msi"
     state: present
     arguments: '/L*v "{{ destination }}logs\\VeeamExplorerForOracle.log" /norestart /qn ACCEPT_EULA="1" ACCEPT_THIRDPARTY_LICENSES="1"'
 - name: Install Veeam Explorer for SharePoint
-  win_package:
+  ansible.windows.win_package:
     path: "{{ source }}Explorers\\VeeamExplorerForSharePoint.msi"
     state: present
     arguments: '/L*v "{{ destination }}logs\\VeeamExplorerForSharePoint.log" /norestart /qn ACCEPT_EULA="1" ACCEPT_THIRDPARTY_LICENSES="1"'
 - name: Install Veeam Explorer for SQL
-  win_package:
+  ansible.windows.win_package:
     path: "{{ source }}Explorers\\VeeamExplorerForSQL.msi"
     state: present
     arguments: '/L*v "{{ destination }}logs\\VeeamExplorerForSQL.log" /norestart /qn ACCEPT_EULA="1" ACCEPT_THIRDPARTY_LICENSES="1"'
 - name: Install Veeam Agent for Linux Redistributable
-  win_package:
+  ansible.windows.win_package:
     path: "{{ source }}Packages\\VALRedist.msi"
     state: present
     arguments: '/L*v "{{ destination }}logs\\VALRedist.log" /norestart /qn ACCEPTEULA="YES" ACCEPT_THIRDPARTY_LICENSES="1"'
 - name: Install Veeam Agent for Microsoft Windows Redistributable
-  win_package:
+  ansible.windows.win_package:
     path: "{{ source }}Packages\\VAWRedist.msi"
     state: present
     arguments: '/L*v "{{ destination }}logs\\VAWRedist.log" /norestart /qn ACCEPTEULA="YES" ACCEPT_THIRDPARTY_LICENSES="1"'
 - name: Looking for patches in '{{ source }}Updates' directory
-  win_find:
+  ansible.windows.win_find:
     paths: "{{ source }}Updates"
     recurse: no
     file_type: file
@@ -87,7 +87,7 @@
   register: file
 - name: Does VBR need to be patched?
   set_fact:
-    patch: "{{ not (file.failed) }}"
+    patch: "{{ file.matched }}"
 - name: Setting patch filename
   set_fact:
     patch_file: "{{ file.files[0].filename }}"
@@ -97,19 +97,14 @@
   when: patch | bool
 
 # POST-INSTALL TASKS
-- name: Delete SQL Installation User
-  win_user:
-    name: "{{ sql_install_username }}"
-    state: absent
-  when: sql_express_setup | bool
 - name: Unmount ISO
-  win_disk_image:
+  community.windows.win_disk_image:
     image_path: "{{ destination }}{{ destination_iso_file }}"
     state: absent
 - name: Installation Complete! Checking OS for pending reboots
   pending_reboot_check:
   register: postcheck
 - name: Rebooting server if necessary
-  win_reboot:
+  ansible.windows.win_reboot:
     msg: Reboot initiated by Ansible to complete VBR install
   when: postcheck.pending_reboot | bool

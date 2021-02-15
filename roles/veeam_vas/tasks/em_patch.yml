@@ -22,23 +22,23 @@
       - "SQL Database: {{ sql_database }}"
       - "SQL Connection Account: {{ sql_username }}"
 - name: Create logs directory
-  win_file:
+  ansible.windows.win_file:
     path: "{{ destination }}logs"
     state: directory
   when: not (patch | bool)
 - name: Stopping all Veeam services prior to applying EM patch
-  win_shell: |
+  ansible.windows.win_shell: |
     Stop-Process -Name "Veeam.Backup.Shell" -Force -ErrorAction SilentlyContinue
     Get-Service veeam* | Stop-Service
 - name: Ensure the required NuGet package provider version is installed
-  win_shell: |
+  ansible.windows.win_shell: |
     [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
     Find-PackageProvider -Name Nuget -ForceBootstrap -IncludeDependencies -Force
   when:
     - sql_instance != '(local)\\VEEAMSQL2016'
     - not (patch | bool)
 - name: Installing SqlServer PowerShell module
-  win_psmodule:
+  community.windows.win_psmodule:
     name: SqlServer
     skip_publisher_check: yes
     state: present
@@ -46,7 +46,7 @@
     - sql_instance != '(local)\\VEEAMSQL2016'
     - not (patch | bool)
 - name: Start adhoc EM database backup
-  win_shell: |
+  ansible.windows.win_shell: |
     $secureString = ConvertTo-SecureString "{{ sql_password }}" -AsPlainText -Force
     $credential = New-Object System.Management.Automation.PSCredential ("{{ sql_username }}", $secureString)
     Backup-SqlDatabase -ServerInstance "{{ sql_instance }}" -Database "{{ sql_database }}" -Credential $credential
@@ -55,7 +55,7 @@
 
 ## INSTALLING PATCH
 - name: Install EM patch
-  win_package:
+  ansible.windows.win_package:
     path: "{{ source }}{{ patch_folder }}{{ patch_file }}"
     product_id: "Veeam Backup Enterprise Manager Update"
     arguments: '/log "{{ destination }}logs\\{{ patch_file }}.log" /silent /noreboot'
@@ -63,14 +63,14 @@
 
 ## POST-INSTALL TASKS
 - name: Starting all Veeam services
-  win_shell: |
+  ansible.windows.win_shell: |
     Get-Service veeam* | Where-Object {$_.Name -ne "VeeamMBPDeploymentService"} | Start-Service
 - name: Stopping all Veeam services
-  win_shell: |
+  ansible.windows.win_shell: |
     Get-Service veeam* | Stop-Service
   when: not (patch | bool)
 - name: Rebooting server now to complete EM patch installation
-  win_reboot:
+  ansible.windows.win_reboot:
     msg: Reboot initiated by Ansible to complete EM patch installation
   when:
     - not (patch | bool)

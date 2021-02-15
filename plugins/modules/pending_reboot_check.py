@@ -31,7 +31,7 @@ EXAMPLES = r'''
   pending_reboot_check:
   register: check
 - name: Rebooting if necessary
-  win_reboot:
+  ansible.windows.win_reboot:
   when: check.pending_reboot|bool
 '''
 

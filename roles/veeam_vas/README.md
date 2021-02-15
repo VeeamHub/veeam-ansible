@@ -44,13 +44,17 @@ A big thanks to Markus Kraus ([@vMarkus_K](https://twitter.com/vMarkus_K))! I us
 
 This role is part of a [collection](https://galaxy.ansible.com/veeamhub/veeam) of all roles in this repository. Easiest method to insatll it is using [Ansible Galaxy](https://docs.ansible.com/ansible/latest/user_guide/collections_using.html):
 
-`ansible-galaxy collection install veeamhub.veeam`
-
-You can also copy the role directly from this repository and put it in your Ansible Roles folder (default: `~/.ansible/roles/`). _Note that using this method will require slight changes to the sample playbooks listed in this document._
+```bash
+ansible-galaxy collection install ansible.windows #dependency
+ansible-galaxy collection install community.windows #dependency
+ansible-galaxy collection install veeamhub.veeam
+```
 
 ## Requirements
 
 Requirements listed are not complete and only include configurations tested during development and use of this Ansible Role. Keep in mind as well these requirements are in addition to Veeam's system requirements for the software to be installed/upgraded. For more information, please reference [Veeam documentation](https://www.veeam.com/documentation-guides-datasheets.html).
+
+As noted in the previous section, this collection depends on Windows modules (`ansible.windows` & `community.windows`) that are not standard in Ansible anymore (2.10.x). These need to be installed for this role to function.
 
 ### Ansible
 
@@ -527,7 +531,7 @@ Please note there are more configurations than the examples shown below. If you 
         name: veeamhub.veeam.veeam_vas
         tasks_from: one_client_upgrade
     - name: Rebooting server now to complete upgrade
-      win_reboot:
+      ansible.windows.win_reboot:
         msg: Reboot initiated by Ansible to complete Veeam ONE upgrade
 ```
 
