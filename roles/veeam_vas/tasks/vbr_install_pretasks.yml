@@ -23,16 +23,16 @@
       - "SQL Install Account: {{ sql_install_username | default('not specified') }}"
       - "VBR SQL Account: {{ sql_username }}"
 - name: Create logs directory
-  win_file:
+  ansible.windows.win_file:
     path: "{{ destination }}logs"
     state: directory
 - name: Copy license file
-  win_copy:
+  ansible.windows.win_copy:
     src: "{{source_license}}"
     dest: "{{ destination }}{{destination_license_file}}"
   when: license | bool
 - name: Create SQL Installation User
-  win_user:
+  ansible.windows.win_user:
     name: "{{ sql_install_username }}"
     password: "{{ sql_install_password }}"
     password_never_expires: yes
@@ -41,7 +41,7 @@
       - Administrators
   when: sql_express_setup | bool
 - name: Create SQL Service Account User
-  win_user:
+  ansible.windows.win_user:
     name: "{{ sql_service_username }}"
     password: "{{ sql_service_password }}"
     password_never_expires: yes
@@ -50,26 +50,26 @@
       - Users
   when: sql_express_setup | bool
 - name: Install 2012 System CLR Types
-  win_package:
+  ansible.windows.win_package:
     path: "{{ source }}Redistr\\x64\\SQLSysClrTypes.msi"
     state: present
 - name: Install 2012 Shared management objects
-  win_package:
+  ansible.windows.win_package:
     path: "{{ source }}Redistr\\x64\\SharedManagementObjects.msi"
     state: present
 - name: Install Microsoft Report Viewer Redistributable 2015
-  win_package:
+  ansible.windows.win_package:
     path: "{{ source }}Redistr\\ReportViewer.msi"
     state: present
 - name: .NET Framework
   include_tasks: install_net_framework.yml
 - name: Check if MS SQL service is installed
-  win_service:
+  ansible.windows.win_service:
     name: MSSQL$VEEAMSQL2016
   when: sql_express_setup | bool
   register: service
 - name: Install SQL Express
-  win_package:
+  ansible.windows.win_package:
     path: "{{ sql_express_file }}"
     product_id: SQL 2016 Express
     arguments:
@@ -95,3 +95,8 @@
   when:
     - sql_express_setup | bool
     - not (service.exists | bool)
+- name: Delete SQL Installation User
+  ansible.windows.win_user:
+    name: "{{ sql_install_username }}"
+    state: absent
+  when: sql_express_setup | bool

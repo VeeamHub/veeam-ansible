@@ -3,12 +3,12 @@
 
 ## Downloading ISO (if necessary)
 - name: Create download directory
-  win_file:
+  ansible.windows.win_file:
     path: "{{ destination }}"
     state: directory
   when: iso_download | bool
 - name: Download ISO
-  win_get_url:
+  ansible.windows.win_get_url:
     url: "{{ iso_url }}"
     dest: "{{ destination }}{{ destination_iso_file }}"
     checksum: "{{ iso_checksum }}"
@@ -23,7 +23,7 @@
 
 ## Mounting ISO
 - name: Mount ISO
-  win_disk_image:
+  community.windows.win_disk_image:
     image_path: "{{ destination }}{{ destination_iso_file }}"
     state: present
   register: disk_image_out

@@ -27,12 +27,12 @@
 
 # INSTALLING VEEAM SOFTWARE
 - name: Install ONE Reporter Web UI
-  win_package:
+  ansible.windows.win_package:
     path: "{{ source }}Reporter\\VeeamONE.Reporter.WebUI.x64.msi"
     state: present
     arguments: '/L*v "{{ destination }}logs\\VeeamONE.Reporter.WebUI.x64.log" ACCEPT_THIRDPARTY_LICENSES=1 ACCEPT_EULA=1 VM_RP_SERVICEACCOUNT="{{ one_username }}" VM_RP_SERVICEPASSWORD="{{ one_password }}" VM_RP_SQL_SERVER="{{ sql_instance }}" VM_RP_SQL_DATABASE="{{ sql_database }}" VM_RP_SQL_AUTHENTICATION=0 VM_RP_SQL_USER="{{ one_username }}" VM_RP_SQL_PASSWORD="{{ one_password }}" VO_INSTALLATION_TYPE="{{ one_installation_type }}"'
 - name: Finding file(s) in '{{ source }}Updates' directory
-  win_find:
+  ansible.windows.win_find:
     paths: "{{ source }}Updates"
     recurse: no
     file_type: file
@@ -40,7 +40,7 @@
   register: file
 - name: Does Veeam ONE need to be patched?
   set_fact:
-    patch: "{{ not (file.failed) }}"
+    patch: "{{ file.matched }}"
 - name: Setting patch filename
   set_fact:
     patch_file: "{{ file.files[0].filename }}"
@@ -51,6 +51,6 @@
 
 # POST-INSTALL TASKS
 - name: Unmount ISO
-  win_disk_image:
+  community.windows.win_disk_image:
     image_path: "{{ destination }}{{ destination_iso_file }}"
     state: absent
