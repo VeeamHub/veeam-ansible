@@ -1,7 +1,7 @@
 ---
 namespace: "veeamhub"
 name: "veeam"
-version: "1.1.0"
+version: "1.1.1"
 readme: "readme_galaxy.md"
 authors:
   - "Chris Arceneaux (https://www.arsano.ninja/)"
@@ -23,5 +23,8 @@ tags:
   - vbr
   - vem
   - em
+dependencies:
+  ansible.windows: '1.4.0'
+  community.windows: '1.3.0'
 repository: "https://github.com/VeeamHub/veeam-ansible"
-issues: "https://github.com/VeeamHub/veeam-ansible/issues/new/choose"
+issues: "https://github.com/VeeamHub/veeam-ansible/issues"
