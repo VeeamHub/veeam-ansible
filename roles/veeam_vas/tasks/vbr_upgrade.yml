@@ -45,8 +45,8 @@
     state: directory
 - name: Copy license file
   ansible.windows.win_copy:
-    src: "{{source_license}}"
-    dest: "{{ destination }}{{destination_license_file}}"
+    src: "{{ source_license }}"
+    dest: "{{ destination }}{{ destination_license_file }}"
   when: license | bool
 - name: Start adhoc VBR configuration backup job
   veeam_vbr_config_backup:
@@ -78,7 +78,7 @@
   ansible.windows.win_package:
     path: "{{ source }}Backup\\Server.x64.msi"
     state: present
-    arguments: '/L*v "{{ destination }}logs\\BackupServer.log" /norestart /qn" ACCEPTEULA="YES" ACCEPT_THIRDPARTY_LICENSES="1" VBR_LICENSE_FILE="{{ destination }}{{destination_license_file}}" VBR_AUTO_UPGRADE="YES"'
+    arguments: '/L*v "{{ destination }}logs\\BackupServer.log" /norestart /qn" ACCEPTEULA="YES" ACCEPT_THIRDPARTY_LICENSES="1" VBR_LICENSE_FILE="{{ destination }}{{ destination_license_file }}" VBR_AUTO_UPGRADE="YES"'
   when: license | bool
 - name: Upgrade Veeam Backup & Replication Server without license
   ansible.windows.win_package:

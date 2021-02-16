@@ -28,8 +28,8 @@
     state: directory
 - name: Copy license file
   ansible.windows.win_copy:
-    src: "{{source_license}}"
-    dest: "{{ destination }}{{destination_license_file}}"
+    src: "{{ source_license }}"
+    dest: "{{ destination }}{{ destination_license_file }}"
   when: license | bool
 - name: Create SQL Installation User
   ansible.windows.win_user:

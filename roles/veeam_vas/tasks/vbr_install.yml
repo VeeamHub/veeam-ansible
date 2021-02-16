@@ -27,7 +27,7 @@
   ansible.windows.win_package:
     path: "{{ source }}Backup\\Server.x64.msi"
     state: present
-    arguments: '/L*v "{{ destination }}logs\\BackupServer.log" VBR_LICENSE_FILE="{{ destination }}{{destination_license_file}}" VBR_SQLSERVER_AUTHENTICATION=1 VBR_SQLSERVER_SERVER="{{ sql_instance }}" VBR_SQLSERVER_DATABASE="{{ sql_database }}" VBR_SQLSERVER_USERNAME="{{ sql_username }}" VBR_SQLSERVER_PASSWORD="{{ sql_password }}" ACCEPT_THIRDPARTY_LICENSES=1 ACCEPTEULA=YES'
+    arguments: '/L*v "{{ destination }}logs\\BackupServer.log" VBR_LICENSE_FILE="{{ destination }}{{ destination_license_file }}" VBR_SQLSERVER_AUTHENTICATION=1 VBR_SQLSERVER_SERVER="{{ sql_instance }}" VBR_SQLSERVER_DATABASE="{{ sql_database }}" VBR_SQLSERVER_USERNAME="{{ sql_username }}" VBR_SQLSERVER_PASSWORD="{{ sql_password }}" ACCEPT_THIRDPARTY_LICENSES=1 ACCEPTEULA=YES'
   when: license | bool
   register: win_package_vbr_server
 - name: Install Veeam Backup & Replication Server without license

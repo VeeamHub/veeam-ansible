@@ -28,8 +28,8 @@
       - "Veeam ONE Installation Type: {{ one_installation_type }}"
 - name: Copy license file
   ansible.windows.win_copy:
-    src: "{{source_license}}"
-    dest: "{{ destination }}{{destination_license_file}}"
+    src: "{{ source_license }}"
+    dest: "{{ destination }}{{ destination_license_file }}"
   when: license | bool
 - name: Including Veeam ONE Common Pre-Install tasks
   include_tasks: one_install_pretasks.yml
@@ -79,7 +79,7 @@
   ansible.windows.win_package:
     path: "{{ source }}Monitor\\VeeamONE.Monitor.Server.x64.msi"
     state: present
-    arguments: '/L*v "{{ destination }}logs\\VeeamONE.Monitor.Server.x64.log" EDITLICFILEPATH="{{ destination }}{{destination_license_file}}" ACCEPT_THIRDPARTY_LICENSES=1 ACCEPT_EULA=1 VM_MN_SERVICEACCOUNT="{{ one_username }}" VM_MN_SERVICEPASSWORD="{{ one_password }}" VM_MN_SQL_SERVER="{{ sql_instance }}" VM_MN_SQL_DATABASE="{{ sql_database }}" VM_MN_SQL_AUTHENTICATION=0 VM_MN_SQL_USER="{{ one_username }}" VM_MN_SQL_PASSWORD="{{ one_password }}" VM_BACKUP_ADD_LATER=1 VM_VC_SELECTED_TYPE=2 VO_INSTALLATION_TYPE="{{ one_installation_type }}"'
+    arguments: '/L*v "{{ destination }}logs\\VeeamONE.Monitor.Server.x64.log" EDITLICFILEPATH="{{ destination }}{{ destination_license_file }}" ACCEPT_THIRDPARTY_LICENSES=1 ACCEPT_EULA=1 VM_MN_SERVICEACCOUNT="{{ one_username }}" VM_MN_SERVICEPASSWORD="{{ one_password }}" VM_MN_SQL_SERVER="{{ sql_instance }}" VM_MN_SQL_DATABASE="{{ sql_database }}" VM_MN_SQL_AUTHENTICATION=0 VM_MN_SQL_USER="{{ one_username }}" VM_MN_SQL_PASSWORD="{{ one_password }}" VM_BACKUP_ADD_LATER=1 VM_VC_SELECTED_TYPE=2 VO_INSTALLATION_TYPE="{{ one_installation_type }}"'
   when: license | bool
   register: monitor_server
 - name: Install ONE Monitor Server without license file
@@ -94,7 +94,7 @@
   ansible.windows.win_package:
     path: "{{ source }}Reporter\\VeeamONE.Reporter.Server.x64.msi"
     state: present
-    arguments: '/L*v "{{ destination }}logs\\VeeamONE.Reporter.Server.x64.log" EDITLICFILEPATH="{{ destination }}{{destination_license_file}}" ACCEPT_THIRDPARTY_LICENSES=1 ACCEPT_EULA=1 VM_RP_SERVICEACCOUNT="{{ one_username }}" VM_RP_SERVICEPASSWORD="{{ one_password }}" VM_RP_SQL_SERVER="{{ sql_instance }}" VM_RP_SQL_DATABASE="{{ sql_database }}" VM_RP_SQL_AUTHENTICATION=0 VM_RP_SQL_USER="{{ one_username }}" VM_RP_SQL_PASSWORD="{{ one_password }}" VM_BACKUP_ADD_LATER=1 VM_VC_SELECTED_TYPE=2 VO_INSTALLATION_TYPE="{{ one_installation_type }}"'
+    arguments: '/L*v "{{ destination }}logs\\VeeamONE.Reporter.Server.x64.log" EDITLICFILEPATH="{{ destination }}{{ destination_license_file }}" ACCEPT_THIRDPARTY_LICENSES=1 ACCEPT_EULA=1 VM_RP_SERVICEACCOUNT="{{ one_username }}" VM_RP_SERVICEPASSWORD="{{ one_password }}" VM_RP_SQL_SERVER="{{ sql_instance }}" VM_RP_SQL_DATABASE="{{ sql_database }}" VM_RP_SQL_AUTHENTICATION=0 VM_RP_SQL_USER="{{ one_username }}" VM_RP_SQL_PASSWORD="{{ one_password }}" VM_BACKUP_ADD_LATER=1 VM_VC_SELECTED_TYPE=2 VO_INSTALLATION_TYPE="{{ one_installation_type }}"'
   when: license | bool
   register: reporter_server
 - name: Install ONE Reporter Server without license file
