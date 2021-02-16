@@ -74,7 +74,7 @@
   ansible.windows.win_package:
     path: "{{ source }}EnterpriseManager\\BackupWeb_x64.msi"
     state: present
-    arguments: '/L*v "{{ destination }}logs\\EnterpriseManager.log" VBREM_LICENSE_FILE="{{ destination }}{{destination_license_file}}" VBREM_SQLSERVER_AUTHENTICATION=1 VBREM_SQLSERVER_SERVER="{{ sql_instance }}" VBREM_SQLSERVER_DATABASE="{{ sql_database }}" VBREM_SQLSERVER_USERNAME="{{ sql_username }}" VBREM_SQLSERVER_PASSWORD="{{ sql_password }}" ACCEPT_THIRDPARTY_LICENSES=1 ACCEPTEULA=YES'
+    arguments: '/L*v "{{ destination }}logs\\EnterpriseManager.log" VBREM_LICENSE_FILE="{{ destination }}{{ destination_license_file }}" VBREM_SQLSERVER_AUTHENTICATION=1 VBREM_SQLSERVER_SERVER="{{ sql_instance }}" VBREM_SQLSERVER_DATABASE="{{ sql_database }}" VBREM_SQLSERVER_USERNAME="{{ sql_username }}" VBREM_SQLSERVER_PASSWORD="{{ sql_password }}" ACCEPT_THIRDPARTY_LICENSES=1 ACCEPTEULA=YES'
 - name: Install Veeam Cloud Connect Portal
   ansible.windows.win_package:
     path: "{{ source }}Cloud Portal\\BackupCloudPortal_x64.msi"

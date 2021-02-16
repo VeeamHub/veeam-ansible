@@ -67,8 +67,8 @@
     state: directory
 - name: Copy license file
   ansible.windows.win_copy:
-    src: "{{source_license}}"
-    dest: "{{ destination }}{{destination_license_file}}"
+    src: "{{ source_license }}"
+    dest: "{{ destination }}{{ destination_license_file }}"
   when: license | bool
 - name: Stopping all Veeam services prior to upgrade
   ansible.windows.win_shell: |
@@ -102,7 +102,7 @@
   ansible.windows.win_package:
     path: "{{ source }}Monitor\\VeeamONE.Monitor.Server.x64.msi"
     state: present
-    arguments: '/L*v "{{ destination }}logs\\VeeamONE.Monitor.Server.x64.log" EDITLICFILEPATH="{{ destination }}{{destination_license_file}}" ACCEPT_THIRDPARTY_LICENSES=1 ACCEPT_EULA=1 VM_MN_SERVICEACCOUNT="{{ one_username }}" VM_MN_SERVICEPASSWORD="{{ one_password }}"'
+    arguments: '/L*v "{{ destination }}logs\\VeeamONE.Monitor.Server.x64.log" EDITLICFILEPATH="{{ destination }}{{ destination_license_file }}" ACCEPT_THIRDPARTY_LICENSES=1 ACCEPT_EULA=1 VM_MN_SERVICEACCOUNT="{{ one_username }}" VM_MN_SERVICEPASSWORD="{{ one_password }}"'
   when: license | bool
 - name: Upgrade ONE Monitor Server without license file
   ansible.windows.win_package:
@@ -115,7 +115,7 @@
   ansible.windows.win_package:
     path: "{{ source }}Reporter\\VeeamONE.Reporter.Server.x64.msi"
     state: present
-    arguments: '/L*v "{{ destination }}logs\\VeeamONE.Reporter.Server.x64.log" EDITLICFILEPATH="{{ destination }}{{destination_license_file}}" ACCEPT_THIRDPARTY_LICENSES=1 ACCEPT_EULA=1 VM_RP_SERVICEACCOUNT="{{ one_username }}" VM_RP_SERVICEPASSWORD="{{ one_password }}"'
+    arguments: '/L*v "{{ destination }}logs\\VeeamONE.Reporter.Server.x64.log" EDITLICFILEPATH="{{ destination }}{{ destination_license_file }}" ACCEPT_THIRDPARTY_LICENSES=1 ACCEPT_EULA=1 VM_RP_SERVICEACCOUNT="{{ one_username }}" VM_RP_SERVICEPASSWORD="{{ one_password }}"'
   when: license | bool
 - name: Upgrade ONE Reporter Server without license file
   ansible.windows.win_package:
