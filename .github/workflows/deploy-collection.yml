@@ -1,4 +1,4 @@
-name: Build & Deploy Ansible Galaxy Collection
+name: Deploy Ansible Galaxy Collection
 on:
   push:
     branches:
@@ -27,4 +27,4 @@ jobs:
           ansible-galaxy collection build
       # Deploying collection
       - run: |
-          ansible-galaxy collection publish ./$COLLECTION_NAMESPACE-$COLLECTION_NAME-$VERSION.tar.gz --api-key $ANSIBLE_GALAXY_TOKEN
+          ansible-galaxy collection publish ./$COLLECTION_NAMESPACE-$COLLECTION_NAME-$VERSION.tar.gz --api-key ${{ secrets.ANSIBLE_GALAXY_TOKEN }}
