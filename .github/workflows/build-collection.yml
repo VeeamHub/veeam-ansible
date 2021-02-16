@@ -1,0 +1,33 @@
+name: Build Ansible Collection
+on:
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    if: github.ref != 'refs/heads/master'
+    steps:
+      # Important: This sets up your GITHUB_WORKSPACE environment variable
+      - uses: actions/checkout@v2
+      - name: Retrieving variables from galaxy.yml
+        run: |
+          echo "COLLECTION_NAMESPACE=`grep 'namespace:' galaxy.yml | tail -n1 | awk '{ print $2}' | tr -d \\"`" >> $GITHUB_ENV
+          echo "COLLECTION_NAME=`grep 'name:' galaxy.yml | tail -n1 | awk '{ print $2}' | tr -d \\"`" >> $GITHUB_ENV
+          echo "VERSION=`grep 'version:' galaxy.yml | tail -n1 | awk '{ print $2}' | tr -d \\"`" >> $GITHUB_ENV
+      - name: Printing Ansible version & custom variables
+        run: |
+          ansible --version
+          echo $COLLECTION_NAMESPACE
+          echo $COLLECTION_NAME
+          echo $VERSION
+      # Building collection
+      - run: |
+          ansible-galaxy collection build
+      # Upload generated tar file as an artifact
+      - name: Retrieving additional environment variables
+        uses: FranzDiebold/github-env-vars-action@v2.1.0
+      - uses: actions/upload-artifact@v2
+        with:
+          name: ${{ env.COLLECTION_NAMESPACE }}-${{ env.COLLECTION_NAME }}-${{ env.VERSION }}-${{ env.CI_SHA_SHORT }}
+          path: |
+            ${{ github.workspace }}/**/*.tar.gz
