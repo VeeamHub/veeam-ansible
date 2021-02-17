@@ -22,7 +22,10 @@ Set-StrictMode -Version 2.0
 # Functions
 Function Connect-VeeamServer {
     try {
-        Add-PSSnapin -PassThru VeeamPSSnapIn -ErrorAction Stop | Out-Null
+        # Accounts for switch from PSSnapin to Module in v11
+        if (-Not (Get-Module -ListAvailable -Name Veeam.Backup.PowerShell)){
+            Add-PSSnapin -PassThru VeeamPSSnapIn -ErrorAction Stop | Out-Null
+        }
     }
     catch {
         Fail-Json -obj @{} -message  "Failed to load Veeam SnapIn on the target: $($_.Exception.Message)"
