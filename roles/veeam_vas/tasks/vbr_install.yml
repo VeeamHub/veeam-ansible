@@ -73,6 +73,12 @@
     path: "{{ source }}Packages\\VALRedist.msi"
     state: present
     arguments: '/L*v "{{ destination }}logs\\VALRedist.log" /norestart /qn ACCEPTEULA="YES" ACCEPT_THIRDPARTY_LICENSES="1"'
+- name: Install Veeam Agent for MacOS Redistributable
+  ansible.windows.win_package:
+    path: "{{ source }}Packages\\VAMRedist.msi"
+    state: present
+    arguments: '/L*v "{{ destination }}logs\\VAMRedist.log" /norestart /qn ACCEPTEULA="YES" ACCEPT_THIRDPARTY_LICENSES="1"'
+  when: version | int >= 11
 - name: Install Veeam Agent for Microsoft Windows Redistributable
   ansible.windows.win_package:
     path: "{{ source }}Packages\\VAWRedist.msi"
