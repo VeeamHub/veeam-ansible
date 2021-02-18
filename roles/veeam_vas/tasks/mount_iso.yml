@@ -20,6 +20,10 @@
   debug:
     var: win_get_url_out
   when: iso_download | bool
+- name: Clearing 'iso_url' variable as it isn't needed
+  set_fact:
+   iso_url: "not specified"
+  when: not iso_download | bool
 
 ## Mounting ISO
 - name: Mount ISO
@@ -27,6 +31,14 @@
     image_path: "{{ destination }}{{ destination_iso_file }}"
     state: present
   register: disk_image_out
-- name: Set Source Fact
+- name: Set ISO Drive Letter
   set_fact:
     source: "{{ disk_image_out.mount_paths[0] }}"
+- name: "Obtain version information about '{{ source }}Setup.exe'"
+  community.windows.win_file_version:
+    path: "{{ source }}Setup.exe"
+  register: iso_version
+- name: "Does the ISO version ({{ iso_version.win_file_version.file_major_part }}) match the version specified in the playbook ({{ version }})?"
+  fail:
+    msg: "Please either specify the correct 'version' in your playbook or the correct ISO to be used. Halting Ansible now as this can cause adverse effects."
+  when: version != iso_version.win_file_version.file_major_part
