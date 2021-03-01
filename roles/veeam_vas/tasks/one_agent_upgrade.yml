@@ -18,7 +18,7 @@
 - name: Print Installation Configuration
   debug:
     msg:
-      - "Installation Source: '{{ source }}'"
+      - "ISO Drive Letter: '{{ source }}'"
       - "Installation Logs Folder: '{{ destination }}logs'"
       - "Version: {{ version }}"
       - "Download ISO?: {{ iso_download }}"
@@ -31,11 +31,11 @@
     state: directory
 
 # UPGRADING VEEAM SOFTWARE
-- name: Upgrade ONE Agent Server
+- name: Upgrade ONE Agent
   ansible.windows.win_package:
     path: "{{ source }}Agent\\VeeamONE.Agent.x64.msi"
     state: present
-    arguments: '/L*v "{{ destination }}logs\\VeeamONE.Agent.x64.log" ACCEPT_THIRDPARTY_LICENSES=1 ACCEPT_EULA=1 VO_AGENT_SERVICE_ACCOUNT_NAME="{{ one_username }}" VO_AGENT_SERVICE_ACCOUNT_PASSWORD="{{ one_password }}"'
+    arguments: '/L*v "{{ destination }}logs\VeeamONE.Agent.x64.log" ACCEPT_THIRDPARTY_LICENSES=1 ACCEPT_EULA=1 VO_AGENT_SERVICE_ACCOUNT_NAME="{{ one_username }}" VO_AGENT_SERVICE_ACCOUNT_PASSWORD="{{ one_password }}"'
 - name: Finding file(s) in '{{ source }}Updates' directory
   ansible.windows.win_find:
     paths: "{{ source }}Updates"

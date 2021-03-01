@@ -17,7 +17,7 @@
     state: present
   when: software.reboot_required | bool
   register: disk_image_out
-- name: Set Source Fact
+- name: Set ISO Drive Letter
   set_fact:
     source: "{{ disk_image_out.mount_paths[0] }}"
   when: software.reboot_required | bool

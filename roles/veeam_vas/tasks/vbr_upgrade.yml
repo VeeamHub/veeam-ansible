@@ -30,7 +30,7 @@
 - name: Print Upgrade Configuration
   debug:
     msg:
-      - "Upgrade Source: '{{ source }}'"
+      - "ISO Drive Letter: '{{ source }}'"
       - "Upgrade Logs Folder: '{{ destination }}logs'"
       - "Version: {{ version }}"
       - "Download ISO?: {{ iso_download }}"
@@ -131,6 +131,12 @@
     path: "{{ source }}Packages\\VALRedist.msi"
     state: present
     arguments: '/L*v "{{ destination }}logs\\VALRedist.log" /norestart /qn ACCEPTEULA="YES" ACCEPT_THIRDPARTY_LICENSES="1"'
+- name: Upgrade Veeam Agent for MacOS Redistributable
+  ansible.windows.win_package:
+    path: "{{ source }}Packages\\VAMRedist.msi"
+    state: present
+    arguments: '/L*v "{{ destination }}logs\\VAMRedist.log" /norestart /qn ACCEPTEULA="YES" ACCEPT_THIRDPARTY_LICENSES="1"'
+  when: version | int >= 11
 - name: Upgrade Veeam Agent for Microsoft Windows Redistributable
   ansible.windows.win_package:
     path: "{{ source }}Packages\\VAWRedist.msi"
@@ -194,7 +200,7 @@
   when: not (cloud_connect | bool)
 - name: Stopping all Veeam services (this may take a while)
   ansible.windows.win_shell: |
-    Add-PSSnapin VeeamPSSnapin | Out-Null
+    if (-Not (Get-Module -ListAvailable -Name Veeam.Backup.PowerShell)){Add-PSSnapin -PassThru VeeamPSSnapIn -ErrorAction Stop | Out-Null}
     Get-VBRJob | Stop-VBRJob | Out-Null
     Get-Service veeam* | Stop-Service
 - name: Unmount ISO

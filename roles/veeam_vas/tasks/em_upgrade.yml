@@ -36,7 +36,7 @@
 - name: Print Upgrade Configuration
   debug:
     msg:
-      - "Upgrade Source: '{{ source }}'"
+      - "ISO Drive Letter: '{{ source }}'"
       - "Upgrade Logs Folder: '{{ destination }}logs'"
       - "Version: {{ version }}"
       - "Download ISO?: {{ iso_download }}"
@@ -59,7 +59,7 @@
   when: license | bool
 - name: Stopping all Veeam Backup Jobs (Only if VBR installed on same server as EM)
   ansible.windows.win_shell: |
-    Add-PSSnapin VeeamPSSnapin | Out-Null
+    if (-Not (Get-Module -ListAvailable -Name Veeam.Backup.PowerShell)){Add-PSSnapin -PassThru VeeamPSSnapIn -ErrorAction Stop | Out-Null}
     Get-VBRJob | Stop-VBRJob | Out-Null
   when: software.installed | bool
 - name: Stopping all Veeam services prior to upgrade
@@ -77,7 +77,7 @@
     skip_publisher_check: yes
     state: present
   when: sql_instance != '(local)\\VEEAMSQL2016'
-- name: Start adhoc EM database backup
+- name: Start adhoc EM database backup to default SQL backup location
   ansible.windows.win_shell: |
     $secureString = ConvertTo-SecureString "{{ sql_password }}" -AsPlainText -Force
     $credential = New-Object System.Management.Automation.PSCredential ("{{ sql_username }}", $secureString)

@@ -16,7 +16,7 @@
 - name: Print Patch Configuration
   debug:
     msg:
-      - "Patch Source: '{{ source }}{{ patch_folder }}{{ patch_file }}'"
+      - "ISO Drive Letter: '{{ source }}{{ patch_folder }}{{ patch_file }}'"
       - "Patch Logs Folder: '{{ destination }}logs'"
 - name: Create logs directory
   ansible.windows.win_file:
@@ -73,7 +73,7 @@
     - not (patch | bool)
 - name: Stopping all Veeam services (this may take a while)
   ansible.windows.win_shell: |
-    Add-PSSnapin VeeamPSSnapin | Out-Null
+    if (-Not (Get-Module -ListAvailable -Name Veeam.Backup.PowerShell)){Add-PSSnapin -PassThru VeeamPSSnapIn -ErrorAction Stop | Out-Null}
     Get-VBRJob | Stop-VBRJob | Out-Null
     Get-Service veeam* | Stop-Service
   when: not (patch | bool)

@@ -7,7 +7,7 @@
 - name: Print Installation Configuration
   debug:
     msg:
-      - "Installation Source: '{{ source }}'"
+      - "ISO Drive Letter: '{{ source }}'"
       - "Installation Logs Folder: '{{ destination }}logs'"
       - "Version: {{ version }}"
       - "Download ISO?: {{ iso_download }}"
@@ -49,15 +49,15 @@
     groups:
       - Users
   when: sql_express_setup | bool
-- name: Install 2012 System CLR Types
+- name: Install System CLR Types
   ansible.windows.win_package:
     path: "{{ source }}Redistr\\x64\\SQLSysClrTypes.msi"
     state: present
-- name: Install 2012 Shared management objects
+- name: Install Shared management objects
   ansible.windows.win_package:
     path: "{{ source }}Redistr\\x64\\SharedManagementObjects.msi"
     state: present
-- name: Install Microsoft Report Viewer Redistributable 2015
+- name: Install Microsoft Report Viewer Redistributable
   ansible.windows.win_package:
     path: "{{ source }}Redistr\\ReportViewer.msi"
     state: present

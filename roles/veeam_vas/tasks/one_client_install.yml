@@ -10,12 +10,13 @@
 - name: Print Installation Configuration
   debug:
     msg:
-      - "Installation Source: '{{ source }}'"
+      - "ISO Drive Letter: '{{ source }}'"
       - "Installation Logs Folder: '{{ destination }}logs'"
       - "Version: {{ version }}"
       - "Download ISO?: {{ iso_download }}"
       - "ISO Source: {{ iso_url }}"
       - "ISO File Destination: {{ destination }}{{ destination_iso_file }}"
+      - "Veeam ONE Server: {{ one_server }}"
 - name: Create logs directory
   ansible.windows.win_file:
     path: "{{ destination }}logs"
@@ -32,7 +33,7 @@
   ansible.windows.win_package:
     path: "{{ source }}Monitor\\VeeamONE.Monitor.Client.x64.msi"
     state: present
-    arguments: '/L*v "{{ destination }}logs\\VeeamONE.Monitor.Client.x64.log" ACCEPT_THIRDPARTY_LICENSES=1 ACCEPT_EULA=1 VM_CLN_SERVER_NAME="{{ one_server }}"'
+    arguments: '/L*v "{{ destination }}logs\VeeamONE.Monitor.Client.x64.log" ACCEPT_THIRDPARTY_LICENSES=1 ACCEPT_EULA=1 VM_CLN_SERVER_NAME="{{ one_server }}"'
 - name: Finding file(s) in '{{ source }}Updates' directory
   ansible.windows.win_find:
     paths: "{{ source }}Updates"

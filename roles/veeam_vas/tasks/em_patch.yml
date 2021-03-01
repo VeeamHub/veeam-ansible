@@ -16,7 +16,7 @@
 - name: Print Patch Configuration
   debug:
     msg:
-      - "Patch Source: '{{ source }}{{ patch_folder }}{{ patch_file }}'"
+      - "ISO Drive Letter: '{{ source }}{{ patch_folder }}{{ patch_file }}'"
       - "Patch Logs Folder: '{{ destination }}logs'"
       - "SQL Instance: {{ sql_instance }}"
       - "SQL Database: {{ sql_database }}"

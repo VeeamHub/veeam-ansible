@@ -16,8 +16,11 @@
 - name: Print Patch Configuration
   debug:
     msg:
-      - "Patch Source: '{{ source }}{{ patch_folder }}{{ patch_file }}'"
+      - "ISO Drive Letter: '{{ source }}{{ patch_folder }}{{ patch_file }}'"
       - "Patch Logs Folder: '{{ destination }}logs'"
+      - "SQL Instance: {{ sql_instance }}"
+      - "SQL Database: {{ sql_database }}"
+      - "SQL Account: {{ one_username }}"
 - name: Create logs directory
   ansible.windows.win_file:
     path: "{{ destination }}logs"
@@ -55,7 +58,7 @@
   ansible.windows.win_package:
     path: "{{ source }}{{ patch_folder }}{{ patch_file }}"
     product_id: "Veeam ONE Update"
-    arguments: '/log "{{ destination }}logs\\{{ patch_file }}.log" /silent /noreboot VM_ONE_SERVICEPASSWORD="{{ one_password }}"'
+    arguments: '/log "{{ destination }}logs\{{ patch_file }}.log" /silent /noreboot VM_ONE_SERVICEPASSWORD="{{ one_password }}"'
   register: patch_results
 
 ## POST-INSTALL TASKS

@@ -25,19 +25,20 @@ A big thanks to Markus Kraus ([@vMarkus_K](https://twitter.com/vMarkus_K))! I us
     - [Veeam Backup & Replication Install with ISO Download](#veeam-backup--replication-install-with-iso-download)
     - [Veeam Backup & Replication Install with ISO Download and remote SQL](#veeam-backup--replication-install-with-iso-download-and-remote-sql)
     - [Veeam Backup & Replication Community Edition Install without ISO Download](#veeam-backup--replication-community-edition-install-without-iso-download)
-    - [Veeam Backup & Replication Upgrade to v10](#veeam-backup--replication-upgrade-to-v10)
-    - [Veeam Cloud Connect Server Upgrade to v10](#veeam-cloud-connect-server-upgrade-to-v10)
+    - [Veeam Backup & Replication Upgrade](#veeam-backup--replication-upgrade)
+    - [Veeam Cloud Connect Server Upgrade](#veeam-cloud-connect-server-upgrade)
     - [Veeam Backup & Replication Patch](#veeam-backup--replication-patch)
     - [Veeam Backup Enterprise Manager Install without ISO Download](#veeam-backup-enterprise-manager-install-without-iso-download)
     - [Veeam Backup Enterprise Manager Install with ISO Download and remote SQL](#veeam-backup-enterprise-manager-install-with-iso-download-and-remote-sql)
     - [Veeam Backup Enterprise Manager Install including Cloud Connect Portal](#veeam-backup-enterprise-manager-install-including-cloud-connect-portal)
-    - [Veeam Backup Enterprise Manager Upgrade to v10](#veeam-backup-enterprise-manager-upgrade-to-v10)
+    - [Veeam Backup Enterprise Manager Upgrade](#veeam-backup-enterprise-manager-upgrade)
     - [Veeam Backup Enterprise Manager Patch](#veeam-backup-enterprise-manager-patch)
     - [Veeam ONE Install - Typical Deployment (single server)](#veeam-one-install---typical-deployment-single-server)
     - [Veeam ONE Community Edition Install - Typical Deployment (single server)](#veeam-one-community-edition-install---typical-deployment-single-server)
     - [Veeam ONE Install - Advanced Deployment (multi-server)](#veeam-one-install---advanced-deployment-multi-server)
     - [Veeam ONE Install - Typical Deployment and remote SQL](#veeam-one-install---typical-deployment-and-remote-sql)
-    - [Veeam ONE Upgrade to v10](#veeam-one-upgrade-to-v10)
+    - [Veeam ONE Typical Upgrade](#veeam-one-typical-upgrade)
+    - [Veeam ONE Upgrade - Advanced Deployment (multi-server)](#veeam-one-upgrade---advanced-deployment-multi-server)
     - [Veeam ONE Patch](#veeam-one-patch)
 
 ## How to use this Role
@@ -66,14 +67,17 @@ This collection depends on Windows modules (`ansible.windows` & `community.windo
 ### Veeam Software
 
 - Veeam Backup & Replication
-  - 9.5 Update 4
+  - 9.5 Update 4b
   - 10
+  - 11
 - Veeam Backup Enterprise Manager
-  - 9.5 Update 4
+  - 9.5 Update 4b
   - 10
+  - 11
 - Veeam ONE
-  - 9.5 Update 4
+  - 9.5 Update 4b
   - 10
+  - 11
 
 ## Role Variables
 
@@ -118,6 +122,7 @@ Please note there are more configurations than the examples shown below. If you 
         name: veeamhub.veeam.veeam_vas
         tasks_from: vbr_install
       vars:
+        version: "11"
         iso_download: true
         sql_install_username: "sql_install"
         sql_install_password: "ChangeM3!"
@@ -138,6 +143,7 @@ Please note there are more configurations than the examples shown below. If you 
         name: veeamhub.veeam.veeam_vas
         tasks_from: vbr_install
       vars:
+        version: "11"
         iso_download: true
         license: true
         source_license: "/root/ansible/license.lic"
@@ -160,6 +166,7 @@ Please note there are more configurations than the examples shown below. If you 
         name: veeamhub.veeam.veeam_vas
         tasks_from: vbr_install
       vars:
+        version: "11"
         license: true
         source_license: "/root/ansible/license.lic"
         sql_express_setup: false
@@ -179,8 +186,9 @@ Please note there are more configurations than the examples shown below. If you 
         name: veeamhub.veeam.veeam_vas
         tasks_from: vbr_install
       vars:
+        version: "11"
         destination: "C:\\install\\"
-        destination_iso_file: "VeeamBackup&Replication_10.0.0.4461_20200401.iso"
+        destination_iso_file: "VeeamBackup&Replication_11.0.0.837_20210220.iso"
         sql_install_username: "sql_install"
         sql_install_password: "ChangeM3!"
         sql_service_username: "svc_sql"
@@ -190,7 +198,7 @@ Please note there are more configurations than the examples shown below. If you 
         # https://docs.ansible.com/ansible/latest/user_guide/playbooks_vault.html#single-encrypted-variable
 ```
 
-### Veeam Backup & Replication Upgrade to v10
+### Veeam Backup & Replication Upgrade
 
 ```yaml
 - name: Veeam Backup & Replication Upgrade
@@ -200,12 +208,13 @@ Please note there are more configurations than the examples shown below. If you 
         name: veeamhub.veeam.veeam_vas
         tasks_from: vbr_upgrade
       vars:
+        version: "11"
         iso_download: true
         license: true
         source_license: "/root/ansible/license.lic"
 ```
 
-### Veeam Cloud Connect Server Upgrade to v10
+### Veeam Cloud Connect Server Upgrade
 
 ```yaml
 - name: Veeam Backup & Replication (Cloud Connect) Upgrade
@@ -215,6 +224,7 @@ Please note there are more configurations than the examples shown below. If you 
         name: veeamhub.veeam.veeam_vas
         tasks_from: vbr_upgrade
       vars:
+        version: "11"
         iso_download: true
         license: true
         source_license: "/root/ansible/license.lic"
@@ -246,8 +256,9 @@ Please note there are more configurations than the examples shown below. If you 
         name: veeamhub.veeam.veeam_vas
         tasks_from: em_install
       vars:
+        version: "11"
         destination: "C:\\install\\"
-        destination_iso_file: "VeeamBackup&Replication_10.0.0.4461_20200401.iso"
+        destination_iso_file: "VeeamBackup&Replication_11.0.0.837_20210220.iso"
         license: true #mandatory for EM
         source_license: "/root/ansible/license.lic"
         sql_install_username: "sql_install"
@@ -270,6 +281,7 @@ Please note there are more configurations than the examples shown below. If you 
         name: veeamhub.veeam.veeam_vas
         tasks_from: em_install
       vars:
+        version: "11"
         iso_download: true
         license: true #mandatory for EM
         source_license: "/root/ansible/license.lic"
@@ -291,6 +303,7 @@ Please note there are more configurations than the examples shown below. If you 
         name: veeamhub.veeam.veeam_vas
         tasks_from: em_install
       vars:
+        version: "11"
         iso_download: true
         license: true #mandatory for EM
         source_license: "/root/ansible/license.lic"
@@ -304,7 +317,7 @@ Please note there are more configurations than the examples shown below. If you 
         # https://docs.ansible.com/ansible/latest/user_guide/playbooks_vault.html#single-encrypted-variable
 ```
 
-### Veeam Backup Enterprise Manager Upgrade to v10
+### Veeam Backup Enterprise Manager Upgrade
 
 ```yaml
 - name: Backup Enterprise Manager Upgrade
@@ -314,6 +327,7 @@ Please note there are more configurations than the examples shown below. If you 
         name: veeamhub.veeam.veeam_vas
         tasks_from: em_upgrade
       vars:
+        version: "11"
         iso_download: true
         license: true
         source_license: "/root/ansible/license.lic"
@@ -351,9 +365,11 @@ Please note there are more configurations than the examples shown below. If you 
   hosts: veeam
 
   vars:
+    version: "11"
     iso_download: false #this way ISO is only downloaded once
     license: true
     source_license: "/root/ansible/license.lic"
+    sql_express_setup: true
     sql_service_username: "svc_sql"
     sql_service_password: "ChangeM3!"
     one_create_service_account: true #true==local false==domain
@@ -385,7 +401,9 @@ Please note there are more configurations than the examples shown below. If you 
   hosts: veeam
 
   vars:
+    version: "11"
     iso_download: false #this way ISO is only downloaded once
+    sql_express_setup: true
     sql_service_username: "svc_sql"
     sql_service_password: "ChangeM3!"
     one_create_service_account: true #true==local false==domain
@@ -415,18 +433,19 @@ Please note there are more configurations than the examples shown below. If you 
 - name: Veeam ONE Advanced Deployment - Veeam ONE Server
   gather_facts: no
   hosts: server
-
   tasks:
     - name: Veeam ONE Server installation tasks
       include_role:
         name: veeamhub.veeam.veeam_vas
         tasks_from: one_server_install
       vars:
+        version: "11"
         iso_download: true
         license: true
         source_license: "/root/ansible/license.lic"
         sql_express_setup: false
         sql_instance: "sql.contoso.local"
+        sql_database: "VeeamOne"
         one_installation_type: "1" #1-Advanced | 2-Backup data only | 3-Typical
         one_create_service_account: false #true==local false==domain
         one_username: "contoso\\jsmith"
@@ -436,31 +455,30 @@ Please note there are more configurations than the examples shown below. If you 
 - name: Veeam ONE Advanced Deployment - Veeam Web UI
   gather_facts: no
   hosts: web
-
   tasks:
     - name: Veeam ONE Web UI installation tasks
       include_role:
         name: veeamhub.veeam.veeam_vas
         tasks_from: one_web_ui_install
       vars:
+        version: "11"
         iso_download: true
-        sql_instance: "sql.contoso.local"
-        one_installation_type: "1" #1-Advanced | 2-Backup data only | 3-Typical
         one_create_service_account: false #true==local false==domain
         one_username: "contoso\\jsmith"
         one_password: "ChangeM3!"
+        one_server: "server.contoso.local"
         # https://docs.ansible.com/ansible/latest/user_guide/playbooks_vault.html#single-encrypted-variable
 
 - name: Veeam ONE Advanced Deployment - Monitoring Client
   gather_facts: no
   hosts: client
-
   tasks:
     - name: Veeam ONE Monitoring Client installation tasks
       include_role:
         name: veeamhub.veeam.veeam_vas
         tasks_from: one_client_install
       vars:
+        version: "11"
         iso_download: true
         one_server: "server.contoso.local"
 ```
@@ -473,11 +491,13 @@ Please note there are more configurations than the examples shown below. If you 
   hosts: veeam
 
   vars:
+    version: "11"
     iso_download: false #this way ISO is only downloaded once
     license: true
     source_license: "/root/ansible/license.lic"
     sql_express_setup: false
     sql_instance: "sql.contoso.local"
+    sql_database: "VeeamOne"
     one_create_service_account: false #true==local false==domain
     one_username: "contoso\\jsmith"
     one_password: "ChangeM3!"
@@ -499,7 +519,7 @@ Please note there are more configurations than the examples shown below. If you 
         tasks_from: one_client_install
 ```
 
-### Veeam ONE Upgrade to v10
+### Veeam ONE Typical Upgrade
 
 ```yaml
 - name: Veeam ONE Upgrade
@@ -507,6 +527,7 @@ Please note there are more configurations than the examples shown below. If you 
   hosts: veeam
 
   vars:
+    version: "11"
     iso_download: false  #this way ISO is only downloaded once
     license: true
     source_license: "/root/ansible/license.lic"
@@ -531,6 +552,58 @@ Please note there are more configurations than the examples shown below. If you 
     - name: Rebooting server now to complete upgrade
       ansible.windows.win_reboot:
         msg: Reboot initiated by Ansible to complete Veeam ONE upgrade
+```
+
+### Veeam ONE Upgrade - Advanced Deployment (multi-server)
+
+```yaml
+- name: Veeam ONE Advanced Deployment - Veeam ONE Server
+  gather_facts: no
+  hosts: server
+  tasks:
+    - name: Veeam ONE Server upgrade tasks
+      include_role:
+        name: veeamhub.veeam.veeam_vas
+        tasks_from: one_server_upgrade
+      vars:
+        version: "11"
+        iso_download: true
+        license: true
+        source_license: "/root/ansible/license.lic"
+        sql_instance: "sql.contoso.local"
+        sql_database: "VeeamOne"
+        one_username: "contoso\\jsmith"
+        one_password: "ChangeM3!"
+        # https://docs.ansible.com/ansible/latest/user_guide/playbooks_vault.html#single-encrypted-variable
+
+- name: Veeam ONE Advanced Deployment - Veeam Web UI
+  hosts: web
+  gather_facts: no
+  tasks:
+    - name: Veeam ONE Web UI upgrade tasks
+      include_role:
+        name: veeamhub.veeam.veeam_vas
+        tasks_from: one_web_ui_upgrade
+      vars:
+        version: "11"
+        iso_download: true
+        one_username: "contoso\\jsmith"
+        one_password: "ChangeM3!"
+        one_server: "server.contoso.local"
+        # https://docs.ansible.com/ansible/latest/user_guide/playbooks_vault.html#single-encrypted-variable
+
+- name: Veeam ONE Advanced Deployment - Monitoring Client
+  hosts: client
+  gather_facts: no
+  tasks:
+    - name: Veeam ONE Monitoring Client upgrade tasks
+      include_role:
+        name: veeamhub.veeam.veeam_vas
+        tasks_from: one_client_upgrade
+      vars:
+        version: "11"
+        iso_download: true
+        one_server: "server.contoso.local"
 ```
 
 ### Veeam ONE Patch

@@ -18,26 +18,44 @@
 - name: Print Upgrade Configuration
   debug:
     msg:
-      - "Upgrade Source: '{{ source }}'"
+      - "ISO Drive Letter: '{{ source }}'"
       - "Upgrade Logs Folder: '{{ destination }}logs'"
       - "Version: {{ version }}"
       - "Download ISO?: {{ iso_download }}"
       - "ISO Source: {{ iso_url }}"
       - "ISO File Destination: {{ destination }}{{ destination_iso_file }}"
+      - "Veeam ONE Server: {{ one_server }} (ignore pre-v11)"
       - "Veeam ONE Service Account: {{ one_username | default('not specified') }}"
 - name: Create logs directory
   ansible.windows.win_file:
     path: "{{ destination }}logs"
     state: directory
-- name: .NET Framework
-  include_tasks: install_net_framework.yml
+- name: Including Veeam ONE Common Pre-Install tasks
+  include_tasks: one_install_pretasks.yml
 
 # UPGRADING VEEAM SOFTWARE
+- name: Upgrade ONE Reporter Web UI (pre-v11)
+  ansible.windows.win_package:
+    path: "{{ source }}Reporter\\VeeamONE.Reporter.WebUI.x64.msi"
+    state: present
+    arguments: '/L*v "{{ destination }}logs\VeeamONE.Reporter.WebUI.x64.log" ACCEPT_THIRDPARTY_LICENSES=1 ACCEPT_EULA=1 VM_RP_SERVICEACCOUNT="{{ one_username }}" VM_RP_SERVICEPASSWORD="{{ one_password }}"'
+  when: version | int < 11
 - name: Upgrade ONE Reporter Web UI
   ansible.windows.win_package:
     path: "{{ source }}Reporter\\VeeamONE.Reporter.WebUI.x64.msi"
     state: present
-    arguments: '/L*v "{{ destination }}logs\\VeeamONE.Reporter.WebUI.x64.log" ACCEPT_THIRDPARTY_LICENSES=1 ACCEPT_EULA=1 VM_RP_SERVICEACCOUNT="{{ one_username }}" VM_RP_SERVICEPASSWORD="{{ one_password }}"'
+    arguments: '/L*v "{{ destination }}logs\VeeamONE.Reporter.WebUI.x64.log" ACCEPT_THIRDPARTY_LICENSES=1 ACCEPT_EULA=1 VO_REPORTER_WEB_SERVER_NAME="{{ one_server }}" VO_REPORTER_WEB_CONNECTION_ACCOUNT_NAME="{{ one_username }}" VO_REPORTER_WEB_CONNECTION_ACCOUNT_PASSWORD="{{ one_password }}"'
+  when:
+    - version | int >= 11
+    - one_username.find("\\") != -1 #locates backslash used in domain account
+- name: Install ONE Reporter Web UI (local account)
+  ansible.windows.win_package:
+    path: "{{ source }}Reporter\\VeeamONE.Reporter.WebUI.x64.msi"
+    state: present
+    arguments: '/L*v "{{ destination }}logs\VeeamONE.Reporter.WebUI.x64.log" ACCEPT_THIRDPARTY_LICENSES=1 ACCEPT_EULA=1 VO_REPORTER_WEB_SERVER_NAME="{{ one_server }}" VO_REPORTER_WEB_CONNECTION_ACCOUNT_NAME="{{ ansible_env.COMPUTERNAME }}\{{ one_username }}" VO_REPORTER_WEB_CONNECTION_ACCOUNT_PASSWORD="{{ one_password }}"'
+  when:
+    - version | int >= 11
+    - one_username.find("\\") == -1 #locates missing backlash for local account
 - name: Finding file(s) in '{{ source }}Updates' directory
   ansible.windows.win_find:
     paths: "{{ source }}Updates"

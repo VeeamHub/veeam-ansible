@@ -14,27 +14,57 @@
     state: present
     groups:
       - Administrators
-  when: one_create_service_account | bool
-- name: Install 2012 System CLR Types
+  when:
+    - one_create_service_account | bool
+    - one_username.find("\\") == -1 #skips account creation if domain account is specified
+- name: Install System CLR Types
   ansible.windows.win_package:
     path: "{{ source }}Redistr\\x64\\SQLSysClrTypes.msi"
     state: present
-- name: Install 2012 Shared management objects
+- name: Install Shared management objects
   ansible.windows.win_package:
     path: "{{ source }}Redistr\\x64\\SharedManagementObjects.msi"
-    state: present
-- name: Install XML Parser
-  ansible.windows.win_package:
-    path: "{{ source }}Redistr\\x64\\msxml6_x64.msi"
     state: present
 - name: Install SQL Native Client
   ansible.windows.win_package:
     path: "{{ source }}Redistr\\x64\\sqlncli.msi"
     state: present
     arguments: "IACCEPTSQLNCLILICENSETERMS=YES"
-- name: Install Microsoft Report Viewer Redistributable 2015
+- name: Install Microsoft OLE DB Driver for SQL Server
+  ansible.windows.win_package:
+    path: "{{ source }}Redistr\\x64\\msoledbsql.msi"
+    state: present
+    arguments: "IACCEPTMSOLEDBSQLLICENSETERMS=YES"
+  when: version | int >= 11
+- name: Install Microsoft .NET Core Runtime
+  ansible.windows.win_package:
+    path: "{{ source }}Redistr\\x64\\dotnet-runtime-3.1.10-win-x64.exe"
+    product_id: Install .NET Core Runtime
+    state: present
+    arguments: '/install /quiet /norestart'
+  when: version | int >= 11
+- name: Install Microsoft ASP.NET Core Shared Framework
+  ansible.windows.win_package:
+    path: "{{ source }}Redistr\\x64\\aspnetcore-runtime-3.1.10-win-x64.exe"
+    product_id: Install ASP.NET Core Runtime
+    state: present
+    arguments: '/install /quiet /norestart'
+  when: version | int >= 11
+- name: Install Microsoft Visual C++ Redistributable
+  ansible.windows.win_package:
+    path: "{{ source }}Redistr\\x64\\vc_redist.x64.exe"
+    product_id: Install C++ Framework
+    state: present
+    arguments: '/install /quiet /norestart'
+  when: version | int >= 11
+- name: Install Microsoft Report Viewer Redistributable
   ansible.windows.win_package:
     path: "{{ source }}Redistr\\ReportViewer.msi"
+    state: present
+  when: version | int < 11
+- name: Install XML Parser
+  ansible.windows.win_package:
+    path: "{{ source }}Redistr\\x64\\msxml6_x64.msi"
     state: present
 - name: .NET Framework
   include_tasks: install_net_framework.yml
@@ -54,6 +84,10 @@
   ansible.windows.win_optional_feature:
     name: IIS-WindowsAuthentication
     state: present
+- name: Enable Windows Feature - IIS WebSocket Protocol Component
+  ansible.windows.win_feature:
+    name: Web-WebSockets
+    state: present
 - name: Enable Windows Feature - .NET Extended support for ASP.NET 4.5
   ansible.windows.win_optional_feature:
     name: NetFx4Extended-ASPNET45
@@ -67,3 +101,13 @@
     name: IIS-ASPNET45
     include_parent: true
     state: present
+- name: Install Microsoft Application Request Routing
+  ansible.windows.win_package:
+    path: "{{ source }}Redistr\\x64\\requestRouter_amd64.msi"
+    state: present
+  when: version | int >= 11
+- name: Install IIS URL Rewrite Module
+  ansible.windows.win_package:
+    path: "{{ source }}Redistr\\x64\\rewrite_amd64_en-US.msi"
+    state: present
+  when: version | int >= 11
