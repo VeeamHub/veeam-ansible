@@ -14,7 +14,9 @@
     state: present
     groups:
       - Administrators
-  when: one_create_service_account | bool
+  when:
+    - one_create_service_account | bool
+    - one_username.find("\\") == -1 #skips account creation if domain account is specified
 - name: Install System CLR Types
   ansible.windows.win_package:
     path: "{{ source }}Redistr\\x64\\SQLSysClrTypes.msi"
