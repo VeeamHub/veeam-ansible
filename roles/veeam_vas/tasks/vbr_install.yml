@@ -82,6 +82,12 @@
     path: "{{ source }}Explorers\\VeeamExplorerForSQL.msi"
     state: present
     arguments: '/L*v "{{ destination }}logs\\VeeamExplorerForSQL.log" /norestart /qn ACCEPT_EULA="1" ACCEPT_THIRDPARTY_LICENSES="1"'
+- name: Install Veeam Explorer for Microsoft Teams
+  ansible.windows.win_package:
+    path: "{{ source }}Explorers\\VeeamExplorerForTeams.msi"
+    state: present
+    arguments: '/L*v "{{ destination }}logs\\VeeamExplorerForTeams.log" /norestart /qn ACCEPT_EULA="1" ACCEPT_THIRDPARTY_LICENSES="1"'
+  when: version | int >= 11
 - name: Install Veeam Agent for Linux Redistributable
   ansible.windows.win_package:
     path: "{{ source }}Packages\\VALRedist.msi"
