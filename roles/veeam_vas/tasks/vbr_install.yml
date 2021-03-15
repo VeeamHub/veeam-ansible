@@ -15,6 +15,20 @@
 # PRE-INSTALL TASKS
 - name: Including VBR Pre-Install tasks
   include_tasks: vbr_install_pretasks.yml
+- name: Install Microsoft .NET Core Runtime
+  ansible.windows.win_package:
+    path: "{{ source }}Redistr\\x64\\dotnet-runtime-3.1.10-win-x64.exe"
+    product_id: Install .NET Core Runtime
+    state: present
+    arguments: '/install /quiet /norestart /log "{{ destination }}logs\\dotnet-runtime-3.1.10-win-x64.log"'
+  when: version | int >= 11
+- name: Install Microsoft ASP.NET Core Shared Framework
+  ansible.windows.win_package:
+    path: "{{ source }}Redistr\\x64\\aspnetcore-runtime-3.1.10-win-x64.exe"
+    product_id: Install ASP.NET Core Runtime
+    state: present
+    arguments: '/install /quiet /norestart /log "{{ destination }}logs\\aspnetcore-runtime-3.1.10-win-x64.log"'
+  when: version | int >= 11
 
 # INSTALLING VEEAM SOFTWARE
 - name: Install Veeam Backup Catalog
