@@ -41,4 +41,6 @@
 - name: "Does the ISO version ({{ iso_version.win_file_version.file_major_part }}) match the version specified in the playbook ({{ version }})?"
   fail:
     msg: "Please either specify the correct 'version' in your playbook or the correct ISO to be used. Halting Ansible now as this can cause adverse effects."
-  when: version != iso_version.win_file_version.file_major_part
+  when:
+    - version != iso_version.win_file_version.file_major_part
+    - not skip_iso_check | bool
