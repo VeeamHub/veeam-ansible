@@ -67,19 +67,47 @@
     Get-Service veeam* | Stop-Service
 - name: .NET Framework
   include_tasks: install_net_framework.yml
+- name: Looking for .NET Core Runtime in Veeam ISO
+  ansible.windows.win_find:
+    paths: "{{ source }}Redistr\\x64"
+    patterns: dotnet-runtime-.*
+    recurse: no
+    file_type: file
+    use_regex: true
+  ignore_errors: yes
+  register: file
+  when: version | int >= 11
 - name: Install Microsoft .NET Core Runtime
   ansible.windows.win_package:
-    path: "{{ source }}Redistr\\x64\\dotnet-runtime-3.1.10-win-x64.exe"
+    path: "{{ file.files[0].path }}"
     product_id: Install .NET Core Runtime
     state: present
-    arguments: '/install /quiet /norestart /log "{{ destination }}logs\\dotnet-runtime-3.1.10-win-x64.log"'
+    arguments: '/install /quiet /norestart /log "{{ destination }}logs\\dotnet-runtime-x.x.x-win-x64.log"'
+  when: version | int >= 11
+- name: Looking for ASP.NET Core Shared Framework in Veeam ISO
+  ansible.windows.win_find:
+    paths: "{{ source }}Redistr\\x64"
+    patterns: aspnetcore-runtime-.*
+    recurse: no
+    file_type: file
+    use_regex: true
+  ignore_errors: yes
+  register: file
   when: version | int >= 11
 - name: Install Microsoft ASP.NET Core Shared Framework
   ansible.windows.win_package:
-    path: "{{ source }}Redistr\\x64\\aspnetcore-runtime-3.1.10-win-x64.exe"
+    path: "{{ file.files[0].path }}"
     product_id: Install ASP.NET Core Runtime
     state: present
-    arguments: '/install /quiet /norestart /log "{{ destination }}logs\\aspnetcore-runtime-3.1.10-win-x64.log"'
+    arguments: '/install /quiet /norestart /log "{{ destination }}logs\\aspnetcore-runtime-x.x.x-win-x64.log"'
+  when: version | int >= 11
+- name: Install Microsoft Visual C++ Redistributable
+  ansible.windows.win_package:
+    path: "{{ source }}Redistr\\x64\\vc_redist.x64.exe"
+    product_id: Install C++ Framework
+    state: present
+    arguments: '/install /quiet /norestart /log "{{ destination }}logs\\vc_redist.x64.log"'
+  ignore_errors: yes
   when: version | int >= 11
 
 # UPGRADING VEEAM SOFTWARE
@@ -162,6 +190,16 @@
     path: "{{ source }}Packages\\VAWRedist.msi"
     state: present
     arguments: '/L*v "{{ destination }}logs\\VAWRedist.log" /norestart /qn ACCEPTEULA="YES" ACCEPT_THIRDPARTY_LICENSES="1"'
+- name: Looking for Veeam Agent for Unix Redistributable
+  ansible.windows.win_stat:
+    path: "{{ source }}Packages\\VAURedist.msi"
+  register: file
+- name: Upgrade Veeam Agent for Unix Redistributable
+  ansible.windows.win_package:
+    path: "{{ source }}Packages\\VAURedist.msi"
+    state: present
+    arguments: '/L*v "{{ destination }}logs\\VAURedist.log" /norestart /qn ACCEPTEULA="YES" ACCEPT_THIRDPARTY_LICENSES="1"'
+  when: file.stat.exists
 - name: Upgrade Veeam Mount Service
   ansible.windows.win_package:
     path: "{{ source }}Packages\\VeeamMountService.msi"
