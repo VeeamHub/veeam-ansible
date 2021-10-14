@@ -97,6 +97,11 @@ Variables are located in two different locations:
 - Install/Patch/Upgrade only supports SQL authentication (no Windows auth)
   - _This is a limitation of the Ansible Role and not the Veeam Product._
 - After the upgrade, any Agent-base backups (VAW, VAL) that Veeam administers will need to be upgraded.
+- Optional plug-ins (see below) are not currently included in this collection
+  - AWS Plug-in for Veeam Backup & Replication
+  - Microsoft Azure Plug-in for Veeam Backup & Replication
+  - Google Cloud Platform Plug-in for Veeam Backup & Replication
+  - Veeam Backup for Nutanix AHV
 
 ### Veeam Backup Enterprise Manager
 
