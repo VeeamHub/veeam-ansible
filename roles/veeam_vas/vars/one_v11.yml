@@ -2,8 +2,8 @@
 # ONE v11 vars file for veeamhub.veeam_vas
 
 ## v10 vars
-iso_url: "https://download2.veeam.com/VONE/v11/VeeamONE_11.0.0.1379_20210419.iso"
-iso_checksum: "63c3591ca8a3585c597a6e39f3510c887c1034d7964b5972c52a5ed0bbd5476e"
+iso_url: "https://download2.veeam.com/VONE/v11/VeeamONE_11.0.1.1880_20210922.iso"
+iso_checksum: "b1724cd66a75b17911c43434f501ff5ecf8944b702d83e5d55fa5d0fd0ca0475"
 destination_iso_file: "one.iso"
 destination_license_file: "one-license.lic"
 sql_express_file: "{{ source }}Redistr\\x64\\SqlExpress\\2016SP2\\SQLEXPR_x64_ENU.exe"

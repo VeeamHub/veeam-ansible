@@ -1,8 +1,8 @@
 ---
 # VBR v11 vars file for veeamhub.veeam_vas
 
-iso_url: "https://download2.veeam.com/VBR/v11/VeeamBackup&Replication_11.0.0.837_20210525.iso"
-iso_checksum: "3a4d6fe966d5b9f71003a2cbbba3a7c0f068b6092a644b3e1a643802813a4bde"
+iso_url: "https://download2.veeam.com/VBR/v11/VeeamBackup&Replication_11.0.1.1261_20211005.iso"
+iso_checksum: "760e117fca61ca350b43ba9d2b99c76556e99ac0ae02b689022f381ee60b6e6e"
 destination_iso_file: "vbr.iso"
 destination_license_file: "vbr-license.lic"
 sql_express_file: "{{ source }}Redistr\\x64\\SqlExpress\\2016SP2\\SQLEXPR_x64_ENU.exe"
