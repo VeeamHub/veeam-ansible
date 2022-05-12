@@ -2,7 +2,7 @@
 # ONE v11 vars file for veeamhub.veeam_vas
 
 ## v10 vars
-iso_url: "https://download2.veeam.com/VONE/v11/VeeamONE_11.0.1.1880_20210922.iso"
+iso_url: "https://download2.veeam.com/VONE/v11/VeeamONE_11.0.1.1880_20211119.iso"
 iso_checksum: "b1724cd66a75b17911c43434f501ff5ecf8944b702d83e5d55fa5d0fd0ca0475"
 destination_iso_file: "one.iso"
 destination_license_file: "one-license.lic"

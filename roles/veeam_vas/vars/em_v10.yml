@@ -1,7 +1,7 @@
 ---
 # EM v10 vars file for veeamhub.veeam_vas
 
-iso_url: "https://download2.veeam.com/VeeamBackup&Replication_10.0.1.4854_20200723.iso"
+iso_url: "https://download2.veeam.com/VeeamBackup&Replication_10.0.1.4854_20220304.iso"
 iso_checksum: "378ae6a95ca683a12d9872eec7596bf2b17848c880812484e6e9e1dd55ec2dad"
 destination_iso_file: "vbr.iso"
 destination_license_file: "vbr-license.lic"
