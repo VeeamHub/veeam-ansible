@@ -5,7 +5,7 @@
   register: precheck
 - name: Is there an existing pending reboot?
   fail:
-    msg: "This Windows server requires a reboot prior to beginning the Veeam Backup & Replication install. After rebooting this server, you can proceed with the installation."
+      msg: "This Windows server requires a reboot prior to beginning the Veeam Backup & Replication install. After rebooting this server, you can proceed with the installation."
   when:
     - precheck.pending_reboot | bool
 - name: Including version-specific variables
