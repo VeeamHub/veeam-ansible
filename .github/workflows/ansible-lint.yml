@@ -13,5 +13,5 @@ jobs:
     - name: Run ansible-lint
       uses: ansible/ansible-lint-action@main
       with:
-        path: "/github/workspace/"  # <-- only one value is allowed
+        targets: ""
       
