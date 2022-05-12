@@ -12,4 +12,6 @@ jobs:
 
     - name: Run ansible-lint
       uses: ansible/ansible-lint-action@v6.0.2
+      with:
+        path: ""  # <-- only one value is allowed
       
