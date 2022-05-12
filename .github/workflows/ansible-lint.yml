@@ -13,5 +13,5 @@ jobs:
     - name: Run ansible-lint
       uses: ansible/ansible-lint-action@main
       with:
-        targets: ""
+        path: "/github/workspace/roles/"  # <-- only one value is allowed
       
