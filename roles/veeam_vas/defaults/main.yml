@@ -8,7 +8,7 @@ version: "11" # "9.5" & "10" is also accepted
 skip_iso_check: false
 iso_download: false
 license: false
-source_license: ''
+source_license: ""
 destination: "C:\\install\\"
 
 # Default common variables

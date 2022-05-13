@@ -25,7 +25,6 @@
 - name: Including Veeam ONE Common Pre-Install tasks
   include_tasks: one_install_pretasks.yml
 
-
 # INSTALLING VEEAM SOFTWARE
 - name: Install ONE Reporter Web UI (pre-v11)
   ansible.windows.win_package:
