@@ -39,7 +39,7 @@
     arguments: '/L*v "{{ destination }}logs\VeeamONE.Reporter.WebUI.x64.log" ACCEPT_THIRDPARTY_LICENSES=1 ACCEPT_EULA=1 VO_REPORTER_WEB_SERVER_NAME="{{ one_server }}" VO_REPORTER_WEB_CONNECTION_ACCOUNT_NAME="{{ one_username }}" VO_REPORTER_WEB_CONNECTION_ACCOUNT_PASSWORD="{{ one_password }}"'
   when:
     - version | int >= 11
-    - one_username.find("\\") != -1 #locates backslash used in domain account
+    - one_username.find("\\") != -1 # locates backslash used in domain account
 - name: Install ONE Reporter Web UI (local account)
   ansible.windows.win_package:
     path: "{{ source }}Reporter\\VeeamONE.Reporter.WebUI.x64.msi"
@@ -47,7 +47,7 @@
     arguments: '/L*v "{{ destination }}logs\VeeamONE.Reporter.WebUI.x64.log" ACCEPT_THIRDPARTY_LICENSES=1 ACCEPT_EULA=1 VO_REPORTER_WEB_SERVER_NAME="{{ one_server }}" VO_REPORTER_WEB_CONNECTION_ACCOUNT_NAME="{{ ansible_env.COMPUTERNAME }}\{{ one_username }}" VO_REPORTER_WEB_CONNECTION_ACCOUNT_PASSWORD="{{ one_password }}"'
   when:
     - version | int >= 11
-    - one_username.find("\\") == -1 #locates missing backlash for local account
+    - one_username.find("\\") == -1 # locates missing backlash for local account
 - name: Finding file(s) in '{{ source }}Updates' directory
   ansible.windows.win_find:
     paths: "{{ source }}Updates"

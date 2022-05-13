@@ -28,6 +28,8 @@ use_default_rules: true
 # This makes linter to fully ignore rules/tags listed below
 skip_list:
   - no-handler
+  - line-length
+  - truthy
 
 # Report only a subset of tags and fully ignore any others
 # tags:
