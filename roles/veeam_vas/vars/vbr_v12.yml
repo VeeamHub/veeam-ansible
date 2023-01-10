@@ -1,0 +1,10 @@
+---
+# VBR v11 vars file for veeamhub.veeam_vas
+
+iso_url: ""
+iso_checksum: ""
+destination_iso_file: "vbr.iso"
+destination_license_file: "vbr-license.lic"
+sql_express_file: "{{ source }}Redistr\\x64\\SqlExpress\\2016SP2\\SQLEXPR_x64_ENU.exe"
+sql_database: "VeeamBackup"
+net_framework_file: "{{ source }}Redistr\\NDP472-KB4054530-x86-x64-AllOS-ENU.exe"
