@@ -52,17 +52,17 @@
     path: "{{ sql_express_file }}"
     product_id: SQL 2016 Express
     arguments:
-      - '/q'
-      - '/ACTION=Install'
-      - '/IACCEPTSQLSERVERLICENSETERMS'
-      - '/FEATURES=SQL'
-      - '/INSTANCENAME=VEEAMSQL2016'
-      - '/SQLSVCACCOUNT={{ sql_service_username }}'
-      - '/SQLSVCPASSWORD={{ sql_service_password }}'
-      - '/ADDCURRENTUSERASSQLADMIN'
-      - '/UPDATEENABLED=1'
-      - '/TCPENABLED=1'
-      - '/NPENABLED=1'
+      - "/q"
+      - "/ACTION=Install"
+      - "/IACCEPTSQLSERVERLICENSETERMS"
+      - "/FEATURES=SQL"
+      - "/INSTANCENAME=VEEAMSQL2016"
+      - "/SQLSVCACCOUNT={{ sql_service_username }}"
+      - "/SQLSVCPASSWORD={{ sql_service_password }}"
+      - "/ADDCURRENTUSERASSQLADMIN"
+      - "/UPDATEENABLED=1"
+      - "/TCPENABLED=1"
+      - "/NPENABLED=1"
   become: yes
   become_flags: logon_type=batch
   vars:

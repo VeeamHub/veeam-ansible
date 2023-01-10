@@ -13,7 +13,7 @@ jobs:
 
     - name: Lint Ansible Playbook
       # replace "master" with any valid ref
-      uses: ansible/ansible-lint-action@master
+      uses: ansible/ansible-lint-action@v4-eol
       with:
         # [required]
         # Paths to ansible files (i.e., playbooks, tasks, handlers etc..)
@@ -29,7 +29,7 @@ jobs:
         # Must follow the example syntax.
         # ansible-lint =>5.0.0 is required for proper linting of collections
         override-deps: |
-          ansible-lint==5.0.12
+          ansible-lint==5.4.0
         # [optional]
         # Arguments to be passed to the ansible-lint
 

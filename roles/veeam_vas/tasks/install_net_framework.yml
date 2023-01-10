@@ -5,7 +5,7 @@
     path: "{{ net_framework_file }}"
     product_id: Install .NET Framework
     state: present
-    arguments: '/q /norestart'
+    arguments: "/q /norestart"
   register: software
 - name: Rebooting server to complete .NET Framework installation
   ansible.windows.win_reboot:

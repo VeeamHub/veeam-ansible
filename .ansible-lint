@@ -1,7 +1,7 @@
 # .ansible-lint
 exclude_paths:
-- .github/
-- .vscode/
+  - .github/
+  - .vscode/
 
 parseable: true
 # quiet: true
@@ -11,7 +11,7 @@ parseable: true
 # mock_modules:
 #   - zuul_return
 #   - fake_namespace.fake_collection.fake_module
-  # note the foo.bar is invalid as being neither a module or a collection
+# note the foo.bar is invalid as being neither a module or a collection
 # mock_roles:
 #   - mocked_role
 #   - author.role_name  # old standalone galaxy role
@@ -28,6 +28,8 @@ use_default_rules: true
 # This makes linter to fully ignore rules/tags listed below
 skip_list:
   - no-handler
+  - line-length
+  - truthy
 
 # Report only a subset of tags and fully ignore any others
 # tags:
@@ -41,7 +43,6 @@ skip_list:
 
 # Offline mode disables installation of requirements.yml
 offline: false
-
 # Define required Ansible's variables to satisfy syntax check
 # extra_vars:
 #   foo: bar

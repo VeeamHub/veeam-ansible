@@ -22,7 +22,7 @@
   when: iso_download | bool
 - name: Clearing 'iso_url' variable as it isn't needed
   set_fact:
-   iso_url: "not specified"
+    iso_url: "not specified"
   when: not iso_download | bool
 
 ## Mounting ISO
