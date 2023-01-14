@@ -57,4 +57,3 @@
     - version | int >= 12
     - iso_version.stdout.find(version) == -1 # looking for version number in autorun.inf
     - not skip_iso_check | bool
-
