@@ -87,16 +87,32 @@
   include_tasks: install_net_framework.yml
 
 # UPGRADING VEEAM SOFTWARE
-- name: Upgrade Veeam Backup Catalog
+- name: Upgrade Veeam Backup Catalog (v12+)
+  ansible.windows.win_package:
+    path: "{{ source }}Catalog\\VeeamBackupCatalog64.msi"
+    state: present
+    arguments: '/L*v "{{ destination }}logs\\VeeamBackupCatalog64.log" /norestart /qn ACCEPTEULA="YES" ACCEPT_LICENSING_POLICY="1" ACCEPT_REQUIRED_SOFTWARE="1" ACCEPT_THIRDPARTY_LICENSES="1"'
+  register: win_package_vbr_catalog
+  when: version | int >= 12
+- name: Upgrade Veeam Backup Catalog (v11-)
   ansible.windows.win_package:
     path: "{{ source }}Catalog\\VeeamBackupCatalog64.msi"
     state: present
     arguments: '/L*v "{{ destination }}logs\\VeeamBackupCatalog64.log" /norestart /qn ACCEPTEULA="YES" ACCEPT_THIRDPARTY_LICENSES="1"'
-- name: Upgrade Veeam Backup Enterprise Manager
+  register: win_package_vbr_catalog
+  when: version | int <= 11
+- name: Upgrade Veeam Backup Enterprise Manager (v12+)
+  ansible.windows.win_package:
+    path: "{{ source }}EnterpriseManager\\BackupWeb_x64.msi"
+    state: present
+    arguments: '/L*v "{{ destination }}logs\\EnterpriseManager.log" VBREM_LICENSE_FILE="{{ destination }}{{ destination_license_file }}"  ACCEPT_LICENSING_POLICY="1" ACCEPT_REQUIRED_SOFTWARE="1" ACCEPT_THIRDPARTY_LICENSES=1 ACCEPTEULA=YES'
+  when: version | int >= 12
+- name: Upgrade Veeam Backup Enterprise Manager (v11-)
   ansible.windows.win_package:
     path: "{{ source }}EnterpriseManager\\BackupWeb_x64.msi"
     state: present
     arguments: '/L*v "{{ destination }}logs\\EnterpriseManager.log" VBREM_LICENSE_FILE="{{ destination }}{{ destination_license_file }}"  ACCEPT_THIRDPARTY_LICENSES=1 ACCEPTEULA=YES'
+  when: version | int <= 11
 - name: Checking to see if Veeam Cloud Connect Portal is installed
   veeam_software_check:
     name: "Veeam Cloud Connect Portal"
