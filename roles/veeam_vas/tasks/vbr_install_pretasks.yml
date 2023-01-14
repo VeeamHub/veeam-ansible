@@ -109,7 +109,7 @@
       - --superpassword
       - "{{ sql_password }}"
       - --enable_acledit
-      - 1      
+      - 1
   become: yes
   become_flags: logon_type=batch
   vars:

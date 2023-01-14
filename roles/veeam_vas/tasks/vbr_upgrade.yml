@@ -133,7 +133,7 @@
     path: "{{ source }}Backup\\Server.x64.msi"
     state: present
     arguments: '/L*v "{{ destination }}logs\\BackupServer.log" ACCEPT_LICENSING_POLICY="1" ACCEPT_REQUIRED_SOFTWARE="1" ACCEPTEULA="YES" ACCEPT_THIRDPARTY_LICENSES="1" VBR_LICENSE_FILE="{{ destination }}{{ destination_license_file }}" VBR_AUTO_UPGRADE="1"'
-  when: 
+  when:
     - version | int >= 12
     - license | bool
   register: win_package_vbr_server
@@ -142,7 +142,7 @@
     path: "{{ source }}Backup\\Server.x64.msi"
     state: present
     arguments: '/L*v "{{ destination }}logs\\BackupServer.log" ACCEPT_LICENSING_POLICY="1" ACCEPT_REQUIRED_SOFTWARE="1" ACCEPTEULA="YES" ACCEPT_THIRDPARTY_LICENSES="1" VBR_AUTO_UPGRADE="1"'
-  when: 
+  when:
     - version | int >= 12
     - not license | bool
   register: win_package_vbr_server
