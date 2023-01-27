@@ -61,8 +61,8 @@ This collection depends on Windows modules (`ansible.windows` & `community.windo
 
 ### OS
 
+- Microsoft Windows Server 2022
 - Microsoft Windows Server 2019
-- Microsoft Windows Server 2016 (64-bit)
 
 ### Veeam Software
 
@@ -70,10 +70,12 @@ This collection depends on Windows modules (`ansible.windows` & `community.windo
   - 9.5 Update 4b
   - 10
   - 11
+  - 12 _(tested with release candidate software)_
 - Veeam Backup Enterprise Manager
   - 9.5 Update 4b
   - 10
   - 11
+  - 12 _(tested with release candidate software)_
 - Veeam ONE
   - 9.5 Update 4b
   - 10
@@ -96,6 +98,7 @@ Variables are located in two different locations:
 
 - Install/Patch/Upgrade only supports SQL authentication (no Windows auth)
   - _This is a limitation of the Ansible Role and not the Veeam Product._
+- Starting with v12, PostgreSQL is installed instead of SQL Express.
 - After the upgrade, any Agent-base backups (VAW, VAL) that Veeam administers will need to be upgraded.
 - Optional plug-ins (see below) are not currently included in this collection
   - AWS Plug-in for Veeam Backup & Replication
@@ -107,6 +110,7 @@ Variables are located in two different locations:
 
 - Install/Patch/Upgrade only supports SQL authentication (no Windows auth)
   - _This is a limitation of the Ansible Role and not the Veeam Product._
+- Starting with v12, PostgreSQL is installed instead of SQL Express.
 
 ### Veeam ONE
 
