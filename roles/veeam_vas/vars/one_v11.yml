@@ -1,7 +1,6 @@
 ---
 # ONE v11 vars file for veeamhub.veeam_vas
 
-## v10 vars
 iso_url: "https://download2.veeam.com/VONE/v11/VeeamONE_11.0.1.1880_20211119.iso"
 iso_checksum: "8a3c91d1f71ab86d887d4aa33305e7c0feda2d4e02d9376156d9efdaf48c8008"
 destination_iso_file: "one.iso"

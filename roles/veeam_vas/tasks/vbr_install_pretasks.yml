@@ -16,7 +16,7 @@
       - "Use license?: {{ license }}"
       - "License Source: {{ source_license }}"
       - "License File Destination: {{ destination }}{{ destination_license_file }}"
-      - "Install SQL Express?: {{ sql_express_setup }}"
+      - "Install SQL Express/PostgreSQL?: {{ sql_express_setup }}"
       - "SQL Instance: {{ sql_instance }}"
       - "SQL Database: {{ sql_database }}"
       - "SQL Service Account: {{ sql_service_username | default('not specified') }}"
@@ -57,21 +57,17 @@
   ansible.windows.win_package:
     path: "{{ source }}Redistr\\x64\\SharedManagementObjects.msi"
     state: present
+  when: version | int <= 11
 - name: Install Microsoft Report Viewer Redistributable
   ansible.windows.win_package:
     path: "{{ source }}Redistr\\ReportViewer.msi"
     state: present
 - name: .NET Framework
   include_tasks: install_net_framework.yml
-- name: Check if MS SQL service is installed
-  ansible.windows.win_service:
-    name: MSSQL$VEEAMSQL2016
-  when: sql_express_setup | bool
-  register: service
 - name: Install SQL Express
   ansible.windows.win_package:
     path: "{{ sql_express_file }}"
-    product_id: SQL 2016 Express
+    creates_service: MSSQL$VEEAMSQL2016
     arguments:
       - "/q"
       - "/ACTION=Install"
@@ -93,8 +89,36 @@
     ansible_become_user: "{{ sql_install_username }}"
     ansible_become_pass: "{{ sql_install_password }}"
   when:
+    - version | int <= 11
     - sql_express_setup | bool
-    - not (service.exists | bool)
+- name: Install PostgreSQL
+  ansible.windows.win_package:
+    path: "{{ postgres_file }}"
+    creates_service: VeeamPostgreSqlSvc
+    arguments:
+      - --mode
+      - unattended
+      - --unattendedmodeui
+      - none
+      - --servicename
+      - VeeamPostgreSqlSvc
+      - --serviceaccount
+      - "{{ sql_service_username }}"
+      - --servicepassword
+      - "{{ sql_service_password }}"
+      - --superpassword
+      - "{{ sql_password }}"
+      - --enable_acledit
+      - 1
+  become: yes
+  become_flags: logon_type=batch
+  vars:
+    ansible_become_method: runas
+    ansible_become_user: "{{ sql_install_username }}"
+    ansible_become_pass: "{{ sql_install_password }}"
+  when:
+    - version | int >= 12
+    - sql_express_setup | bool
 - name: Delete SQL Installation User
   ansible.windows.win_user:
     name: "{{ sql_install_username }}"

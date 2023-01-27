@@ -34,13 +34,26 @@
 - name: Set ISO Drive Letter
   set_fact:
     source: "{{ disk_image_out.mount_paths[0] }}"
-- name: "Obtain version information about '{{ source }}Setup.exe'"
+- name: "Obtain version information about '{{ source }}Setup.exe' (v11-)"
   community.windows.win_file_version:
     path: "{{ source }}Setup.exe"
   register: iso_version
+  when: version | int <= 11
 - name: "Does the ISO version ({{ iso_version.win_file_version.file_major_part }}) match the version specified in the playbook ({{ version }})?"
   fail:
     msg: "Please either specify the correct 'version' in your playbook or the correct ISO to be used. Halting Ansible now as this can cause adverse effects."
   when:
+    - version | int <= 11
     - version != iso_version.win_file_version.file_major_part
+    - not skip_iso_check | bool
+- name: "Obtain version information from '{{ source }}autorun.inf' (v12+)"
+  ansible.windows.win_shell: "Get-Content {{ source }}autorun.inf"
+  register: iso_version
+  when: version | int >= 12
+- name: "Does the ISO version match the version specified in the playbook ({{ version }})?"
+  fail:
+    msg: "Please either specify the correct 'version' in your playbook or the correct ISO to be used. Halting Ansible now as this can cause adverse effects."
+  when:
+    - version | int >= 12
+    - iso_version.stdout.find(version) == -1 # looking for version number in autorun.inf
     - not skip_iso_check | bool

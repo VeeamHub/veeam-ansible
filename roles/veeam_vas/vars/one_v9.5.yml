@@ -1,7 +1,6 @@
 ---
 # ONE v9.5 vars file for veeamhub.veeam_vas
 
-## v9.5 vars
 iso_url: "https://download2.veeam.com/VeeamONE_9.5.4.4587.Update4a.iso"
 iso_checksum: "C601E8147C042965892C2F4C54C6151600146C4D9876AAABD1A5A358DB3A7F5A"
 destination_iso_file: "one.iso"

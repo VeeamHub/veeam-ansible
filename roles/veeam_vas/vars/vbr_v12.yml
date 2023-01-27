@@ -1,0 +1,11 @@
+---
+# VBR v12 vars file for veeamhub.veeam_vas
+
+iso_url: ""
+iso_checksum: ""
+destination_iso_file: "vbr.iso"
+destination_license_file: "vbr-license.lic"
+postgres_file: "{{ source }}Redistr\\x64\\PostgreSQL\\15.1-1\\postgresql-15.1-1-windows-x64.exe"
+sql_instance: "localhost"
+sql_database: "VeeamBackup"
+net_framework_file: "{{ source }}Redistr\\NDP472-KB4054530-x86-x64-AllOS-ENU.exe"

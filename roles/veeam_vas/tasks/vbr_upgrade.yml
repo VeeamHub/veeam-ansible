@@ -19,6 +19,9 @@
 - name: Including version-specific variables
   include_vars:
     file: "vars/vbr_v{{ version }}.yml"
+- name: Ensure Veeam services are running
+  ansible.windows.win_shell: |
+    Get-Service veeam* | Start-Service -ErrorAction SilentlyContinue
 
 # PRE-UPGRADE TASKS
 - name: Enable Cloud Connect Maintenance Mode
@@ -111,28 +114,68 @@
   when: version | int >= 11
 
 # UPGRADING VEEAM SOFTWARE
-- name: Upgrade Veeam Backup Catalog
+- name: Upgrade Veeam Backup Catalog (v12+)
+  ansible.windows.win_package:
+    path: "{{ source }}Catalog\\VeeamBackupCatalog64.msi"
+    state: present
+    arguments: '/L*v "{{ destination }}logs\\VeeamBackupCatalog64.log" /norestart /qn ACCEPTEULA="YES" ACCEPT_LICENSING_POLICY="1" ACCEPT_REQUIRED_SOFTWARE="1" ACCEPT_THIRDPARTY_LICENSES="1"'
+  register: win_package_vbr_catalog
+  when: version | int >= 12
+- name: Upgrade Veeam Backup Catalog (v11-)
   ansible.windows.win_package:
     path: "{{ source }}Catalog\\VeeamBackupCatalog64.msi"
     state: present
     arguments: '/L*v "{{ destination }}logs\\VeeamBackupCatalog64.log" /norestart /qn ACCEPTEULA="YES" ACCEPT_THIRDPARTY_LICENSES="1"'
-- name: Upgrade Veeam Backup & Replication Server with license
+  register: win_package_vbr_catalog
+  when: version | int <= 11
+- name: Upgrade Veeam Backup & Replication Server with license (v12+)
+  ansible.windows.win_package:
+    path: "{{ source }}Backup\\Server.x64.msi"
+    state: present
+    arguments: '/L*v "{{ destination }}logs\\BackupServer.log" ACCEPT_LICENSING_POLICY="1" ACCEPT_REQUIRED_SOFTWARE="1" ACCEPTEULA="YES" ACCEPT_THIRDPARTY_LICENSES="1" VBR_LICENSE_FILE="{{ destination }}{{ destination_license_file }}" VBR_AUTO_UPGRADE="1"'
+  when:
+    - version | int >= 12
+    - license | bool
+  register: win_package_vbr_server
+- name: Upgrade Veeam Backup & Replication Server without license (v12+)
+  ansible.windows.win_package:
+    path: "{{ source }}Backup\\Server.x64.msi"
+    state: present
+    arguments: '/L*v "{{ destination }}logs\\BackupServer.log" ACCEPT_LICENSING_POLICY="1" ACCEPT_REQUIRED_SOFTWARE="1" ACCEPTEULA="YES" ACCEPT_THIRDPARTY_LICENSES="1" VBR_AUTO_UPGRADE="1"'
+  when:
+    - version | int >= 12
+    - not license | bool
+  register: win_package_vbr_server
+- name: Upgrade Veeam Backup & Replication Server with license (v11-)
   ansible.windows.win_package:
     path: "{{ source }}Backup\\Server.x64.msi"
     state: present
     arguments: '/L*v "{{ destination }}logs\\BackupServer.log" /norestart /qn" ACCEPTEULA="YES" ACCEPT_THIRDPARTY_LICENSES="1" VBR_LICENSE_FILE="{{ destination }}{{ destination_license_file }}" VBR_AUTO_UPGRADE="YES"'
-  when: license | bool
-- name: Upgrade Veeam Backup & Replication Server without license
+  when:
+    - version | int <= 11
+    - license | bool
+- name: Upgrade Veeam Backup & Replication Server without license (v11-)
   ansible.windows.win_package:
     path: "{{ source }}Backup\\Server.x64.msi"
     state: present
     arguments: '/L*v "{{ destination }}logs\\BackupServer.log" /norestart /qn" ACCEPTEULA="YES" ACCEPT_THIRDPARTY_LICENSES="1" VBR_AUTO_UPGRADE="YES"'
-  when: not license | bool
-- name: Upgrade Veeam Backup & Replication Console
+  when:
+    - version | int <= 11
+    - not license | bool
+- name: Upgrade Veeam Backup & Replication Console (v12+)
+  ansible.windows.win_package:
+    path: "{{ source }}Backup\\Shell.x64.msi"
+    state: present
+    arguments: '/L*v "{{ destination }}logs\\Shell.x64.log" /norestart /qn ACCEPTEULA="YES" ACCEPT_LICENSING_POLICY="1" ACCEPT_REQUIRED_SOFTWARE="1" ACCEPT_THIRDPARTY_LICENSES="1"'
+  register: win_package_vbr_console
+  when: version | int >= 12
+- name: Upgrade Veeam Backup & Replication Console (v11-)
   ansible.windows.win_package:
     path: "{{ source }}Backup\\Shell.x64.msi"
     state: present
     arguments: '/L*v "{{ destination }}logs\\Shell.x64.log" /norestart /qn ACCEPTEULA="YES" ACCEPT_THIRDPARTY_LICENSES="1"'
+  register: win_package_vbr_console
+  when: version | int <= 11
 - name: Upgrade Veeam Explorer for ActiveDirectory
   ansible.windows.win_package:
     path: "{{ source }}Explorers\\VeeamExplorerForActiveDirectory.msi"
@@ -148,6 +191,12 @@
     path: "{{ source }}Explorers\\VeeamExplorerForOracle.msi"
     state: present
     arguments: '/L*v "{{ destination }}logs\\VeeamExplorerForOracle.log" /norestart /qn ACCEPT_EULA="1" ACCEPT_THIRDPARTY_LICENSES="1"'
+- name: Upgrade Veeam Explorer for Postres
+  ansible.windows.win_package:
+    path: "{{ source }}Explorers\\VeeamExplorerForPostgreSQL.msi"
+    state: present
+    arguments: '/L*v "{{ destination }}logs\\VeeamExplorerForPostgreSQL.log" /norestart /qn ACCEPT_EULA="1" ACCEPT_THIRDPARTY_LICENSES="1"'
+  when: version | int >= 12
 - name: Upgrade Veeam Explorer for SharePoint
   ansible.windows.win_package:
     path: "{{ source }}Explorers\\VeeamExplorerForSharePoint.msi"
@@ -174,6 +223,12 @@
     path: "{{ source }}Packages\\VeeamInstallerSvc.msi"
     state: present
     arguments: '/L*v "{{ destination }}logs\\VeeamInstallerSvc.log" /norestart /qn ACCEPTEULA="YES" ACCEPT_THIRDPARTY_LICENSES="1"'
+- name: Upgrade Veeam Plug-ins for Enterprise Applications Redistributable
+  ansible.windows.win_package:
+    path: "{{ source }}Packages\\DbPluginRedist.msi"
+    state: present
+    arguments: '/L*v "{{ destination }}logs\\DbPluginRedist.log" /norestart /qn ACCEPTEULA="YES" ACCEPT_THIRDPARTY_LICENSES="1"'
+  when: version | int >= 12
 - name: Upgrade Veeam Agent for Linux Redistributable
   ansible.windows.win_package:
     path: "{{ source }}Packages\\VALRedist.msi"
