@@ -75,6 +75,7 @@
   community.windows.win_psmodule:
     name: SqlServer
     skip_publisher_check: yes
+    accept_license: true
     state: present
   when: sql_instance != '(local)\\VEEAMSQL2016'
 - name: Start adhoc EM database backup to default SQL backup location
