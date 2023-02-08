@@ -68,6 +68,7 @@
   community.windows.win_psmodule:
     name: SqlServer
     skip_publisher_check: yes
+    accept_license: true
     state: present
   when: sql_instance != '(local)\\VEEAMSQL2016'
 - name: Start adhoc Veeam ONE database backup to default SQL backup location
@@ -84,19 +85,95 @@
 
 # UPGRADING VEEAM SOFTWARE
 ## ONE Monitor Server
-- name: Upgrade ONE Monitor Server with license file
+- name: Upgrade ONE Monitor Server with license file (v12+)
+  ansible.windows.win_package:
+    path: "{{ source }}Monitor\\VeeamONE.Monitor.Server.x64.msi"
+    state: present
+    arguments: '/L*v "{{ destination }}logs\VeeamONE.Monitor.Server.x64.log" EDITLICFILEPATH="{{ destination }}{{ destination_license_file }}" ACCEPT_THIRDPARTY_LICENSES=1 ACCEPT_EULA=1 ACCEPT_LICENSING_POLICY=1 ACCEPT_REQUIRED_SOFTWARE=1 VM_MN_SERVICEACCOUNT="{{ one_username }}" VM_MN_SERVICEPASSWORD="{{ one_password }}"'
+  when:
+    - license | bool
+    - version | int >= 12
+- name: Upgrade ONE Monitor Server without license file (v12+)
+  ansible.windows.win_package:
+    path: "{{ source }}Monitor\\VeeamONE.Monitor.Server.x64.msi"
+    state: present
+    arguments: '/L*v "{{ destination }}logs\VeeamONE.Monitor.Server.x64.log" ACCEPT_THIRDPARTY_LICENSES=1 ACCEPT_EULA=1 ACCEPT_LICENSING_POLICY=1 ACCEPT_REQUIRED_SOFTWARE=1 VM_MN_SERVICEACCOUNT="{{ one_username }}" VM_MN_SERVICEPASSWORD="{{ one_password }}"'
+  when:
+    - not (license | bool)
+    - version | int >= 12
+- name: Upgrade ONE Monitor Server with license file (v11-)
   ansible.windows.win_package:
     path: "{{ source }}Monitor\\VeeamONE.Monitor.Server.x64.msi"
     state: present
     arguments: '/L*v "{{ destination }}logs\VeeamONE.Monitor.Server.x64.log" EDITLICFILEPATH="{{ destination }}{{ destination_license_file }}" ACCEPT_THIRDPARTY_LICENSES=1 ACCEPT_EULA=1 VM_MN_SERVICEACCOUNT="{{ one_username }}" VM_MN_SERVICEPASSWORD="{{ one_password }}"'
-  when: license | bool
-- name: Upgrade ONE Monitor Server without license file
+  when:
+    - license | bool
+    - version | int <= 11
+- name: Upgrade ONE Monitor Server without license file (v11-)
   ansible.windows.win_package:
     path: "{{ source }}Monitor\\VeeamONE.Monitor.Server.x64.msi"
     state: present
     arguments: '/L*v "{{ destination }}logs\VeeamONE.Monitor.Server.x64.log" ACCEPT_THIRDPARTY_LICENSES=1 ACCEPT_EULA=1 VM_MN_SERVICEACCOUNT="{{ one_username }}" VM_MN_SERVICEPASSWORD="{{ one_password }}"'
-  when: not (license | bool)
+  when:
+    - not (license | bool)
+    - version | int <= 11
 ## ONE Reporter Server
+- name: Upgrade ONE Reporter Server with license file (v12+)
+  ansible.windows.win_package:
+    path: "{{ source }}Reporter\\VeeamONE.Reporter.Server.x64.msi"
+    state: present
+    arguments: '/L*v "{{ destination }}logs\VeeamONE.Reporter.Server.x64.log" EDITLICFILEPATH="{{ destination }}{{ destination_license_file }}" ACCEPT_THIRDPARTY_LICENSES=1 ACCEPT_EULA=1 ACCEPT_LICENSING_POLICY=1 ACCEPT_REQUIRED_SOFTWARE=1 VO_REPORTER_SERVICE_ACCOUNT_NAME="{{ one_username }}" VO_REPORTER_SERVICE_ACCOUNT_PASSWORD="{{ one_password }}"'
+  become: yes
+  become_flags: logon_type=batch
+  vars:
+    ansible_become_method: runas
+    ansible_become_user: "{{ one_username }}"
+    ansible_become_pass: "{{ one_password }}"
+  when:
+    - license | bool
+    - version | int >= 12
+- name: Upgrade ONE Reporter Server without license file (v12+)
+  ansible.windows.win_package:
+    path: "{{ source }}Reporter\\VeeamONE.Reporter.Server.x64.msi"
+    state: present
+    arguments: '/L*v "{{ destination }}logs\VeeamONE.Reporter.Server.x64.log" ACCEPT_THIRDPARTY_LICENSES=1 ACCEPT_EULA=1 ACCEPT_LICENSING_POLICY=1 ACCEPT_REQUIRED_SOFTWARE=1 VO_REPORTER_SERVICE_ACCOUNT_NAME="{{ one_username }}" VO_REPORTER_SERVICE_ACCOUNT_PASSWORD="{{ one_password }}"'
+  become: yes
+  become_flags: logon_type=batch
+  vars:
+    ansible_become_method: runas
+    ansible_become_user: "{{ one_username }}"
+    ansible_become_pass: "{{ one_password }}"
+  when:
+    - not (license | bool)
+    - version | int >= 12
+- name: Upgrade ONE Reporter Server with license file (v11)
+  ansible.windows.win_package:
+    path: "{{ source }}Reporter\\VeeamONE.Reporter.Server.x64.msi"
+    state: present
+    arguments: '/L*v "{{ destination }}logs\VeeamONE.Reporter.Server.x64.log" EDITLICFILEPATH="{{ destination }}{{ destination_license_file }}" ACCEPT_THIRDPARTY_LICENSES=1 ACCEPT_EULA=1 VO_REPORTER_SERVICE_ACCOUNT_NAME="{{ one_username }}" VO_REPORTER_SERVICE_ACCOUNT_PASSWORD="{{ one_password }}"'
+  become: yes
+  become_flags: logon_type=batch
+  vars:
+    ansible_become_method: runas
+    ansible_become_user: "{{ one_username }}"
+    ansible_become_pass: "{{ one_password }}"
+  when:
+    - license | bool
+    - version | int == 11
+- name: Upgrade ONE Reporter Server without license file (v11)
+  ansible.windows.win_package:
+    path: "{{ source }}Reporter\\VeeamONE.Reporter.Server.x64.msi"
+    state: present
+    arguments: '/L*v "{{ destination }}logs\VeeamONE.Reporter.Server.x64.log" ACCEPT_THIRDPARTY_LICENSES=1 ACCEPT_EULA=1 VO_REPORTER_SERVICE_ACCOUNT_NAME="{{ one_username }}" VO_REPORTER_SERVICE_ACCOUNT_PASSWORD="{{ one_password }}"'
+  become: yes
+  become_flags: logon_type=batch
+  vars:
+    ansible_become_method: runas
+    ansible_become_user: "{{ one_username }}"
+    ansible_become_pass: "{{ one_password }}"
+  when:
+    - not (license | bool)
+    - version | int == 11
 - name: Upgrade ONE Reporter Server with license file (pre-v11)
   ansible.windows.win_package:
     path: "{{ source }}Reporter\\VeeamONE.Reporter.Server.x64.msi"
@@ -113,40 +190,19 @@
   when:
     - not (license | bool)
     - version | int < 11
-- name: Upgrade ONE Reporter Server with license file
-  ansible.windows.win_package:
-    path: "{{ source }}Reporter\\VeeamONE.Reporter.Server.x64.msi"
-    state: present
-    arguments: '/L*v "{{ destination }}logs\VeeamONE.Reporter.Server.x64.log" EDITLICFILEPATH="{{ destination }}{{ destination_license_file }}" ACCEPT_THIRDPARTY_LICENSES=1 ACCEPT_EULA=1 VO_REPORTER_SERVICE_ACCOUNT_NAME="{{ one_username }}" VO_REPORTER_SERVICE_ACCOUNT_PASSWORD="{{ one_password }}"'
-  become: yes
-  become_flags: logon_type=batch
-  vars:
-    ansible_become_method: runas
-    ansible_become_user: "{{ one_username }}"
-    ansible_become_pass: "{{ one_password }}"
-  when:
-    - license | bool
-    - version | int >= 11
-- name: Upgrade ONE Reporter Server without license file
-  ansible.windows.win_package:
-    path: "{{ source }}Reporter\\VeeamONE.Reporter.Server.x64.msi"
-    state: present
-    arguments: '/L*v "{{ destination }}logs\VeeamONE.Reporter.Server.x64.log" ACCEPT_THIRDPARTY_LICENSES=1 ACCEPT_EULA=1 VO_REPORTER_SERVICE_ACCOUNT_NAME="{{ one_username }}" VO_REPORTER_SERVICE_ACCOUNT_PASSWORD="{{ one_password }}"'
-  become: yes
-  become_flags: logon_type=batch
-  vars:
-    ansible_become_method: runas
-    ansible_become_user: "{{ one_username }}"
-    ansible_become_pass: "{{ one_password }}"
-  when:
-    - not (license | bool)
-    - version | int >= 11
 ## ONE Agent Server
-- name: Upgrade ONE Agent Server
+- name: Upgrade ONE Agent Server (v12+)
+  ansible.windows.win_package:
+    path: "{{ source }}Agent\\VeeamONE.Agent.x64.msi"
+    state: present
+    arguments: '/L*v "{{ destination }}logs\VeeamONE.Agent.x64.log" ACCEPT_THIRDPARTY_LICENSES=1 ACCEPT_EULA=1 ACCEPT_LICENSING_POLICY=1 ACCEPT_REQUIRED_SOFTWARE=1 VO_AGENT_SERVICE_ACCOUNT_NAME="{{ one_username }}" VO_AGENT_SERVICE_ACCOUNT_PASSWORD="{{ one_password }}"'
+  when: version | int >= 12
+- name: Upgrade ONE Agent Server (v11-)
   ansible.windows.win_package:
     path: "{{ source }}Agent\\VeeamONE.Agent.x64.msi"
     state: present
     arguments: '/L*v "{{ destination }}logs\VeeamONE.Agent.x64.log" ACCEPT_THIRDPARTY_LICENSES=1 ACCEPT_EULA=1 VO_AGENT_SERVICE_ACCOUNT_NAME="{{ one_username }}" VO_AGENT_SERVICE_ACCOUNT_PASSWORD="{{ one_password }}"'
+  when: version | int <= 11
 - name: Finding file(s) in '{{ source }}Updates' directory
   ansible.windows.win_find:
     paths: "{{ source }}Updates"

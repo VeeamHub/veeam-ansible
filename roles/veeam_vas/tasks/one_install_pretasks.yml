@@ -122,6 +122,11 @@
     name: IIS-ASPNET45
     include_parent: true
     state: present
+- name: Enable Windows Feature - IIS Client Certificate Mapping Authentication
+  ansible.windows.win_feature:
+    name: Web-Client-Auth
+    state: present
+  when: version | int >= 12
 - name: Install Microsoft Application Request Routing
   ansible.windows.win_package:
     path: "{{ source }}Redistr\\x64\\requestRouter_amd64.msi"

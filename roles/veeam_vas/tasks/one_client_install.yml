@@ -27,13 +27,28 @@
   ansible.windows.win_package:
     path: "{{ source }}Redistr\\x64\\msxml6_x64.msi"
     state: present
+- name: Install Microsoft Visual C++ Redistributable
+  ansible.windows.win_package:
+    path: "{{ source }}Redistr\\x64\\vc_redist.x64.exe"
+    product_id: Install C++ Framework
+    state: present
+    arguments: '/install /quiet /norestart /log "{{ destination }}logs\\vc_redist.x64.log"'
+  ignore_errors: yes
+  when: version | int >= 12
 
 # INSTALLING VEEAM SOFTWARE
-- name: Install ONE Monitor Client
+- name: Install ONE Monitor Client (v12+)
+  ansible.windows.win_package:
+    path: "{{ source }}Monitor\\VeeamONE.Monitor.Client.x64.msi"
+    state: present
+    arguments: '/L*v "{{ destination }}logs\VeeamONE.Monitor.Client.x64.log" ACCEPT_THIRDPARTY_LICENSES=1 ACCEPT_EULA=1 ACCEPT_LICENSING_POLICY=1 ACCEPT_REQUIRED_SOFTWARE=1 VM_CLN_SERVER_NAME="{{ one_server }}"'
+  when: version | int >= 12
+- name: Install ONE Monitor Client (v11-)
   ansible.windows.win_package:
     path: "{{ source }}Monitor\\VeeamONE.Monitor.Client.x64.msi"
     state: present
     arguments: '/L*v "{{ destination }}logs\VeeamONE.Monitor.Client.x64.log" ACCEPT_THIRDPARTY_LICENSES=1 ACCEPT_EULA=1 VM_CLN_SERVER_NAME="{{ one_server }}"'
+  when: version | int <= 11
 - name: Finding file(s) in '{{ source }}Updates' directory
   ansible.windows.win_find:
     paths: "{{ source }}Updates"
