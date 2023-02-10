@@ -68,8 +68,10 @@
   community.windows.win_psmodule:
     name: SqlServer
     skip_publisher_check: yes
-    accept_license: true
     state: present
+  register: result
+  until: result is not failed
+  retries: 1  # allows PowerShellGet to be upgraded if needed
   when: sql_instance != '(local)\\VEEAMSQL2016'
 - name: Start adhoc Veeam ONE database backup to default SQL backup location
   ansible.windows.win_shell: |

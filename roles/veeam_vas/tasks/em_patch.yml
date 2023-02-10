@@ -42,6 +42,9 @@
     name: SqlServer
     skip_publisher_check: yes
     state: present
+  register: result
+  until: result is not failed
+  retries: 1  # allows PowerShellGet to be upgraded if needed
   when:
     - sql_instance != '(local)\\VEEAMSQL2016'
     - not (patch | bool)
