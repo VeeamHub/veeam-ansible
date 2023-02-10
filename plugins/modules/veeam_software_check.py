@@ -19,6 +19,7 @@ description:
    - If true, software version is returned as well
 requirements:
    - Windows Server 2019
+   - Windows Server 2022
 notes:
   - Function taken from U(https://helpcenter.veeam.com/docs/backup/powershell/getting_started.html)
   - Values are pulled from the registry

@@ -16,7 +16,6 @@ description:
    - Set VBR configuration backup job settings #TBD
    - Start adhoc VBR configuration backup job
 requirements:
-   - Windows Server 2019
    - Veeam Backup & Replication 9.5 Update 3
 notes:
   - In order to understand all the returned properties and values please visit the following site

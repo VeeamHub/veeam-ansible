@@ -18,7 +18,6 @@ description:
    - Disables all backup jobs
    - Enables all backup jobs listed in file
 requirements:
-   - Windows Server 2019
    - Veeam Backup & Replication 9.5 Update 3
 notes:
   - In order to understand all the returned properties and values please visit the following site
