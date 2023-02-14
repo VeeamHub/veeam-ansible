@@ -8,8 +8,8 @@ This collection contains all of the Ansible Roles built for automating Veeam dep
 
 ## Tested On
 
+* Windows Server 2022
 * Windows Server 2019
-* Windows Server 2016 (64-bit)
 
 ## Examples
 

@@ -23,13 +23,17 @@ A big thanks to Markus Kraus ([@vMarkus_K](https://twitter.com/vMarkus_K))! I us
   - [Example Playbooks](#example-playbooks)
     - [Veeam Backup & Replication Community Edition Install with ISO Download](#veeam-backup--replication-community-edition-install-with-iso-download)
     - [Veeam Backup & Replication Install with ISO Download](#veeam-backup--replication-install-with-iso-download)
-    - [Veeam Backup & Replication Install with ISO Download and remote SQL](#veeam-backup--replication-install-with-iso-download-and-remote-sql)
+    - [Veeam Backup & Replication Install with ISO Download and remote Microsoft SQL (v12+)](#Veeam-Backup--Replication-Install-with-ISO-Download-and-remote-Microsoft-SQL-v12)
+    - [Veeam Backup & Replication Install with ISO Download and remote PostgreSQL (v12+)](#Veeam-Backup--Replication-Install-with-ISO-Download-and-remote-PostgreSQL-v12)
+    - [Veeam Backup & Replication Install with ISO Download and remote SQL (v11-)](#Veeam-Backup--Replication-Install-with-ISO-Download-and-remote-SQL-v11-)
     - [Veeam Backup & Replication Community Edition Install without ISO Download](#veeam-backup--replication-community-edition-install-without-iso-download)
     - [Veeam Backup & Replication Upgrade](#veeam-backup--replication-upgrade)
     - [Veeam Cloud Connect Server Upgrade](#veeam-cloud-connect-server-upgrade)
     - [Veeam Backup & Replication Patch](#veeam-backup--replication-patch)
     - [Veeam Backup Enterprise Manager Install without ISO Download](#veeam-backup-enterprise-manager-install-without-iso-download)
-    - [Veeam Backup Enterprise Manager Install with ISO Download and remote SQL](#veeam-backup-enterprise-manager-install-with-iso-download-and-remote-sql)
+    - [Veeam Backup Enterprise Manager Install with ISO Download and remote Microsoft SQL (v12+)](#Veeam-Backup-Enterprise-Manager-Install-with-ISO-Download-and-remote-Microsoft-SQL-v12)
+    - [Veeam Backup Enterprise Manager Install with ISO Download and remote PostgreSQL (v12+)](#Veeam-Backup-Enterprise-Manager-Install-with-ISO-Download-and-remote-PostgreSQL-v12)
+    - [Veeam Backup Enterprise Manager Install with ISO Download and remote SQL (v11-)](#Veeam-Backup-Enterprise-Manager-Install-with-ISO-Download-and-remote-SQL-v11-)
     - [Veeam Backup Enterprise Manager Install including Cloud Connect Portal](#veeam-backup-enterprise-manager-install-including-cloud-connect-portal)
     - [Veeam Backup Enterprise Manager Upgrade](#veeam-backup-enterprise-manager-upgrade)
     - [Veeam Backup Enterprise Manager Patch](#veeam-backup-enterprise-manager-patch)
@@ -67,19 +71,17 @@ This collection depends on Windows modules (`ansible.windows` & `community.windo
 ### Veeam Software
 
 - Veeam Backup & Replication
-  - 9.5 Update 4b
   - 10
   - 11
-  - 12 _(tested with release candidate software)_
+  - 12
 - Veeam Backup Enterprise Manager
-  - 9.5 Update 4b
   - 10
   - 11
-  - 12 _(tested with release candidate software)_
+  - 12
 - Veeam ONE
-  - 9.5 Update 4b
   - 10
   - 11
+  - 12
 
 ## Role Variables
 
@@ -99,6 +101,8 @@ Variables are located in two different locations:
 - Install/Patch/Upgrade only supports SQL authentication (no Windows auth)
   - _This is a limitation of the Ansible Role and not the Veeam Product._
 - Starting with v12, PostgreSQL is installed instead of SQL Express.
+- If a remote PostgreSQL database is chosen, performance tuning needs to be applied. The new `veeam_vbr_set_postgres_database_server_limits` module hosted in this collection can assist in this regard.
+  - [Check out the sample playbook below](#Veeam-Backup--Replication-Install-with-ISO-Download-and-remote-PostgreSQL-v12)
 - After the upgrade, any Agent-base backups (VAW, VAL) that Veeam administers will need to be upgraded.
 - Optional plug-ins (see below) are not currently included in this collection
   - AWS Plug-in for Veeam Backup & Replication
@@ -111,6 +115,7 @@ Variables are located in two different locations:
 - Install/Patch/Upgrade only supports SQL authentication (no Windows auth)
   - _This is a limitation of the Ansible Role and not the Veeam Product._
 - Starting with v12, PostgreSQL is installed instead of SQL Express.
+- If a remote PostgreSQL database is chosen, performance tuning needs to be applied. The new `veeam_vbr_set_postgres_database_server_limits` module hosted in this collection can assist in this regard.
 
 ### Veeam ONE
 
@@ -131,7 +136,7 @@ Please note there are more configurations than the examples shown below. If you 
         name: veeamhub.veeam.veeam_vas
         tasks_from: vbr_install
       vars:
-        version: "11"
+        version: "12"
         iso_download: true
         sql_install_username: "sql_install"
         sql_install_password: "ChangeM3!"
@@ -152,7 +157,7 @@ Please note there are more configurations than the examples shown below. If you 
         name: veeamhub.veeam.veeam_vas
         tasks_from: vbr_install
       vars:
-        version: "11"
+        version: "12"
         iso_download: true
         license: true
         source_license: "/root/ansible/license.lic"
@@ -165,7 +170,53 @@ Please note there are more configurations than the examples shown below. If you 
         # https://docs.ansible.com/ansible/latest/user_guide/playbooks_vault.html#single-encrypted-variable
 ```
 
-### Veeam Backup & Replication Install with ISO Download and remote SQL
+### Veeam Backup & Replication Install with ISO Download and remote Microsoft SQL (v12+)
+
+```yaml
+- name: Veeam Backup & Replication Install with Remote Microsoft SQL Server (v12+)
+  hosts: veeam
+  tasks:
+    - include_role:
+        name: veeamhub.veeam.veeam_vas
+        tasks_from: vbr_install
+      vars:
+        version: "12"
+        license: true
+        source_license: "/root/ansible/license.lic"
+        sql_express_setup: false
+        sql_engine: "0" # 0-MSSQL / 1-Postgres (default)
+        sql_instance: "sql.contoso.local"
+        sql_username: "svc_veeam"
+        sql_password: "ChangeM3!"
+        # https://docs.ansible.com/ansible/latest/user_guide/playbooks_vault.html#single-encrypted-variable
+```
+
+### Veeam Backup & Replication Install with ISO Download and remote PostgreSQL (v12+)
+
+```yaml
+- name: Veeam Backup & Replication Install with Remote PostgreSQL Server
+  hosts: veeam
+  tasks:
+    - include_role:
+        name: veeamhub.veeam.veeam_vas
+        tasks_from: vbr_install
+      vars:
+        version: "12"
+        license: true
+        source_license: "/root/ansible/license.lic"
+        sql_express_setup: false        
+        sql_instance: "sql.contoso.local"
+        sql_username: "svc_veeam"
+        sql_password: "ChangeM3!"
+        # https://docs.ansible.com/ansible/latest/user_guide/playbooks_vault.html#single-encrypted-variable
+    - name: Applying tuning on a remote PostgreSQL server running as the VBR DB
+       veeamhub.veeam.veeam_vbr_set_postgres_database_server_limits:
+         os_type: Windows
+         cpu_count: 16
+         ram_gb: 30
+```
+
+### Veeam Backup & Replication Install with ISO Download and remote SQL (v11-)
 
 ```yaml
 - name: Veeam Backup & Replication Install with Remote SQL Server
@@ -195,9 +246,9 @@ Please note there are more configurations than the examples shown below. If you 
         name: veeamhub.veeam.veeam_vas
         tasks_from: vbr_install
       vars:
-        version: "11"
+        version: "12"
         destination: "C:\\install\\"
-        destination_iso_file: "VeeamBackup&Replication_11.0.0.837_20210220.iso"
+        destination_iso_file: "VeeamBackup&Replication_12.0.0.1420_20230209.iso"
         sql_install_username: "sql_install"
         sql_install_password: "ChangeM3!"
         sql_service_username: "svc_sql"
@@ -217,7 +268,7 @@ Please note there are more configurations than the examples shown below. If you 
         name: veeamhub.veeam.veeam_vas
         tasks_from: vbr_upgrade
       vars:
-        version: "11"
+        version: "12"
         iso_download: true
         license: true
         source_license: "/root/ansible/license.lic"
@@ -233,7 +284,7 @@ Please note there are more configurations than the examples shown below. If you 
         name: veeamhub.veeam.veeam_vas
         tasks_from: vbr_upgrade
       vars:
-        version: "11"
+        version: "12"
         iso_download: true
         license: true
         source_license: "/root/ansible/license.lic"
@@ -265,9 +316,9 @@ Please note there are more configurations than the examples shown below. If you 
         name: veeamhub.veeam.veeam_vas
         tasks_from: em_install
       vars:
-        version: "11"
+        version: "12"
         destination: "C:\\install\\"
-        destination_iso_file: "VeeamBackup&Replication_11.0.0.837_20210220.iso"
+        destination_iso_file: "VeeamBackup&Replication_12.0.0.1420_20230209.iso"
         license: true #mandatory for EM
         source_license: "/root/ansible/license.lic"
         sql_install_username: "sql_install"
@@ -279,7 +330,52 @@ Please note there are more configurations than the examples shown below. If you 
         # https://docs.ansible.com/ansible/latest/user_guide/playbooks_vault.html#single-encrypted-variable
 ```
 
-### Veeam Backup Enterprise Manager Install with ISO Download and remote SQL
+### Veeam Backup Enterprise Manager Install with ISO Download and remote Microsoft SQL (v12+)
+
+```yaml
+- name: Veeam Backup Enterprise Manager Install
+  gather_facts: no
+  hosts: veeam
+  tasks:
+    - include_role:
+        name: veeamhub.veeam.veeam_vas
+        tasks_from: em_install
+      vars:
+        version: "12"
+        iso_download: true
+        license: true #mandatory for EM
+        source_license: "/root/ansible/license.lic"
+        sql_express_setup: false
+        sql_engine: "0" # 0-MSSQL / 1-Postgres (default)
+        sql_instance: "sql.contoso.local"
+        sql_username: "svc_veeam"
+        sql_password: "ChangeM3!"
+        # https://docs.ansible.com/ansible/latest/user_guide/playbooks_vault.html#single-encrypted-variable
+```
+
+### Veeam Backup Enterprise Manager Install with ISO Download and remote PostgreSQL (v12+)
+
+```yaml
+- name: Veeam Backup Enterprise Manager Install
+  gather_facts: no
+  hosts: veeam
+  tasks:
+    - include_role:
+        name: veeamhub.veeam.veeam_vas
+        tasks_from: em_install
+      vars:
+        version: "12"
+        iso_download: true
+        license: true #mandatory for EM
+        source_license: "/root/ansible/license.lic"
+        sql_express_setup: false
+        sql_instance: "sql.contoso.local"
+        sql_username: "svc_veeam"
+        sql_password: "ChangeM3!"
+        # https://docs.ansible.com/ansible/latest/user_guide/playbooks_vault.html#single-encrypted-variable
+```
+
+### Veeam Backup Enterprise Manager Install with ISO Download and remote SQL (v11-)
 
 ```yaml
 - name: Veeam Backup Enterprise Manager Install
@@ -312,7 +408,7 @@ Please note there are more configurations than the examples shown below. If you 
         name: veeamhub.veeam.veeam_vas
         tasks_from: em_install
       vars:
-        version: "11"
+        version: "12"
         iso_download: true
         license: true #mandatory for EM
         source_license: "/root/ansible/license.lic"
@@ -336,7 +432,7 @@ Please note there are more configurations than the examples shown below. If you 
         name: veeamhub.veeam.veeam_vas
         tasks_from: em_upgrade
       vars:
-        version: "11"
+        version: "12"
         iso_download: true
         license: true
         source_license: "/root/ansible/license.lic"
@@ -374,7 +470,7 @@ Please note there are more configurations than the examples shown below. If you 
   hosts: veeam
 
   vars:
-    version: "11"
+    version: "12"
     iso_download: false #this way ISO is only downloaded once
     license: true
     source_license: "/root/ansible/license.lic"
@@ -410,7 +506,7 @@ Please note there are more configurations than the examples shown below. If you 
   hosts: veeam
 
   vars:
-    version: "11"
+    version: "12"
     iso_download: false #this way ISO is only downloaded once
     sql_express_setup: true
     sql_service_username: "svc_sql"
@@ -448,7 +544,7 @@ Please note there are more configurations than the examples shown below. If you 
         name: veeamhub.veeam.veeam_vas
         tasks_from: one_server_install
       vars:
-        version: "11"
+        version: "12"
         iso_download: true
         license: true
         source_license: "/root/ansible/license.lic"
@@ -470,7 +566,7 @@ Please note there are more configurations than the examples shown below. If you 
         name: veeamhub.veeam.veeam_vas
         tasks_from: one_web_ui_install
       vars:
-        version: "11"
+        version: "12"
         iso_download: true
         one_create_service_account: false #true==local false==domain
         one_username: "contoso\\jsmith"
@@ -487,7 +583,7 @@ Please note there are more configurations than the examples shown below. If you 
         name: veeamhub.veeam.veeam_vas
         tasks_from: one_client_install
       vars:
-        version: "11"
+        version: "12"
         iso_download: true
         one_server: "server.contoso.local"
 ```
@@ -500,7 +596,7 @@ Please note there are more configurations than the examples shown below. If you 
   hosts: veeam
 
   vars:
-    version: "11"
+    version: "12"
     iso_download: false #this way ISO is only downloaded once
     license: true
     source_license: "/root/ansible/license.lic"
@@ -536,7 +632,7 @@ Please note there are more configurations than the examples shown below. If you 
   hosts: veeam
 
   vars:
-    version: "11"
+    version: "12"
     iso_download: false  #this way ISO is only downloaded once
     license: true
     source_license: "/root/ansible/license.lic"
@@ -575,7 +671,7 @@ Please note there are more configurations than the examples shown below. If you 
         name: veeamhub.veeam.veeam_vas
         tasks_from: one_server_upgrade
       vars:
-        version: "11"
+        version: "12"
         iso_download: true
         license: true
         source_license: "/root/ansible/license.lic"
@@ -594,7 +690,7 @@ Please note there are more configurations than the examples shown below. If you 
         name: veeamhub.veeam.veeam_vas
         tasks_from: one_web_ui_upgrade
       vars:
-        version: "11"
+        version: "12"
         iso_download: true
         one_username: "contoso\\jsmith"
         one_password: "ChangeM3!"
@@ -610,7 +706,7 @@ Please note there are more configurations than the examples shown below. If you 
         name: veeamhub.veeam.veeam_vas
         tasks_from: one_client_upgrade
       vars:
-        version: "11"
+        version: "12"
         iso_download: true
         one_server: "server.contoso.local"
 ```
@@ -618,7 +714,7 @@ Please note there are more configurations than the examples shown below. If you 
 ### Veeam ONE Patch
 
 ```yaml
-- name: Veeam Backup & Replication Patch
+- name: Veeam ONE Patch
   hosts: veeam
   tasks:
     - include_role:
