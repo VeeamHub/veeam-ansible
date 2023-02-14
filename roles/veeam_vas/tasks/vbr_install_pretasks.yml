@@ -119,6 +119,14 @@
   when:
     - version | int >= 12
     - sql_express_setup | bool
+- name: Enabling PostgreSQL pg_stat_statements extension
+  community.windows.win_lineinfile:
+    path: "C:\\Program Files\\PostgreSQL\\15\\data\\postgresql.conf"
+    insertafter: "^#shared_preload_libraries"
+    line: "shared_preload_libraries = 'pg_stat_statements'"
+  when:
+    - version | int >= 12
+    - sql_express_setup | bool
 - name: Delete SQL Installation User
   ansible.windows.win_user:
     name: "{{ sql_install_username }}"

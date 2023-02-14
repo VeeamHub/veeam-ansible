@@ -19,6 +19,7 @@ description:
    - If true, pending reboot flag has been detected
 requirements:
    - Windows Server 2019
+   - Windows Server 2022
 notes:
   - Base code taken from U(https://github.com/bcwilhite/PendingReboot/)
   - Values are pulled from the registry

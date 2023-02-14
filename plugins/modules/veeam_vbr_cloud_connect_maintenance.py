@@ -15,7 +15,6 @@ short_description: Manages VBR Cloud Connect maintenance mode
 description:
    - Enables/Disables Veeam Cloud Connect maintenance mode
 requirements:
-   - Windows Server 2019
    - Veeam Backup & Replication 9.5 Update 3
 notes:
   - In order to understand all the returned properties and values please visit the following site

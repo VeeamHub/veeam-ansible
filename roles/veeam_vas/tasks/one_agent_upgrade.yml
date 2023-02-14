@@ -31,11 +31,18 @@
     state: directory
 
 # UPGRADING VEEAM SOFTWARE
-- name: Upgrade ONE Agent
+- name: Upgrade ONE Agent (v12+)
+  ansible.windows.win_package:
+    path: "{{ source }}Agent\\VeeamONE.Agent.x64.msi"
+    state: present
+    arguments: '/L*v "{{ destination }}logs\VeeamONE.Agent.x64.log" ACCEPT_THIRDPARTY_LICENSES=1 ACCEPT_EULA=1 ACCEPT_LICENSING_POLICY=1 ACCEPT_REQUIRED_SOFTWARE=1 VO_AGENT_SERVICE_ACCOUNT_NAME="{{ one_username }}" VO_AGENT_SERVICE_ACCOUNT_PASSWORD="{{ one_password }}"'
+  when: version | int >= 12
+- name: Upgrade ONE Agent (v11-)
   ansible.windows.win_package:
     path: "{{ source }}Agent\\VeeamONE.Agent.x64.msi"
     state: present
     arguments: '/L*v "{{ destination }}logs\VeeamONE.Agent.x64.log" ACCEPT_THIRDPARTY_LICENSES=1 ACCEPT_EULA=1 VO_AGENT_SERVICE_ACCOUNT_NAME="{{ one_username }}" VO_AGENT_SERVICE_ACCOUNT_PASSWORD="{{ one_password }}"'
+  when: version | int <= 11
 - name: Finding file(s) in '{{ source }}Updates' directory
   ansible.windows.win_find:
     paths: "{{ source }}Updates"

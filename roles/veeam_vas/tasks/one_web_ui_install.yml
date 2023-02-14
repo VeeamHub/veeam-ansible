@@ -16,9 +16,9 @@
       - "Download ISO?: {{ iso_download }}"
       - "ISO Source: {{ iso_url }}"
       - "ISO File Destination: {{ destination }}{{ destination_iso_file }}"
-      - "SQL Instance: {{ sql_instance }} (ignore v11)"
-      - "SQL Database: {{ sql_database }} (ignore v11)"
-      - "Veeam ONE Server: {{ one_server }} (ignore pre-v11)"
+      - "SQL Instance: {{ sql_instance }}"
+      - "SQL Database: {{ sql_database }}"
+      - "Veeam ONE Server: {{ one_server }}"
       - "Veeam ONE Service Account: {{ one_username }}"
       - "Veeam ONE SQL Account: {{ one_username }}"
       - "Veeam ONE Installation Type: {{ one_installation_type }}"
@@ -26,28 +26,44 @@
   include_tasks: one_install_pretasks.yml
 
 # INSTALLING VEEAM SOFTWARE
+- name: Install ONE Reporter Web UI (v12+)
+  ansible.windows.win_package:
+    path: "{{ source }}Reporter\\VeeamONE.Reporter.WebUI.x64.msi"
+    state: present
+    arguments: '/L*v "{{ destination }}logs\VeeamONE.Reporter.WebUI.x64.log" ACCEPT_THIRDPARTY_LICENSES=1 ACCEPT_EULA=1 ACCEPT_LICENSING_POLICY=1 ACCEPT_REQUIRED_SOFTWARE=1 VO_REPORTER_WEB_SERVER_NAME="{{ one_server }}" VO_REPORTER_WEB_CONNECTION_ACCOUNT_NAME="{{ one_username }}" VO_REPORTER_WEB_CONNECTION_ACCOUNT_PASSWORD="{{ one_password }}"'
+  when:
+    - version | int >= 12
+    - one_username.find("\\") != -1 # locates backslash used in domain account
+- name: Install ONE Reporter Web UI - local account (v12+)
+  ansible.windows.win_package:
+    path: "{{ source }}Reporter\\VeeamONE.Reporter.WebUI.x64.msi"
+    state: present
+    arguments: '/L*v "{{ destination }}logs\VeeamONE.Reporter.WebUI.x64.log" ACCEPT_THIRDPARTY_LICENSES=1 ACCEPT_EULA=1 ACCEPT_LICENSING_POLICY=1 ACCEPT_REQUIRED_SOFTWARE=1 VO_REPORTER_WEB_SERVER_NAME="{{ one_server }}" VO_REPORTER_WEB_CONNECTION_ACCOUNT_NAME="{{ ansible_env.COMPUTERNAME }}\{{ one_username }}" VO_REPORTER_WEB_CONNECTION_ACCOUNT_PASSWORD="{{ one_password }}"'
+  when:
+    - version | int >= 12
+    - one_username.find("\\") == -1 # locates missing backlash for local account
+- name: Install ONE Reporter Web UI (v11)
+  ansible.windows.win_package:
+    path: "{{ source }}Reporter\\VeeamONE.Reporter.WebUI.x64.msi"
+    state: present
+    arguments: '/L*v "{{ destination }}logs\VeeamONE.Reporter.WebUI.x64.log" ACCEPT_THIRDPARTY_LICENSES=1 ACCEPT_EULA=1 VO_REPORTER_WEB_SERVER_NAME="{{ one_server }}" VO_REPORTER_WEB_CONNECTION_ACCOUNT_NAME="{{ one_username }}" VO_REPORTER_WEB_CONNECTION_ACCOUNT_PASSWORD="{{ one_password }}"'
+  when:
+    - version | int == 11
+    - one_username.find("\\") != -1 # locates backslash used in domain account
+- name: Install ONE Reporter Web UI - local account (v11)
+  ansible.windows.win_package:
+    path: "{{ source }}Reporter\\VeeamONE.Reporter.WebUI.x64.msi"
+    state: present
+    arguments: '/L*v "{{ destination }}logs\VeeamONE.Reporter.WebUI.x64.log" ACCEPT_THIRDPARTY_LICENSES=1 ACCEPT_EULA=1 VO_REPORTER_WEB_SERVER_NAME="{{ one_server }}" VO_REPORTER_WEB_CONNECTION_ACCOUNT_NAME="{{ ansible_env.COMPUTERNAME }}\{{ one_username }}" VO_REPORTER_WEB_CONNECTION_ACCOUNT_PASSWORD="{{ one_password }}"'
+  when:
+    - version | int == 11
+    - one_username.find("\\") == -1 # locates missing backlash for local account
 - name: Install ONE Reporter Web UI (pre-v11)
   ansible.windows.win_package:
     path: "{{ source }}Reporter\\VeeamONE.Reporter.WebUI.x64.msi"
     state: present
     arguments: '/L*v "{{ destination }}logs\VeeamONE.Reporter.WebUI.x64.log" ACCEPT_THIRDPARTY_LICENSES=1 ACCEPT_EULA=1 VM_RP_SERVICEACCOUNT="{{ one_username }}" VM_RP_SERVICEPASSWORD="{{ one_password }}" VM_RP_SQL_SERVER="{{ sql_instance }}" VM_RP_SQL_DATABASE="{{ sql_database }}" VM_RP_SQL_AUTHENTICATION=0 VM_RP_SQL_USER="{{ one_username }}" VM_RP_SQL_PASSWORD="{{ one_password }}" VO_INSTALLATION_TYPE="{{ one_installation_type }}"'
   when: version | int < 11
-- name: Install ONE Reporter Web UI
-  ansible.windows.win_package:
-    path: "{{ source }}Reporter\\VeeamONE.Reporter.WebUI.x64.msi"
-    state: present
-    arguments: '/L*v "{{ destination }}logs\VeeamONE.Reporter.WebUI.x64.log" ACCEPT_THIRDPARTY_LICENSES=1 ACCEPT_EULA=1 VO_REPORTER_WEB_SERVER_NAME="{{ one_server }}" VO_REPORTER_WEB_CONNECTION_ACCOUNT_NAME="{{ one_username }}" VO_REPORTER_WEB_CONNECTION_ACCOUNT_PASSWORD="{{ one_password }}"'
-  when:
-    - version | int >= 11
-    - one_username.find("\\") != -1 # locates backslash used in domain account
-- name: Install ONE Reporter Web UI (local account)
-  ansible.windows.win_package:
-    path: "{{ source }}Reporter\\VeeamONE.Reporter.WebUI.x64.msi"
-    state: present
-    arguments: '/L*v "{{ destination }}logs\VeeamONE.Reporter.WebUI.x64.log" ACCEPT_THIRDPARTY_LICENSES=1 ACCEPT_EULA=1 VO_REPORTER_WEB_SERVER_NAME="{{ one_server }}" VO_REPORTER_WEB_CONNECTION_ACCOUNT_NAME="{{ ansible_env.COMPUTERNAME }}\{{ one_username }}" VO_REPORTER_WEB_CONNECTION_ACCOUNT_PASSWORD="{{ one_password }}"'
-  when:
-    - version | int >= 11
-    - one_username.find("\\") == -1 # locates missing backlash for local account
 - name: Finding file(s) in '{{ source }}Updates' directory
   ansible.windows.win_find:
     paths: "{{ source }}Updates"
