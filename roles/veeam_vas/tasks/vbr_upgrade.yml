@@ -21,7 +21,7 @@
     file: "vars/vbr_v{{ version }}.yml"
 - name: Ensure Veeam services are running
   ansible.windows.win_shell: |
-    Get-Service veeam* | Start-Service -ErrorAction SilentlyContinue
+    Get-Service veeam* | Where-Object {$_.Name -ne "VeeamMBPDeploymentService"} | Start-Service
 
 # PRE-UPGRADE TASKS
 - name: Enable Cloud Connect Maintenance Mode
