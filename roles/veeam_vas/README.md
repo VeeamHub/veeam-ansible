@@ -21,7 +21,8 @@ A big thanks to Markus Kraus ([@vMarkus_K](https://twitter.com/vMarkus_K))! I us
     - [Veeam Backup Enterprise Manager](#veeam-backup-enterprise-manager)
     - [Veeam ONE](#veeam-one)
   - [Example Playbooks](#example-playbooks)
-    - [Veeam Backup & Replication Community Edition Install with ISO Download](#veeam-backup--replication-community-edition-install-with-iso-download)
+    - [Veeam Backup & Replication Community Edition Install with ISO Download (v12+)](#Veeam-Backup--Replication-Community-Edition-Install-with-ISO-Download-v12)
+    - [Veeam Backup & Replication Community Edition Install with ISO Download (v11-)](#Veeam-Backup--Replication-Community-Edition-Install-with-ISO-Download-v11-)
     - [Veeam Backup & Replication Install with ISO Download](#veeam-backup--replication-install-with-iso-download)
     - [Veeam Backup & Replication Install with ISO Download and remote Microsoft SQL (v12+)](#Veeam-Backup--Replication-Install-with-ISO-Download-and-remote-Microsoft-SQL-v12)
     - [Veeam Backup & Replication Install with ISO Download and remote PostgreSQL (v12+)](#Veeam-Backup--Replication-Install-with-ISO-Download-and-remote-PostgreSQL-v12)
@@ -126,7 +127,30 @@ Variables are located in two different locations:
 
 Please note there are more configurations than the examples shown below. If you have any questions, please feel free to create an [issue](https://github.com/VeeamHub/veeam-ansible/issues/new/choose).
 
-### Veeam Backup & Replication Community Edition Install with ISO Download
+### Veeam Backup & Replication Community Edition Install with ISO Download (v12+)
+
+```yaml
+- name: Veeam Backup & Replication Install
+  hosts: veeam
+  tasks:
+    - include_role:
+        name: veeamhub.veeam.veeam_vas
+        tasks_from: vbr_install
+      vars:
+        version: "12"
+        iso_download: true
+        sql_install_username: "sql_install"
+        sql_install_password: "ChangeM3!"
+        sql_service_username: "svc_sql"
+        sql_service_password: "ChangeM3!"
+        sql_username: "postgres"
+        sql_password: "ChangeM3!"
+        # https://docs.ansible.com/ansible/latest/user_guide/playbooks_vault.html#single-encrypted-variable
+    - name: Applying tuning on a local PostgreSQL server running as the VBR DB
+       veeamhub.veeam.veeam_vbr_set_postgres_database_server_limits:
+```
+
+### Veeam Backup & Replication Community Edition Install with ISO Download (v11-)
 
 ```yaml
 - name: Veeam Backup & Replication Install
