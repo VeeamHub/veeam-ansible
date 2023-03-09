@@ -1,7 +1,7 @@
 ---
 namespace: "veeamhub"
 name: "veeam"
-version: "1.4.10"
+version: "1.4.11"
 readme: "readme_galaxy.md"
 authors:
   - "Chris Arceneaux (https://www.arsano.ninja/)"
