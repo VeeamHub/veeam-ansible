@@ -147,7 +147,7 @@ Please note there are more configurations than the examples shown below. If you 
         sql_password: "ChangeM3!"
         # https://docs.ansible.com/ansible/latest/user_guide/playbooks_vault.html#single-encrypted-variable
     - name: Applying tuning on a local PostgreSQL server running as the VBR DB
-       veeamhub.veeam.veeam_vbr_set_postgres_database_server_limits:
+        veeamhub.veeam.veeam_vbr_set_postgres_database_server_limits:
 ```
 
 ### Veeam Backup & Replication Community Edition Install with ISO Download (v11-)
@@ -160,7 +160,7 @@ Please note there are more configurations than the examples shown below. If you 
         name: veeamhub.veeam.veeam_vas
         tasks_from: vbr_install
       vars:
-        version: "12"
+        version: "11"
         iso_download: true
         sql_install_username: "sql_install"
         sql_install_password: "ChangeM3!"
