@@ -60,10 +60,13 @@
 - name: Starting all Veeam services
   ansible.windows.win_shell: |
     Get-Service veeam* | Where-Object {$_.Name -ne "VeeamMBPDeploymentService"} | Start-Service
+  when: not (patch | bool)
 - name: Disable Cloud Connect Maintenance Mode
   veeam_vbr_cloud_connect_maintenance:
     state: disable
-  when: cloud_connect | bool
+  when:
+    - cloud_connect | bool
+    - not (patch | bool)
 - name: Enabling all backup jobs in specified file
   veeam_vbr_upgrade_job_prep:
     state: enable
