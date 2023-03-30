@@ -62,7 +62,7 @@ This collection depends on Windows modules (`ansible.windows` & `community.windo
 
 ### Ansible
 
-- Ansible 2.9+
+- Ansible 2.12+
 
 ### OS
 
