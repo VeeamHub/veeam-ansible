@@ -45,7 +45,7 @@ EXAMPLES = r'''
   tasks:
   - name: Test veeam_vbr_rest_servercertificate_info
     veeamhub.veeam.veeam_vbr_rest_servercertificate_info:
-        server_name: '10.0.2.16'
+        server_name: '<FQDN/IP>'
     register: testout
   - name: Debug Result
     debug:

@@ -83,11 +83,11 @@ EXAMPLES = r'''
   tasks:
   - name: Test veeam_vbr_rest_credentials Create
     veeamhub.veeam.veeam_vbr_rest_credentials:
-        server_name: '10.0.2.16'
-        server_username: 'Administrator'
-        server_password: 'Anfang!!'
+        server_name: '<FQDN/IP>'
+        server_username: '<Username>'
+        server_password: '<Password>'
         type: 'linux'
-        username: 'root'
+        username: '<Username>'
         password: '<Password>'
         description: 'Created by Ansible RestAPI Module'
     register: create_cred
@@ -96,9 +96,9 @@ EXAMPLES = r'''
         var: create_cred
   - name: Test veeam_vbr_credentials Delete
     veeamhub.veeam_rest.veeam_vbr_credentials:
-        server_name: '10.0.2.16'
-        server_username: 'Administrator'
-        server_password: 'Anfang!!'
+        server_name: '<FQDN/IP>'
+        server_username: '<Username>'
+        server_password: '<Password>'
         id: "{{ create_cred.msg.id }}"
         state: absent
     register: delete_cred

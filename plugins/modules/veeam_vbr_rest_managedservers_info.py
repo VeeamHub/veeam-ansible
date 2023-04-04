@@ -53,8 +53,8 @@ EXAMPLES = r'''
   tasks:
   - name: Test veeam_vbr_rest_managedservers_info
     veeamhub.veeam.veeam_vbr_rest_managedservers_info:
-        server_name: '10.0.2.16'
-        server_username: 'Administrator'
+        server_name: '<FQDN/IP>'
+        server_username: '<Username>'
         server_password: '<Password>'
     register: testout
   - name: Debug Result
