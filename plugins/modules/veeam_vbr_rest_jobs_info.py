@@ -9,8 +9,41 @@ from ansible.module_utils.basic import AnsibleModule
 from ansible.module_utils.urls import fetch_url
 
 DOCUMENTATION = r'''
-# Pass in a message
+---
+module: veeam_vbr_rest_jobs_info
 
+short_description: Get Veeam Backup & Replication Jobs.
+
+version_added: "1.0.0"
+
+description: Get Veeam Backup & Replication Jobs.
+
+options:
+    validate_certs:
+        description: Validate SSL certs.
+        required: false
+        default: false
+        type: bool
+    server_name:
+        description: VBR Server Name or IP
+        required: true
+        type: str
+    server_port:
+        description: VBR RestAPI Sever Port
+        required: false
+        default: 9419
+        type: str
+    server_username:
+        description: VBR Server Username
+        required: true
+        type: str
+    server_password:
+        description: VBR Server password
+        required: true
+        type: str
+
+author:
+    - Markus Kraus (@vMarkusK)
 '''
 
 EXAMPLES = r'''
