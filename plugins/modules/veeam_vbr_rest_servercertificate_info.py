@@ -43,8 +43,7 @@ author:
 '''
 
 EXAMPLES = r'''
-# Pass in a message
-- name: Test Veeam RestAPI Collection
+- name: Veeam RestAPI Collection
   hosts: localhost
   tasks:
   - name: Test veeam_vbr_rest_servercertificate_info
@@ -52,7 +51,7 @@ EXAMPLES = r'''
         server_name: '<FQDN/IP>'
     register: testout
   - name: Debug Result
-    debug:
+    ansible.builtin.debug:
         var: testout
 '''
 

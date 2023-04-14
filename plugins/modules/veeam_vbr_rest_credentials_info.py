@@ -62,7 +62,7 @@ EXAMPLES = r'''
         server_password: '<Password>'
     register: testout
   - name: Debug Result
-    debug:
+    ansible.builtin.debug:
         var: testout
 '''
 

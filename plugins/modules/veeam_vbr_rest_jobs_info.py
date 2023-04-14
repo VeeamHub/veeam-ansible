@@ -51,8 +51,18 @@ author:
 '''
 
 EXAMPLES = r'''
-# Pass in a message
-
+- name: Veeam RestAPI Collection
+  hosts: localhost
+  tasks:
+  - name: Test veeam_vbr_rest_jobs_info
+    veeamhub.veeam.veeam_vbr_rest_jobs_info:
+        server_name: '<FQDN/IP>'
+        server_username: '<Username>'
+        server_password: '<Password>'
+    register: testout
+  - name: Debug Result
+    ansible.builtin.debug:
+        var: testout
 '''
 
 def run_module():
