@@ -94,7 +94,7 @@ def run_module():
     )
 
     # General
-    apiversion = '1.0-rev2'
+    apiversion = '1.1-rev0'
 
     # Authenticate
     request_server = module.params['server_name']

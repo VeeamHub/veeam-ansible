@@ -157,7 +157,7 @@ def run_module():
     )
 
     # General
-    apiversion = '1.0-rev2'
+    apiversion = '1.1-rev0'
     state = module.params['state']
     request_server = module.params['server_name']
     request_port = module.params['server_port']
