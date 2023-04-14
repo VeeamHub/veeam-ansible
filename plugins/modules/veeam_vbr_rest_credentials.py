@@ -81,7 +81,6 @@ author:
 '''
 
 EXAMPLES = r'''
-# Pass in a message
 - name: Test Veeam RestAPI Collection
   hosts: localhost
   tasks:
@@ -90,13 +89,13 @@ EXAMPLES = r'''
         server_name: '<FQDN/IP>'
         server_username: '<Username>'
         server_password: '<Password>'
-        type: 'linux'
+        type: 'Linux'
         username: '<Username>'
         password: '<Password>'
         description: 'Created by Ansible RestAPI Module'
     register: create_cred
   - name: Debug Result
-    debug:
+    ansible.builtin.debug:
         var: create_cred
   - name: Test veeam_vbr_credentials Delete
     veeamhub.veeam_rest.veeam_vbr_credentials:
@@ -107,7 +106,7 @@ EXAMPLES = r'''
         state: absent
     register: delete_cred
   - name: Debug Result
-    debug:
+    ansible.builtin.debug:
         var: delete_cred
 '''
 
