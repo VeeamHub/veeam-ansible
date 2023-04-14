@@ -5,6 +5,7 @@
     - [Veeam Backup \& Replication RestAPI Modules](#veeam-backup--replication-restapi-modules)
       - [veeam\_vbr\_rest\_servercertificate\_info](#veeam_vbr_rest_servercertificate_info)
       - [veeam\_vbr\_rest\_credentials\_info](#veeam_vbr_rest_credentials_info)
+      - [veeam\_vbr\_rest\_cloudcredentials\_info](#veeam_vbr_rest_cloudcredentials_info)
       - [veeam\_vbr\_rest\_credentials](#veeam_vbr_rest_credentials)
       - [veeam\_vbr\_rest\_repositories\_info](#veeam_vbr_rest_repositories_info)
       - [veeam\_vbr\_rest\_managedservers\_info](#veeam_vbr_rest_managedservers_info)
@@ -57,6 +58,26 @@ Get Veeam Backup & Replication Credentials.
   tasks:
   - name: Test veeam_vbr_credentials_info
     veeamhub.veeam.veeam_vbr_rest_credentials_info:
+        server_name: '<VBR Host>'
+        server_username: '<VBR User>'
+        server_password: '<VBR Password>'
+    register: testout
+  - name: Debug Result
+    ansible.builtin.debug:
+        var: testout
+```
+
+#### veeam_vbr_rest_cloudcredentials_info
+
+Get Veeam Backup & Replication Cloud Credentials.
+
+```yaml
+- name: Test Veeam RestAPI Collection
+  hosts: localhost
+  gather_facts: false
+  tasks:
+  - name: Test veeam_vbr_cloudcredentials_info
+    veeamhub.veeam.veeam_vbr_rest_cloudcredentials_info:
         server_name: '<VBR Host>'
         server_username: '<VBR User>'
         server_password: '<VBR Password>'
