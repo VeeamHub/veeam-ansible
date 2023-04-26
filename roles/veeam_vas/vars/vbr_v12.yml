@@ -3,6 +3,7 @@
 
 iso_url: "https://download2.veeam.com/VBR/v12/VeeamBackup&Replication_12.0.0.1420_20230223.iso"
 iso_checksum: "052c46255042545d565cffd7e4c855d9dcb6bf833c403dcbae4acd5c7a7da786"
+iso_checksum_algorithm: sha256
 destination_iso_file: "vbr.iso"
 destination_license_file: "vbr-license.lic"
 postgres_file: "{{ source }}Redistr\\x64\\PostgreSQL\\15.1-1\\postgresql-15.1-1-windows-x64.exe"

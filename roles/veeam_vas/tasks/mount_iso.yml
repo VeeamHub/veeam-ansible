@@ -12,7 +12,7 @@
     url: "{{ iso_url }}"
     dest: "{{ destination }}{{ destination_iso_file }}"
     checksum: "{{ iso_checksum }}"
-    checksum_algorithm: sha256
+    checksum_algorithm: "{{ iso_checksum_algorithm }}"
     force: true
   when: iso_download | bool
   register: win_get_url_out

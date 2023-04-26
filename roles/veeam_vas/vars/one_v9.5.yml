@@ -3,6 +3,7 @@
 
 iso_url: "https://download2.veeam.com/VeeamONE_9.5.4.4587.Update4a.iso"
 iso_checksum: "C601E8147C042965892C2F4C54C6151600146C4D9876AAABD1A5A358DB3A7F5A"
+iso_checksum_algorithm: sha256
 destination_iso_file: "one.iso"
 destination_license_file: "one-license.lic"
 sql_express_file: "{{ source }}Redistr\\x64\\SqlExpress\\2016SP1\\SQLEXPR_x64_ENU.exe"
