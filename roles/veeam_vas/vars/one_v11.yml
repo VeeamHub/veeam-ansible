@@ -3,7 +3,6 @@
 
 iso_url: "https://download2.veeam.com/VONE/v11/VeeamONE_11.0.1.1880_20211119.iso"
 iso_checksum: "8a3c91d1f71ab86d887d4aa33305e7c0feda2d4e02d9376156d9efdaf48c8008"
-iso_checksum_algorithm: sha256
 destination_iso_file: "one.iso"
 destination_license_file: "one-license.lic"
 sql_express_file: "{{ source }}Redistr\\x64\\SqlExpress\\2016SP2\\SQLEXPR_x64_ENU.exe"
