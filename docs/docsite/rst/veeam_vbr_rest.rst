@@ -19,6 +19,7 @@ veeam_vbr_rest_servercertificate_info
 Get Current Veeam Backup Server Certificate from RestAPI.
 
 ..  code-block:: yaml
+
     - name: Test Veeam RestAPI Collection
       hosts: localhost
       gather_facts: false
@@ -37,6 +38,7 @@ veeam_vbr_rest_credentials_info
 Get Veeam Backup & Replication Credentials.
 
 ..  code-block:: yaml
+
     - name: Test Veeam RestAPI Collection
       hosts: localhost
       gather_facts: false
@@ -57,6 +59,7 @@ veeam_vbr_rest_cloudcredentials_info
 Get Veeam Backup & Replication Cloud Credentials.
 
 ..  code-block:: yaml
+
     - name: Test Veeam RestAPI Collection
       hosts: localhost
       gather_facts: false
@@ -79,9 +82,11 @@ Add and Remove Veeam Backup & Replication Credentials.
 **Please note** This is an MVP with very limited functionality
 
 Known Limitations:
+
 - Not idempotent
 
 ..  code-block:: yaml
+
     - name: Test Veeam RestAPI Collection
       hosts: localhost
       gather_facts: false
@@ -119,9 +124,11 @@ Get Veeam Backup & Replication Repositories.
 **Please note** This is an MVP with very limited functionality
 
 Known Limitations:
+
 - No SOBR listing
 
 ..  code-block:: yaml
+
     - name: Test Veeam RestAPI Collection
       hosts: localhost
       gather_facts: false
@@ -142,6 +149,7 @@ veeam_vbr_rest_managedservers_info
 Get Veeam Backup & Replication Managed Servers.
 
 ..  code-block:: yaml
+
     - name: Test Veeam RestAPI Collection
       hosts: localhost
       gather_facts: false
@@ -162,6 +170,7 @@ veeam_vbr_rest_jobs_info
 Get Veeam Backup & Replication Jobs.
 
 ..  code-block:: yaml
+
     - name: Test Veeam RestAPI Collection
       hosts: localhost
       gather_facts: false
@@ -184,6 +193,7 @@ Add and Delete Veeam Backup & Replication Jobs.
 **Please note** This is an MVP with very limited functionality
 
 Known Limitations:
+
 - Only vSphere Jobs with a single VM
 - Not idempotent
 - No Options
@@ -191,6 +201,7 @@ Known Limitations:
 End-to-End Create Veeam Job and vSphere VM:
 
 ..  code-block:: yaml
+
     - name: Test Veeam RestAPI Collection
       hosts: localhost
       gather_facts: false
@@ -278,6 +289,7 @@ End-to-End Create Veeam Job and vSphere VM:
 End-to-End Delete Veeam Job and vSphere VM:
 
 ..  code-block:: yaml
+
     - name: Test Veeam RestAPI Collection
       hosts: localhost
       gather_facts: false
