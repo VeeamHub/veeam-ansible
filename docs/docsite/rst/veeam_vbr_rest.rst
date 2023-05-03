@@ -12,7 +12,6 @@ Veeam Backup & Replication RestAPI Modules
    :local:
    :depth: 1
 
-
 veeam_vbr_rest_servercertificate_info
 -------------------------------------
 
