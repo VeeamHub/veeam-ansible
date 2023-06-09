@@ -55,14 +55,14 @@ EXAMPLES = r'''
 - name: Test Veeam RestAPI Collection
   hosts: localhost
   tasks:
-  - name: Test veeam_vbr_rest_credentials_info
-    veeamhub.veeam.veeam_vbr_rest_credentials_info:
+    - name: Test veeam_vbr_rest_credentials_info
+      veeamhub.veeam.veeam_vbr_rest_credentials_info:
         server_name: '<FQDN/IP>'
         server_username: '<Username>'
         server_password: '<Password>'
-    register: testout
-  - name: Debug Result
-    ansible.builtin.debug:
+      register: testout
+    - name: Debug Result
+      ansible.builtin.debug:
         var: testout
 '''
 

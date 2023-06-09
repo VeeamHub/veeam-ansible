@@ -84,29 +84,29 @@ EXAMPLES = r'''
 - name: Test Veeam RestAPI Collection
   hosts: localhost
   tasks:
-  - name: Test veeam_vbr_rest_credentials Create
-    veeamhub.veeam.veeam_vbr_rest_credentials:
-        server_name: '<FQDN/IP>'
-        server_username: '<Username>'
-        server_password: '<Password>'
-        type: 'Linux'
-        username: '<Username>'
-        password: '<Password>'
-        description: 'Created by Ansible RestAPI Module'
-    register: create_cred
-  - name: Debug Result
-    ansible.builtin.debug:
+    - name: Test veeam_vbr_rest_credentials Create
+      veeamhub.veeam.veeam_vbr_rest_credentials:
+        server_name: "<FQDN/IP>"
+        server_username: "<Username>"
+        server_password: "<Password>"
+        type: "Linux"
+        username: "<Username>"
+        password: "<Password>"
+        description: "Created by Ansible RestAPI Module"
+      register: create_cred
+    - name: Debug Result
+      ansible.builtin.debug:
         var: create_cred
-  - name: Test veeam_vbr_credentials Delete
-    veeamhub.veeam_rest.veeam_vbr_credentials:
-        server_name: '<FQDN/IP>'
-        server_username: '<Username>'
-        server_password: '<Password>'
+    - name: Test veeam_vbr_credentials Delete
+      veeamhub.veeam.veeam_vbr_rest_credentials:
+        server_name: "<FQDN/IP>"
+        server_username: "<Username>"
+        server_password: "<Password>"
         id: "{{ create_cred.msg.id }}"
         state: absent
-    register: delete_cred
-  - name: Debug Result
-    ansible.builtin.debug:
+      register: delete_cred
+    - name: Debug Result
+      ansible.builtin.debug:
         var: delete_cred
 '''
 
