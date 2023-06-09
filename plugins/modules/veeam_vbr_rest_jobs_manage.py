@@ -14,9 +14,9 @@ ANSIBLE_METADATA = {'metadata_version': '1.11',
 
 DOCUMENTATION = r'''
 ---
-module: veeam_vbr_rest_jobs_info
+module: veeam_vbr_rest_jobs_manage
 
-short_description: Manage  Veeam Backup & Replication Jobs.
+short_description: Manage Veeam Backup & Replication Jobs.
 
 version_added: "1.0.0"
 
@@ -48,94 +48,78 @@ options:
 
 author:
     - Markus Kraus (@vMarkusK)
-
 '''
 
 EXAMPLES = r'''
-- name: Test Veeam RestAPI Collection
+- name: End-to-End Create Veeam Job
   hosts: localhost
   gather_facts: false
   vars:
-    repos_query: "infrastructure_repositories.data[?name=='Local01']"
-    vcenter_hostname: "<vCenter Host>"
-    vcenter_username: "<vCenter User>"
-    vcenter_password: "<vCenter Password>"
-    vm_datacenter: "<vCenter DC>"
-    vm_cluster: "<vCenter Cluster>"
-    vm_name: "Ansible_Test"
-    vm_folder: "<vCenter Folder>"
-    vm_datastore: "<Datastore Name>"
-    vm_network: "<Network Name>"
+    - repo_name: '<Repository Name>'
   tasks:
-  - name: Create vSphere VM {{ vm_name }}
-    community.vmware.vmware_guest:
-        hostname: "{{ vcenter_hostname }}"
-        username: "{{ vcenter_username }}"
-        password: "{{ vcenter_password }}"
-        validate_certs: yes
-        datacenter: "{{ vm_datacenter }}"
-        cluster: "{{ vm_cluster }}"
-        folder: "{{ vm_folder }}"
-        name: "{{ vm_name }}" 
-        state: poweredoff
-        guest_id: "rhel8_64Guest"
-        datastore: "{{ vm_datastore }}"
-        disk:
-          - size_gb: "16"
-        hardware:
-            version: 19
-            memory_mb: 2048
-            memory_reservation_lock: false
-            num_cpus: 1
-            scsi: paravirtual
-            boot_firmware: efi
-        networks:
-          - name: "{{ vm_network }}"
-            device_type: vmxnet3
-        advanced_settings:
-          - key: "ctkEnabled"
-            value: "True"
-        wait_for_ip_address: no
-    register: deploy_vm
-  - name: VBR API-Test
-    veeamhub.veeam.veeam_vbr_rest_servercertificate_info:
-        server_name: '<VBR Host>'
-    register: api_testout
-  - name: Debug VBR API-Test Result
-    ansible.builtin.debug:
-        var: api_testout
-  - name: Get VBR Repos
-    veeamhub.veeam.veeam_vbr_rest_repositories_info:
-        server_name: '<VBR Host>'
-        server_username: '<VBR User>'
-        server_password: '<VBR Password>'
-    register: repo_testout
-  - name: Debug VBR Repos Result
-    ansible.builtin.debug:
-        var: repo_testout | json_query(repos_query)
-  - name: Filter Repo Object
-    set_fact: 
-      repo_id: "{{ repo_testout | json_query(repos_id_query) }}"
-    vars:
-      repos_id_query: 'infrastructure_repositories.data[?name==`Local01`].id'
-  - name: Create VBR Job
-    veeamhub.veeam.veeam_vbr_rest_jobs_manage:
-        server_name: '<VBR Host>'
-        server_username: '<VBR User>'
-        server_password: '<VBR Password>'
+    - name: Get VBR Repos
+      veeamhub.veeam.veeam_vbr_rest_repositories_info:
+        server_name: "<VBR Host>"
+        server_username: "<VBR User>"
+        server_password: "<VBR Password>"
+      register: repo_testout
+    - name: Debug VBR Repos Result
+      ansible.builtin.debug:
+        var: repo_testout
+    - name: Filter Repo Object
+      set_fact:
+        repo_id: "{{ repo_testout | json_query(repos_id_query) }}"
+      vars:
+        repos_id_query: "infrastructure_repositories.data[?name==`{{ repo_name }}`].id"
+    - name: Create VBR Job
+      veeamhub.veeam.veeam_vbr_rest_jobs_manage:
+        server_name: "<VBR Host>"
+        server_username: "<VBR User>"
+        server_password: "<VBR Password>"
         state: present
-        jobName: 'Ansible Test'
-        hostName: "{{ vcenter_hostname }}"
-        name: "{{ vm_name }}"
-        objectId: "{{ deploy_vm.instance.moid }}"
-        type: 'VirtualMachine'
-        description: 'My Test'
+        jobName: "Ansible Test"
+        hostName: "<vCenter Hostname>"
+        name: "<VM Name>"
+        objectId: "<VM MoRef ID>"
+        type: "VirtualMachine"
+        description: "Created by Ansible RestAPI Module"
         backupRepositoryId: "{{ repo_id[0] }}"
-    register: job_createout
-  - name: Debug VBR Jobs Result
-    ansible.builtin.debug:
-        var: job_createout   
+      register: create_job
+    - name: Debug VBR Jobs Result
+      ansible.builtin.debug:
+        var: create_job
 
+- name: End-to-End Delete Veeam Job
+  hosts: localhost
+  gather_facts: false
+  vars:
+    job_name: "Ansible Test"
+  tasks:
+    - name: Get VBR Jobs
+      veeamhub.veeam.veeam_vbr_rest_jobs_info:
+        server_name: "<VBR Host>"
+        server_username: "<VBR User>"
+        server_password: "<VBR Password>"
+      register: job_testout
+    - name: Debug VBR Jobs Result
+      ansible.builtin.debug:
+        var: job_testout
+    - name: Filter Job Object
+      set_fact:
+        job_id: "{{ job_testout | json_query(jobs_id_query) }}"
+      vars:
+        jobs_id_query: "infrastructure_jobs.data[?name==`{{ job_name }}`].id"
+    - name: Delete VBR Job
+      veeamhub.veeam.veeam_vbr_rest_jobs_manage:
+        server_name: "<VBR Host>"
+        server_username: "<VBR User>"
+        server_password: "<VBR Password>"
+        state: absent
+        id: "{{ job_id[0] }}"
+      register: delete_job
+    - name: Debug VBR Jobs Result
+      ansible.builtin.debug:
+        var: delete_job
 '''
 
 def run_module():
@@ -464,7 +448,7 @@ def run_module():
         id = module.params['id']
 
         headers = {
-            'x-api-version': '1.0-rev1',
+            'x-api-version': '1.1-rev0',
             'Authorization': 'Bearer ' + login_resp['access_token']
         }
         request_url = 'https://' + request_server + ':' + request_port + '/api/v1/jobs/' + id
