@@ -1,12 +1,5 @@
 # Ansible Sample Code
 
-- [Ansible Sample Code](#ansible-sample-code)
-  - [📗 Documentation](#-documentation)
-  - [✍ Contributions](#-contributions)
-  - [🤝🏾 License](#-license)
-  - [🤔 Questions](#-questions)
-
-
 This repository contains sample code for automating Veeam deployment/configuration of various Veeam solutions using Ansible.
 
 [Ansible](https://www.ansible.com/) is a radically simple IT automation engine that automates cloud provisioning, configuration management, application deployment, intra-service orchestration, and many other IT needs. Avoid writing scripts or custom code to deploy and update your applications — automate in a language that approaches plain English, using SSH, with no agents to install on remote systems. There are both [paid](https://www.ansible.com/products/pricing) and [open-source](https://github.com/ansible/ansible) versions of Ansible.
