@@ -4,5 +4,5 @@
 
 edit_on_github:
   repository: veeamhub/veeamhub.veeam
-  branch: main
+  branch: master
   path_prefix: ''
