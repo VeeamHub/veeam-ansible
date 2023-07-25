@@ -71,7 +71,7 @@
   ansible.windows.win_package:
     path: "{{ source }}Catalog\\VeeamBackupCatalog64.msi"
     state: present
-    arguments: '/L*v "{{ destination }}logs\\VeeamBackupCatalog64.log" /norestart /qn ACCEPTEULA="YES" ACCEPT_THIRDPARTY_LICENSES="1" INSTALLDIR="{{ install_dir }}" /installdir "{{ install_dir }"'
+    arguments: '/L*v "{{ destination }}logs\\VeeamBackupCatalog64.log" /norestart /qn ACCEPTEULA="YES" ACCEPT_THIRDPARTY_LICENSES="1" INSTALLDIR="{{ install_dir }}"'
   register: win_package_vbr_catalog
   when: version | int <= 11
 - name: Install Veeam Backup & Replication Server with license (v12+)
