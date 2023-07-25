@@ -20,7 +20,7 @@ sql_instance: "(local)\\VEEAMSQL2016"
 # VBR/EM-specific default variables
 vbr_jobs_file: "{{ destination }}DisabledJobs{{ ansible_date_time.iso8601_basic_short }}.csv"
 cloud_connect: false # Is the server a Cloud Connect server? (If in doubt, 'false')
-install_dir: "C:/Program Files/Veeam"
+install_dir: "C:\\Program Files\\Veeam"
 
 # Veeam ONE-specific default variables
 one_create_service_account: true
