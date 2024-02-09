@@ -46,12 +46,12 @@ EXAMPLES = r'''
 
 
 - name: Checking to see if Veeam software is installed
-    veeam_software_check:
-      name: "Veeam*"
-      allow_multiple: true
-    register: software
-  - debug:
-      var: software.output | from_json
+  veeam_software_check:
+    name: "Veeam*"
+    allow_multiple: true
+  register: software
+- ansible.builtin.debug:
+    var: software.output | from_json
 '''
 
 RETURN = r'''

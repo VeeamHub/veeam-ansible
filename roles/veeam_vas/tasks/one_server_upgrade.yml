@@ -6,7 +6,7 @@
     name: "Veeam ONE Monitor Server"
   register: monitor_server
 - name: Is Veeam ONE Monitor Server installed?
-  fail:
+  ansible.builtin.fail:
     msg: "Veeam ONE Monitor Server must be installed on this server in order to upgrade it."
   when: not (monitor_server.installed | bool)
 ## ONE Reporter Server
@@ -15,7 +15,7 @@
     name: "Veeam ONE Reporter Server"
   register: reporter_server
 - name: Is Veeam ONE Reporter Server installed?
-  fail:
+  ansible.builtin.fail:
     msg: "Veeam ONE Reporter Server must be installed on this server in order to upgrade it."
   when: not (reporter_server.installed | bool)
 ## ONE Agent Server
@@ -24,18 +24,18 @@
     name: "Veeam ONE Agent"
   register: agent_server
 - name: Is Veeam ONE Agent installed?
-  fail:
+  ansible.builtin.fail:
     msg: "Veeam ONE Agent must be installed on this server in order to upgrade it."
   when: not (agent_server.installed | bool)
 - name: Including version-specific variables
-  include_vars:
+  ansible.builtin.include_vars:
     file: "vars/one_v{{ version }}.yml"
 
 # PRE-UPGRADE TASKS
 - name: Veeam ONE ISO Tasks
-  include_tasks: mount_iso.yml
+  ansible.builtin.include_tasks: mount_iso.yml
 - name: Print Upgrade Configuration
-  debug:
+  ansible.builtin.debug:
     msg:
       - "ISO Drive Letter: '{{ source }}'"
       - "Upgrade Logs Folder: '{{ destination }}logs'"
@@ -67,7 +67,7 @@
 - name: Installing SqlServer PowerShell module
   community.windows.win_psmodule:
     name: SqlServer
-    skip_publisher_check: yes
+    skip_publisher_check: true
     state: present
   register: result
   until: result is not failed
@@ -76,14 +76,14 @@
 - name: Start adhoc Veeam ONE database backup to default SQL backup location
   ansible.windows.win_shell: |
     Backup-SqlDatabase -ServerInstance "{{ sql_instance }}" -Database "{{ sql_database }}"
-  become: yes
+  become: true
   become_flags: logon_type=batch
   vars:
     ansible_become_method: runas
     ansible_become_user: "{{ one_username }}"
     ansible_become_pass: "{{ one_password }}"
 - name: Including Veeam ONE Common Pre-Install tasks
-  include_tasks: one_install_pretasks.yml
+  ansible.builtin.include_tasks: one_install_pretasks.yml
 
 # UPGRADING VEEAM SOFTWARE
 ## ONE Monitor Server
@@ -125,7 +125,7 @@
     path: "{{ source }}Reporter\\VeeamONE.Reporter.Server.x64.msi"
     state: present
     arguments: '/L*v "{{ destination }}logs\VeeamONE.Reporter.Server.x64.log" EDITLICFILEPATH="{{ destination }}{{ destination_license_file }}" ACCEPT_THIRDPARTY_LICENSES=1 ACCEPT_EULA=1 ACCEPT_LICENSING_POLICY=1 ACCEPT_REQUIRED_SOFTWARE=1 VO_REPORTER_SERVICE_ACCOUNT_NAME="{{ one_username }}" VO_REPORTER_SERVICE_ACCOUNT_PASSWORD="{{ one_password }}"'
-  become: yes
+  become: true
   become_flags: logon_type=batch
   vars:
     ansible_become_method: runas
@@ -139,7 +139,7 @@
     path: "{{ source }}Reporter\\VeeamONE.Reporter.Server.x64.msi"
     state: present
     arguments: '/L*v "{{ destination }}logs\VeeamONE.Reporter.Server.x64.log" ACCEPT_THIRDPARTY_LICENSES=1 ACCEPT_EULA=1 ACCEPT_LICENSING_POLICY=1 ACCEPT_REQUIRED_SOFTWARE=1 VO_REPORTER_SERVICE_ACCOUNT_NAME="{{ one_username }}" VO_REPORTER_SERVICE_ACCOUNT_PASSWORD="{{ one_password }}"'
-  become: yes
+  become: true
   become_flags: logon_type=batch
   vars:
     ansible_become_method: runas
@@ -153,7 +153,7 @@
     path: "{{ source }}Reporter\\VeeamONE.Reporter.Server.x64.msi"
     state: present
     arguments: '/L*v "{{ destination }}logs\VeeamONE.Reporter.Server.x64.log" EDITLICFILEPATH="{{ destination }}{{ destination_license_file }}" ACCEPT_THIRDPARTY_LICENSES=1 ACCEPT_EULA=1 VO_REPORTER_SERVICE_ACCOUNT_NAME="{{ one_username }}" VO_REPORTER_SERVICE_ACCOUNT_PASSWORD="{{ one_password }}"'
-  become: yes
+  become: true
   become_flags: logon_type=batch
   vars:
     ansible_become_method: runas
@@ -167,7 +167,7 @@
     path: "{{ source }}Reporter\\VeeamONE.Reporter.Server.x64.msi"
     state: present
     arguments: '/L*v "{{ destination }}logs\VeeamONE.Reporter.Server.x64.log" ACCEPT_THIRDPARTY_LICENSES=1 ACCEPT_EULA=1 VO_REPORTER_SERVICE_ACCOUNT_NAME="{{ one_username }}" VO_REPORTER_SERVICE_ACCOUNT_PASSWORD="{{ one_password }}"'
-  become: yes
+  become: true
   become_flags: logon_type=batch
   vars:
     ansible_become_method: runas
@@ -208,25 +208,26 @@
 - name: Finding file(s) in '{{ source }}Updates' directory
   ansible.windows.win_find:
     paths: "{{ source }}Updates"
-    recurse: no
+    recurse: false
     file_type: file
-  ignore_errors: yes
+  ignore_errors: true
   register: file
 - name: Does Veeam ONE need to be patched?
-  set_fact:
+  ansible.builtin.set_fact:
     patch: "{{ file.matched }}"
 - name: Setting patch filename
-  set_fact:
+  ansible.builtin.set_fact:
     patch_file: "{{ file.files[0].filename }}"
   when: patch | bool
 - name: Including Veeam ONE patch tasks
-  include_tasks: one_patch.yml
+  ansible.builtin.include_tasks: one_patch.yml
   when: patch | bool
 
 # POST-UPGRADE TASKS
 - name: Starting all Veeam services post-upgrade
   ansible.windows.win_shell: |
     Get-Service veeam* | Start-Service
+  retries: 3
 - name: Unmount ISO
   community.windows.win_disk_image:
     image_path: "{{ destination }}{{ destination_iso_file }}"

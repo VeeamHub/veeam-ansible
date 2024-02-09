@@ -2,19 +2,19 @@
 
 ## PRE-INSTALL TASKS
 - name: Including version-specific variables
-  include_vars:
+  ansible.builtin.include_vars:
     file: "vars/one_v{{ version }}.yml"
   when: not (patch | bool)
 - name: Setting patch folder (from ISO)
-  set_fact:
+  ansible.builtin.set_fact:
     patch_folder: "Updates\\"
   when: patch | bool
 - name: Setting patch folder (not from ISO)
-  set_fact:
+  ansible.builtin.set_fact:
     patch_folder: ""
   when: not (patch | bool)
 - name: Print Patch Configuration
-  debug:
+  ansible.builtin.debug:
     msg:
       - "ISO Drive Letter: '{{ source }}{{ patch_folder }}{{ patch_file }}'"
       - "Patch Logs Folder: '{{ destination }}logs'"
@@ -40,7 +40,7 @@
 - name: Installing SqlServer PowerShell module
   community.windows.win_psmodule:
     name: SqlServer
-    skip_publisher_check: yes
+    skip_publisher_check: true
     state: present
   when:
     - sql_instance != '(local)\\VEEAMSQL2016'

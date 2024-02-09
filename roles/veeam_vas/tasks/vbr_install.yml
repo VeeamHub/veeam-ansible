@@ -4,26 +4,26 @@
   pending_reboot_check:
   register: precheck
 - name: Is there an existing pending reboot?
-  fail:
+  ansible.builtin.fail:
     msg: "This Windows server requires a reboot prior to beginning the Veeam Backup & Replication install. After rebooting this server, you can proceed with the installation."
   when:
     - precheck.pending_reboot | bool
 - name: Including version-specific variables
-  include_vars:
+  ansible.builtin.include_vars:
     file: "vars/vbr_v{{ version }}.yml"
 
 # PRE-INSTALL TASKS
 - name: Including VBR Pre-Install tasks
-  include_tasks: vbr_install_pretasks.yml
+  ansible.builtin.include_tasks: vbr_install_pretasks.yml
 
 - name: Looking for .NET Core Runtime in Veeam ISO
   ansible.windows.win_find:
     paths: "{{ source }}Redistr\\x64"
     patterns: dotnet-runtime-.*
-    recurse: no
+    recurse: false
     file_type: file
     use_regex: true
-  ignore_errors: yes
+  ignore_errors: true
   register: file
   when: version | int >= 11
 - name: Install Microsoft .NET Core Runtime
@@ -32,15 +32,16 @@
     product_id: Install .NET Core Runtime
     state: present
     arguments: '/install /quiet /norestart /log "{{ destination }}logs\\dotnet-runtime-x.x.x-win-x64.log"'
+  ignore_errors: true
   when: version | int >= 11
 - name: Looking for ASP.NET Core Shared Framework in Veeam ISO
   ansible.windows.win_find:
     paths: "{{ source }}Redistr\\x64"
     patterns: aspnetcore-runtime-.*
-    recurse: no
+    recurse: false
     file_type: file
     use_regex: true
-  ignore_errors: yes
+  ignore_errors: true
   register: file
   when: version | int >= 11
 - name: Install Microsoft ASP.NET Core Shared Framework
@@ -56,7 +57,7 @@
     product_id: Install C++ Framework
     state: present
     arguments: '/install /quiet /norestart /log "{{ destination }}logs\\vc_redist.x64.log"'
-  ignore_errors: yes
+  ignore_errors: true
   when: version | int >= 11
 
 # INSTALLING VEEAM SOFTWARE
@@ -124,6 +125,11 @@
     arguments: '/L*v "{{ destination }}logs\\Shell.x64.log" /norestart /qn ACCEPTEULA="YES" ACCEPT_THIRDPARTY_LICENSES="1"'
   register: win_package_vbr_console
   when: version | int <= 11
+- name: Install Veeam Distribution Service
+  ansible.windows.win_package:
+    path: "{{ source }}Packages\\VeeamDistributionSvc.msi"
+    state: present
+    arguments: '/L*v "{{ destination }}logs\\VeeamDistributionSvc.log" /norestart /qn ACCEPTEULA="YES" ACCEPT_LICENSING_POLICY="1" ACCEPT_REQUIRED_SOFTWARE="1" ACCEPT_THIRDPARTY_LICENSES="1"'
 - name: Install Veeam Explorer for Active Directory
   ansible.windows.win_package:
     path: "{{ source }}Explorers\\VeeamExplorerForActiveDirectory.msi"
@@ -165,24 +171,24 @@
   ansible.windows.win_package:
     path: "{{ source }}Packages\\DbPluginRedist.msi"
     state: present
-    arguments: '/L*v "{{ destination }}logs\\DbPluginRedist.log" /norestart /qn ACCEPTEULA="YES" ACCEPT_THIRDPARTY_LICENSES="1"'
+    arguments: '/L*v "{{ destination }}logs\\DbPluginRedist.log" /norestart /qn ACCEPTEULA="YES" ACCEPT_LICENSING_POLICY="1" ACCEPT_REQUIRED_SOFTWARE="1" ACCEPT_THIRDPARTY_LICENSES="1"'
   when: version | int >= 12
 - name: Install Veeam Agent for Linux Redistributable
   ansible.windows.win_package:
     path: "{{ source }}Packages\\VALRedist.msi"
     state: present
-    arguments: '/L*v "{{ destination }}logs\\VALRedist.log" /norestart /qn ACCEPTEULA="YES" ACCEPT_THIRDPARTY_LICENSES="1"'
+    arguments: '/L*v "{{ destination }}logs\\VALRedist.log" /norestart /qn ACCEPTEULA="YES" ACCEPT_LICENSING_POLICY="1" ACCEPT_REQUIRED_SOFTWARE="1" ACCEPT_THIRDPARTY_LICENSES="1"'
 - name: Install Veeam Agent for MacOS Redistributable
   ansible.windows.win_package:
     path: "{{ source }}Packages\\VAMRedist.msi"
     state: present
-    arguments: '/L*v "{{ destination }}logs\\VAMRedist.log" /norestart /qn ACCEPTEULA="YES" ACCEPT_THIRDPARTY_LICENSES="1"'
+    arguments: '/L*v "{{ destination }}logs\\VAMRedist.log" /norestart /qn ACCEPTEULA="YES" ACCEPT_LICENSING_POLICY="1" ACCEPT_REQUIRED_SOFTWARE="1" ACCEPT_THIRDPARTY_LICENSES="1"'
   when: version | int >= 11
 - name: Install Veeam Agent for Microsoft Windows Redistributable
   ansible.windows.win_package:
     path: "{{ source }}Packages\\VAWRedist.msi"
     state: present
-    arguments: '/L*v "{{ destination }}logs\\VAWRedist.log" /norestart /qn ACCEPTEULA="YES" ACCEPT_THIRDPARTY_LICENSES="1"'
+    arguments: '/L*v "{{ destination }}logs\\VAWRedist.log" /norestart /qn ACCEPTEULA="YES" ACCEPT_LICENSING_POLICY="1" ACCEPT_REQUIRED_SOFTWARE="1" ACCEPT_THIRDPARTY_LICENSES="1"'
 - name: Looking for Veeam Agent for Unix Redistributable
   ansible.windows.win_stat:
     path: "{{ source }}Packages\\VAURedist.msi"
@@ -191,24 +197,24 @@
   ansible.windows.win_package:
     path: "{{ source }}Packages\\VAURedist.msi"
     state: present
-    arguments: '/L*v "{{ destination }}logs\\VAURedist.log" /norestart /qn ACCEPTEULA="YES" ACCEPT_THIRDPARTY_LICENSES="1"'
+    arguments: '/L*v "{{ destination }}logs\\VAURedist.log" /norestart /qn ACCEPTEULA="YES" ACCEPT_LICENSING_POLICY="1" ACCEPT_REQUIRED_SOFTWARE="1" ACCEPT_THIRDPARTY_LICENSES="1"'
   when: file.stat.exists
 - name: Looking for patches in '{{ source }}Updates' directory
   ansible.windows.win_find:
     paths: "{{ source }}Updates"
-    recurse: no
+    recurse: false
     file_type: file
-  ignore_errors: yes
+  ignore_errors: true
   register: file
 - name: Does VBR need to be patched?
-  set_fact:
+  ansible.builtin.set_fact:
     patch: "{{ file.matched }}"
 - name: Setting patch filename
-  set_fact:
+  ansible.builtin.set_fact:
     patch_file: "{{ file.files[0].filename }}"
   when: patch | bool
 - name: Including VBR patch tasks
-  include_tasks: vbr_patch.yml
+  ansible.builtin.include_tasks: vbr_patch.yml
   when: patch | bool
 
 # POST-INSTALL TASKS

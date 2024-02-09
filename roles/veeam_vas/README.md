@@ -333,7 +333,7 @@ Please note there are more configurations than the examples shown below. If you 
 
 ```yaml
 - name: Veeam Backup Enterprise Manager Install
-  gather_facts: no
+  gather_facts: false
   hosts: veeam
   tasks:
     - include_role:
@@ -358,7 +358,7 @@ Please note there are more configurations than the examples shown below. If you 
 
 ```yaml
 - name: Veeam Backup Enterprise Manager Install
-  gather_facts: no
+  gather_facts: false
   hosts: veeam
   tasks:
     - include_role:
@@ -381,7 +381,7 @@ Please note there are more configurations than the examples shown below. If you 
 
 ```yaml
 - name: Veeam Backup Enterprise Manager Install
-  gather_facts: no
+  gather_facts: false
   hosts: veeam
   tasks:
     - include_role:
@@ -403,7 +403,7 @@ Please note there are more configurations than the examples shown below. If you 
 
 ```yaml
 - name: Veeam Backup Enterprise Manager Install
-  gather_facts: no
+  gather_facts: false
   hosts: veeam
   tasks:
     - include_role:
@@ -425,7 +425,7 @@ Please note there are more configurations than the examples shown below. If you 
 
 ```yaml
 - name: Veeam Backup Enterprise Manager Install including Cloud Connect Portal
-  gather_facts: no
+  gather_facts: false
   hosts: veeam
   tasks:
     - include_role:
@@ -490,7 +490,7 @@ Please note there are more configurations than the examples shown below. If you 
 
 ```yaml
 - name: Installing Veeam ONE Install (Typical Deployment)
-  gather_facts: no
+  gather_facts: false
   hosts: veeam
 
   vars:
@@ -501,7 +501,7 @@ Please note there are more configurations than the examples shown below. If you 
     sql_express_setup: true
     sql_service_username: "svc_sql"
     sql_service_password: "ChangeM3!"
-    one_create_service_account: true #true==local false==domain
+    create_service_account: true #true==local false==domain
     one_username: "svc_one"
     one_password: "ChangeM3!"
     # https://docs.ansible.com/ansible/latest/user_guide/playbooks_vault.html#single-encrypted-variable
@@ -526,7 +526,7 @@ Please note there are more configurations than the examples shown below. If you 
 
 ```yaml
 - name: Installing Veeam ONE Install (Typical Deployment)
-  gather_facts: no
+  gather_facts: false
   hosts: veeam
 
   vars:
@@ -535,7 +535,7 @@ Please note there are more configurations than the examples shown below. If you 
     sql_express_setup: true
     sql_service_username: "svc_sql"
     sql_service_password: "ChangeM3!"
-    one_create_service_account: true #true==local false==domain
+    create_service_account: true #true==local false==domain
     one_username: "svc_one"
     one_password: "ChangeM3!"
     # https://docs.ansible.com/ansible/latest/user_guide/playbooks_vault.html#single-encrypted-variable
@@ -560,7 +560,7 @@ Please note there are more configurations than the examples shown below. If you 
 
 ```yaml
 - name: Veeam ONE Advanced Deployment - Veeam ONE Server
-  gather_facts: no
+  gather_facts: false
   hosts: server
   tasks:
     - name: Veeam ONE Server installation tasks
@@ -576,13 +576,13 @@ Please note there are more configurations than the examples shown below. If you 
         sql_instance: "sql.contoso.local"
         sql_database: "VeeamOne"
         one_installation_type: "1" #1-Advanced | 2-Backup data only | 3-Typical
-        one_create_service_account: false #true==local false==domain
+        create_service_account: false #true==local false==domain
         one_username: "contoso\\jsmith"
         one_password: "ChangeM3!"
         # https://docs.ansible.com/ansible/latest/user_guide/playbooks_vault.html#single-encrypted-variable
 
 - name: Veeam ONE Advanced Deployment - Veeam Web UI
-  gather_facts: no
+  gather_facts: false
   hosts: web
   tasks:
     - name: Veeam ONE Web UI installation tasks
@@ -592,14 +592,14 @@ Please note there are more configurations than the examples shown below. If you 
       vars:
         version: "12"
         iso_download: true
-        one_create_service_account: false #true==local false==domain
+        create_service_account: false #true==local false==domain
         one_username: "contoso\\jsmith"
         one_password: "ChangeM3!"
         one_server: "server.contoso.local"
         # https://docs.ansible.com/ansible/latest/user_guide/playbooks_vault.html#single-encrypted-variable
 
 - name: Veeam ONE Advanced Deployment - Monitoring Client
-  gather_facts: no
+  gather_facts: false
   hosts: client
   tasks:
     - name: Veeam ONE Monitoring Client installation tasks
@@ -616,7 +616,7 @@ Please note there are more configurations than the examples shown below. If you 
 
 ```yaml
 - name: Installing Veeam ONE Install (Typical Deployment)
-  gather_facts: no
+  gather_facts: false
   hosts: veeam
 
   vars:
@@ -627,7 +627,7 @@ Please note there are more configurations than the examples shown below. If you 
     sql_express_setup: false
     sql_instance: "sql.contoso.local"
     sql_database: "VeeamOne"
-    one_create_service_account: false #true==local false==domain
+    create_service_account: false #true==local false==domain
     one_username: "contoso\\jsmith"
     one_password: "ChangeM3!"
     # https://docs.ansible.com/ansible/latest/user_guide/playbooks_vault.html#single-encrypted-variable
@@ -652,7 +652,7 @@ Please note there are more configurations than the examples shown below. If you 
 
 ```yaml
 - name: Veeam ONE Upgrade
-  gather_facts: no
+  gather_facts: false
   hosts: veeam
 
   vars:
@@ -687,7 +687,7 @@ Please note there are more configurations than the examples shown below. If you 
 
 ```yaml
 - name: Veeam ONE Advanced Deployment - Veeam ONE Server
-  gather_facts: no
+  gather_facts: false
   hosts: server
   tasks:
     - name: Veeam ONE Server upgrade tasks
@@ -707,7 +707,7 @@ Please note there are more configurations than the examples shown below. If you 
 
 - name: Veeam ONE Advanced Deployment - Veeam Web UI
   hosts: web
-  gather_facts: no
+  gather_facts: false
   tasks:
     - name: Veeam ONE Web UI upgrade tasks
       include_role:
@@ -723,7 +723,7 @@ Please note there are more configurations than the examples shown below. If you 
 
 - name: Veeam ONE Advanced Deployment - Monitoring Client
   hosts: client
-  gather_facts: no
+  gather_facts: false
   tasks:
     - name: Veeam ONE Monitoring Client upgrade tasks
       include_role:

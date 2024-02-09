@@ -4,7 +4,7 @@
   pending_reboot_check:
   register: precheck
 - name: Is there an existing pending reboot?
-  fail:
+  ansible.builtin.fail:
     msg: "This Windows server requires a reboot prior to beginning the Veeam Backup & Replication install. After rebooting this server, you can proceed with the installation."
   when:
     - precheck.pending_reboot | bool
@@ -13,11 +13,11 @@
     name: "Veeam Backup & Replication Server"
   register: software
 - name: Is Veeam Backup & Replication Server installed?
-  fail:
+  ansible.builtin.fail:
     msg: "Veeam Backup & Replication Server must be installed on this server in order to upgrade it."
   when: not (software.installed | bool)
 - name: Including version-specific variables
-  include_vars:
+  ansible.builtin.include_vars:
     file: "vars/vbr_v{{ version }}.yml"
 - name: Ensure Veeam services are running
   ansible.windows.win_shell: |
@@ -29,9 +29,9 @@
     state: enable
   when: cloud_connect | bool
 - name: VBR ISO Tasks
-  include_tasks: mount_iso.yml
+  ansible.builtin.include_tasks: mount_iso.yml
 - name: Print Upgrade Configuration
-  debug:
+  ansible.builtin.debug:
     msg:
       - "ISO Drive Letter: '{{ source }}'"
       - "Upgrade Logs Folder: '{{ destination }}logs'"
@@ -61,7 +61,7 @@
   when: not (cloud_connect | bool)
   register: jobs
 - name: Print Backup Jobs backup file name
-  debug:
+  ansible.builtin.debug:
     var: jobs
   when: not (cloud_connect | bool)
 - name: Stopping all Veeam services prior to upgrade
@@ -69,15 +69,15 @@
     Stop-Process -Name "Veeam.Backup.Shell" -Force -ErrorAction SilentlyContinue
     Get-Service veeam* | Stop-Service
 - name: .NET Framework
-  include_tasks: install_net_framework.yml
+  ansible.builtin.include_tasks: install_net_framework.yml
 - name: Looking for .NET Core Runtime in Veeam ISO
   ansible.windows.win_find:
     paths: "{{ source }}Redistr\\x64"
     patterns: dotnet-runtime-.*
-    recurse: no
+    recurse: false
     file_type: file
     use_regex: true
-  ignore_errors: yes
+  ignore_errors: true
   register: file
   when: version | int >= 11
 - name: Install Microsoft .NET Core Runtime
@@ -91,10 +91,10 @@
   ansible.windows.win_find:
     paths: "{{ source }}Redistr\\x64"
     patterns: aspnetcore-runtime-.*
-    recurse: no
+    recurse: false
     file_type: file
     use_regex: true
-  ignore_errors: yes
+  ignore_errors: true
   register: file
   when: version | int >= 11
 - name: Install Microsoft ASP.NET Core Shared Framework
@@ -110,7 +110,7 @@
     product_id: Install C++ Framework
     state: present
     arguments: '/install /quiet /norestart /log "{{ destination }}logs\\vc_redist.x64.log"'
-  ignore_errors: yes
+  ignore_errors: true
   when: version | int >= 11
 
 # UPGRADING VEEAM SOFTWARE
@@ -283,25 +283,26 @@
 - name: Finding file(s) in '{{ source }}Updates' directory
   ansible.windows.win_find:
     paths: "{{ source }}Updates"
-    recurse: no
+    recurse: false
     file_type: file
-  ignore_errors: yes
+  ignore_errors: true
   register: file
 - name: Does VBR need to be patched?
-  set_fact:
+  ansible.builtin.set_fact:
     patch: "{{ file.matched }}"
 - name: Setting patch filename
-  set_fact:
+  ansible.builtin.set_fact:
     patch_file: "{{ file.files[0].filename }}"
   when: patch | bool
 - name: Including VBR patch tasks
-  include_tasks: vbr_patch.yml
+  ansible.builtin.include_tasks: vbr_patch.yml
   when: patch | bool
 
 # POST-UPGRADE TASKS
 - name: Starting all Veeam services to kick off upgrade of repo/proxy servers
   ansible.windows.win_shell: |
     Get-Service veeam* | Where-Object {$_.Name -ne "VeeamMBPDeploymentService"} | Start-Service
+  retries: 3
 - name: Disable Cloud Connect Maintenance Mode
   veeam_vbr_cloud_connect_maintenance:
     state: disable

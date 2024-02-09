@@ -1,14 +1,14 @@
 ---
 # one_client_install tasks file for veeamhub.veeam_vas
 - name: Including version-specific variables
-  include_vars:
+  ansible.builtin.include_vars:
     file: "vars/one_v{{ version }}.yml"
 
 # PRE-INSTALL TASKS
 - name: Veeam ONE ISO Tasks
-  include_tasks: mount_iso.yml
+  ansible.builtin.include_tasks: mount_iso.yml
 - name: Print Installation Configuration
-  debug:
+  ansible.builtin.debug:
     msg:
       - "ISO Drive Letter: '{{ source }}'"
       - "Installation Logs Folder: '{{ destination }}logs'"
@@ -22,7 +22,7 @@
     path: "{{ destination }}logs"
     state: directory
 - name: .NET Framework
-  include_tasks: install_net_framework.yml
+  ansible.builtin.include_tasks: install_net_framework.yml
 - name: Install XML Parser
   ansible.windows.win_package:
     path: "{{ source }}Redistr\\x64\\msxml6_x64.msi"
@@ -33,7 +33,7 @@
     product_id: Install C++ Framework
     state: present
     arguments: '/install /quiet /norestart /log "{{ destination }}logs\\vc_redist.x64.log"'
-  ignore_errors: yes
+  ignore_errors: true
   when: version | int >= 12
 
 # INSTALLING VEEAM SOFTWARE
@@ -52,19 +52,19 @@
 - name: Finding file(s) in '{{ source }}Updates' directory
   ansible.windows.win_find:
     paths: "{{ source }}Updates"
-    recurse: no
+    recurse: false
     file_type: file
-  ignore_errors: yes
+  ignore_errors: true
   register: file
 - name: Does Veeam ONE need to be patched?
-  set_fact:
+  ansible.builtin.set_fact:
     patch: "{{ file.matched }}"
 - name: Setting patch filename
-  set_fact:
+  ansible.builtin.set_fact:
     patch_file: "{{ file.files[0].filename }}"
   when: patch | bool
 - name: Including Veeam ONE patch tasks
-  include_tasks: one_patch.yml
+  ansible.builtin.include_tasks: one_patch.yml
   when: patch | bool
 
 # POST-INSTALL TASKS

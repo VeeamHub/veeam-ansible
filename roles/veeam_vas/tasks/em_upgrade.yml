@@ -4,7 +4,7 @@
   pending_reboot_check:
   register: precheck
 - name: Is there an existing pending reboot?
-  fail:
+  ansible.builtin.fail:
     msg: "This Windows server requires a reboot prior to beginning the Veeam Backup Enterprise Manager install. After rebooting this server, you can proceed with the installation."
   when:
     - precheck.pending_reboot | bool
@@ -13,7 +13,7 @@
     name: "Veeam Backup Enterprise Manager"
   register: software
 - name: Is Veeam Backup Enterprise Manager installed?
-  fail:
+  ansible.builtin.fail:
     msg: "Veeam Backup Enterprise Manager must be installed on this server in order to upgrade it."
   when: not (software.installed | bool)
 - name: Checking to see if Veeam Backup & Replication Server is installed
@@ -21,20 +21,20 @@
     name: "Veeam Backup & Replication Server"
   register: software
 - name: Is Veeam Backup & Replication Server w/Cloud Connect installed?
-  fail:
+  ansible.builtin.fail:
     msg: "Veeam Backup Enterprise Manager install on the same server as Cloud Connect is not supported by this role. Please proceed with a manual install."
   when:
     - software.installed | bool
     - cloud_connect | bool
 - name: Including version-specific variables
-  include_vars:
+  ansible.builtin.include_vars:
     file: "vars/em_v{{ version }}.yml"
 
 # PRE-UPGRADE TASKS
 - name: VBR ISO Tasks
-  include_tasks: mount_iso.yml
+  ansible.builtin.include_tasks: mount_iso.yml
 - name: Print Upgrade Configuration
-  debug:
+  ansible.builtin.debug:
     msg:
       - "ISO Drive Letter: '{{ source }}'"
       - "Upgrade Logs Folder: '{{ destination }}logs'"
@@ -74,7 +74,7 @@
 - name: Installing SqlServer PowerShell module
   community.windows.win_psmodule:
     name: SqlServer
-    skip_publisher_check: yes
+    skip_publisher_check: true
     state: present
   register: result
   until: result is not failed
@@ -87,7 +87,7 @@
     Backup-SqlDatabase -ServerInstance "{{ sql_instance }}" -Database "{{ sql_database }}" -Credential $credential
   no_log: true
 - name: .NET Framework
-  include_tasks: install_net_framework.yml
+  ansible.builtin.include_tasks: install_net_framework.yml
 
 # UPGRADING VEEAM SOFTWARE
 - name: Upgrade Veeam Backup Catalog (v12+)
@@ -129,19 +129,19 @@
 - name: Finding file(s) in '{{ source }}Updates' directory
   ansible.windows.win_find:
     paths: "{{ source }}Updates"
-    recurse: no
+    recurse: false
     file_type: file
-  ignore_errors: yes
+  ignore_errors: true
   register: file
 - name: Does EM need to be patched?
-  set_fact:
+  ansible.builtin.set_fact:
     patch: "{{ file.matched }}"
 - name: Setting patch filename
-  set_fact:
+  ansible.builtin.set_fact:
     patch_file: "{{ file.files[0].filename }}"
   when: patch | bool
 - name: Including EM patch tasks
-  include_tasks: em_patch.yml
+  ansible.builtin.include_tasks: em_patch.yml
   when: patch | bool
 
 # POST-UPGRADE TASKS

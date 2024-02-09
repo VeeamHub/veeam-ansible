@@ -2,19 +2,19 @@
 
 ## PRE-INSTALL TASKS
 - name: Including version-specific variables
-  include_vars:
+  ansible.builtin.include_vars:
     file: "vars/vbr_v{{ version }}.yml"
   when: not (patch | bool)
 - name: Setting patch folder (from ISO)
-  set_fact:
+  ansible.builtin.set_fact:
     patch_folder: "Updates\\"
   when: patch | bool
 - name: Setting patch folder (not from ISO)
-  set_fact:
+  ansible.builtin.set_fact:
     patch_folder: ""
   when: not (patch | bool)
 - name: Print Patch Configuration
-  debug:
+  ansible.builtin.debug:
     msg:
       - "ISO Drive Letter: '{{ source }}{{ patch_folder }}{{ patch_file }}'"
       - "Patch Logs Folder: '{{ destination }}logs'"
@@ -40,7 +40,7 @@
     - not (patch | bool)
   register: jobs
 - name: Print Backup Jobs backup file name
-  debug:
+  ansible.builtin.debug:
     var: jobs
   when: not (cloud_connect | bool)
 - name: Stopping all Veeam services prior to applying VBR patch
@@ -61,6 +61,7 @@
   ansible.windows.win_shell: |
     Get-Service veeam* | Where-Object {$_.Name -ne "VeeamMBPDeploymentService"} | Start-Service
   when: not (patch | bool)
+  retries: 3
 - name: Disable Cloud Connect Maintenance Mode
   veeam_vbr_cloud_connect_maintenance:
     state: disable

@@ -10,12 +10,12 @@
   ansible.windows.win_user:
     name: "{{ one_username }}"
     password: "{{ one_password }}"
-    password_never_expires: yes
+    password_never_expires: true
     state: present
     groups:
       - Administrators
   when:
-    - one_create_service_account | bool
+    - create_service_account | bool
     - one_username.find("\\") == -1 # skips account creation if domain account is specified
 - name: Install System CLR Types
   ansible.windows.win_package:
@@ -40,10 +40,10 @@
   ansible.windows.win_find:
     paths: "{{ source }}Redistr\\x64"
     patterns: dotnet-runtime-.*
-    recurse: no
+    recurse: false
     file_type: file
     use_regex: true
-  ignore_errors: yes
+  ignore_errors: true
   register: file
   when: version | int >= 11
 - name: Install Microsoft .NET Core Runtime
@@ -57,10 +57,10 @@
   ansible.windows.win_find:
     paths: "{{ source }}Redistr\\x64"
     patterns: aspnetcore-runtime-.*
-    recurse: no
+    recurse: false
     file_type: file
     use_regex: true
-  ignore_errors: yes
+  ignore_errors: true
   register: file
   when: version | int >= 11
 - name: Install Microsoft ASP.NET Core Shared Framework
@@ -76,7 +76,7 @@
     product_id: Install C++ Framework
     state: present
     arguments: '/install /quiet /norestart /log "{{ destination }}logs\\vc_redist.x64.log"'
-  ignore_errors: yes
+  ignore_errors: true
   when: version | int >= 11
 - name: Install Microsoft Report Viewer Redistributable
   ansible.windows.win_package:
@@ -88,7 +88,7 @@
     path: "{{ source }}Redistr\\x64\\msxml6_x64.msi"
     state: present
 - name: .NET Framework
-  include_tasks: install_net_framework.yml
+  ansible.builtin.include_tasks: install_net_framework.yml
 - name: Enable Windows Feature - IIS Web Server Role
   ansible.windows.win_optional_feature:
     name: IIS-WebServerRole

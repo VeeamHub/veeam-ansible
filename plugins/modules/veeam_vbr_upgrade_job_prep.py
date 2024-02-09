@@ -40,7 +40,7 @@ options:
 
 EXAMPLES = r'''
 - name: Defining Backup Job file for exporting disabled jobs
-  set_fact:
+  ansible.builtin.set_fact:
     jobs_file: "C:\\install\\DisabledJobs{{ ansible_date_time.iso8601_basic_short }}.csv"
 - name: Stopping and disabling all backup jobs
   veeam_vbr_upgrade_job_prep:

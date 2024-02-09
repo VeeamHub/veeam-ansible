@@ -5,7 +5,6 @@ iso_url: "https://download2.veeam.com/VBR/v12/VeeamBackup&Replication_12.0.0.142
 iso_checksum: "052c46255042545d565cffd7e4c855d9dcb6bf833c403dcbae4acd5c7a7da786"
 destination_iso_file: "vbr.iso"
 destination_license_file: "vbr-license.lic"
-postgres_file: "{{ source }}Redistr\\x64\\PostgreSQL\\15.1-1\\postgresql-15.1-1-windows-x64.exe"
 sql_instance: "localhost"
 sql_database: "VeeamBackupReporting"
 net_framework_file: "{{ source }}Redistr\\NDP472-KB4054530-x86-x64-AllOS-ENU.exe"

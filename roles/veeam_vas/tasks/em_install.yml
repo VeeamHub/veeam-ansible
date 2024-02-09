@@ -4,7 +4,7 @@
   pending_reboot_check:
   register: precheck
 - name: Is there an existing pending reboot?
-  fail:
+  ansible.builtin.fail:
     msg: "Windows server requires a reboot. After reboot, you can proceed with the Veeam Backup Enterprise Manager install."
   when:
     - precheck.pending_reboot | bool
@@ -13,18 +13,18 @@
     name: "Veeam Backup & Replication Server"
   register: software
 - name: Is Veeam Backup & Replication Server w/Cloud Connect installed?
-  fail:
+  ansible.builtin.fail:
     msg: "Veeam Backup Enterprise Manager install on the same server as Cloud Connect is not supported by this role. Please proceed with a manual install."
   when:
     - software.installed | bool
     - cloud_connect | bool
 - name: Including version-specific variables
-  include_vars:
+  ansible.builtin.include_vars:
     file: "vars/em_v{{ version }}.yml"
 
 # PRE-INSTALL TASKS
 - name: Including common VBR pre-install tasks
-  include_tasks: vbr_install_pretasks.yml
+  ansible.builtin.include_tasks: vbr_install_pretasks.yml
 - name: Enable Windows Feature - IIS Web Server Role
   ansible.windows.win_optional_feature:
     name: IIS-WebServerRole
@@ -99,19 +99,19 @@
 - name: Looking for patches in '{{ source }}Updates' directory
   ansible.windows.win_find:
     paths: "{{ source }}Updates"
-    recurse: no
+    recurse: false
     file_type: file
-  ignore_errors: yes
+  ignore_errors: true
   register: file
 - name: Does EM need to be patched?
-  set_fact:
+  ansible.builtin.set_fact:
     patch: "{{ file.matched }}"
 - name: Setting patch filename & id
-  set_fact:
+  ansible.builtin.set_fact:
     patch_file: "{{ file.files[0].filename }}"
   when: patch | bool
 - name: Including EM patch tasks
-  include_tasks: em_patch.yml
+  ansible.builtin.include_tasks: em_patch.yml
   when: patch | bool
 
 # POST-INSTALL TASKS
