@@ -177,7 +177,7 @@
 
 			<!--[Optional] Parameter VBCP_INSTALL specifies if Veeam Cloud Connect Portal will be installed. If you do not specify this parameter, it will not be installed-->
 				<!--Supported values: 0/1-->
-				{% if cloud_connect == 'true' %}
+				{% if cloud_connect %}
 				<property name="VBCP_INSTALL" value="1" />
 				{% endif %}
 
