@@ -20,12 +20,12 @@
   poll: 0
   when: iso_download | bool
 - name: Check on download status
-  async_status:
+  ansible.builtin.async_status:
     jid: "{{ win_get_url_out.ansible_job_id }}"
   register: async_poll_results
   until: async_poll_results.finished
-  retries: 60
-  delay: 60
+  retries: 120
+  delay: 30
 - name: Debug Download Result
   ansible.builtin.debug:
     var: win_get_url_out

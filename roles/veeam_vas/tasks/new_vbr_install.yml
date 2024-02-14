@@ -1,29 +1,7 @@
 ---
 # new_vbr_install tasks file for veeamhub.veeam_vas
 
-# MOUNTING ISO
-- name: VBR ISO Tasks
-  ansible.builtin.include_tasks: mount_iso.yml
-
 # PRE-INSTALL TASKS
-- name: Print Installation Configuration
-  ansible.builtin.debug:
-    msg:
-      - "ISO Drive Letter: '{{ source }}'"
-      - "Installation Logs Folder: '{{ destination }}logs'"
-      - "Version: {{ version }}"
-      - "Download ISO?: {{ iso_download }}"
-      - "ISO Source: {{ iso_url }}"
-      - "ISO File Destination: {{ destination }}{{ destination_iso_file }}"
-      - "Use license?: {{ license }}"
-      - "License Source: {{ source_license }}"
-      - "License File Destination: {{ destination }}{{ destination_license_file }}"
-      - "Install SQL Express/PostgreSQL?: {{ sql_express_setup }}"
-      - "SQL Instance: {{ sql_instance }}"
-      - "SQL Database: {{ sql_database }}"
-      - "SQL Service Account: {{ sql_service_username | default('not specified') }}"
-      - "SQL Install Account: {{ sql_install_username | default('not specified') }}"
-      - "VBR SQL Account: {{ sql_username }}"
 - name: Copy license file
   ansible.windows.win_copy:
     src: "{{ source_license }}"
@@ -42,6 +20,7 @@
   ansible.builtin.template:
     src: templates/VBR/VbrAnswerFile_install.xml.j2
     dest: "{{ destination }}VbrAnswerFile_install.xml"
+    mode: '777'
 
 # INSTALLING VEEAM SOFTWARE
 - name: Install Veeam Backup & Replication
@@ -49,6 +28,16 @@
     path: "{{ source }}Setup\\Silent\\Veeam.Silent.Install.exe"
     state: present
     arguments: '/AnswerFile "{{ destination }}VbrAnswerFile_install.xml" /SkipNetworkLogonErrors /LogFolder "{{ destination }}logs"'
+  async: 3600
+  poll: 0
+  register: async_result
+- name: Check on install status
+  ansible.builtin.async_status:
+    jid: "{{ async_result.ansible_job_id }}"
+  register: async_poll_results
+  until: async_poll_results.finished
+  retries: 60
+  delay: 60
 
 # POST-INSTALL TASKS
 - name: Unmount ISO

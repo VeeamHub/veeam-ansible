@@ -14,12 +14,12 @@ source_license: ""
 destination: "C:\\install\\"
 
 # Default common variables
-sql_authentication: "1" # 0-Native 1-Windows SQL Authentication Mode 
+sql_authentication: "1" # 0-Native 1-Windows SQL Authentication Mode
 sql_engine: "1" # 0-MSSQL / 1-Postgres (only for v12 and newer)
 sql_express_setup: true # Starting with v12, this means a local PostgreSQL install
 sql_instance: "(local)\\VEEAMSQL2016"
 patch: false
-legacy: false # true - 12.1 & later | false - 12 & previous versions
+legacy: false
 
 # VBR/EM-specific default variables
 vbr_jobs_file: "{{ destination }}DisabledJobs{{ ansible_date_time.iso8601_basic_short }}.csv"
