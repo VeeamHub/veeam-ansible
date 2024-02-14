@@ -52,7 +52,7 @@
 			<!--[Optional] Parameter VBREM_SQLSERVER_PASSWORD specifies a password to connect to the SQL server in the native authentication mode. Required when VBREM_SQLSERVER_USERNAME is used-->
 			<!--Make sure you keep the answer file in a safe location whenever SQL server account password is added to the answer file-->
 				<!--Supported values: password in plain text-->
-				{% if sql_username is defined %}
+				{% if sql_authentication == '1' %}
 				<property name="VBREM_SQLSERVER_PASSWORD" value="{{ sql_password }}" hidden="1"/>
 				{% endif %}
 
