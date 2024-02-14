@@ -2,26 +2,6 @@
 # vbr_install_pretasks tasks file for veeamhub.veeam_vas
 
 # VBR PRE-INSTALL TASKS
-- name: VBR ISO Tasks
-  ansible.builtin.include_tasks: mount_iso.yml
-- name: Print Installation Configuration
-  ansible.builtin.debug:
-    msg:
-      - "ISO Drive Letter: '{{ source }}'"
-      - "Installation Logs Folder: '{{ destination }}logs'"
-      - "Version: {{ version }}"
-      - "Download ISO?: {{ iso_download }}"
-      - "ISO Source: {{ iso_url }}"
-      - "ISO File Destination: {{ destination }}{{ destination_iso_file }}"
-      - "Use license?: {{ license }}"
-      - "License Source: {{ source_license }}"
-      - "License File Destination: {{ destination }}{{ destination_license_file }}"
-      - "Install SQL Express/PostgreSQL?: {{ sql_express_setup }}"
-      - "SQL Instance: {{ sql_instance }}"
-      - "SQL Database: {{ sql_database }}"
-      - "SQL Service Account: {{ sql_service_username | default('not specified') }}"
-      - "SQL Install Account: {{ sql_install_username | default('not specified') }}"
-      - "VBR SQL Account: {{ sql_username }}"
 - name: Create logs directory
   ansible.windows.win_file:
     path: "{{ destination }}logs"

@@ -11,16 +11,57 @@
 - name: Including version-specific variables
   ansible.builtin.include_vars:
     file: "vars/vbr_v{{ version }}.yml"
+- name: VBR ISO Tasks
+  ansible.builtin.include_tasks: mount_iso.yml
 
-# Does the legacy or new install process need to be used?
-# All versions prior to 12.1 use the legacy process
+# Determining which process (legacy or new) will be used
+- name: Looking for 'Veeam.Silent.Install.exe' in Veeam ISO
+  ansible.windows.win_find:
+    paths: "{{ source }}Setup"
+    patterns: Veeam.Silent.Install.exe
+    recurse: true
+    file_type: file
+    use_regex: false
+  register: file
+- name: Determine version of 'Veeam.Silent.Install.exe'
+  community.windows.win_file_version:
+    path: "{{ file.files[0].path }}"
+  register: file_version
+  when: file.matched | bool
+- name: Legacy install process will be used
+  ansible.builtin.set_fact:
+    legacy: true
+  when: not file.matched | bool or file_version.win_file_version.file_version == '1.0.0.0'
+
+# Print Installation Configuration
+- name: Print Installation Configuration
+  ansible.builtin.debug:
+    msg:
+      - "Legacy Install Process: {{ legacy }}"
+      - "ISO Drive Letter: '{{ source }}'"
+      - "Installation Logs Folder: '{{ destination }}logs'"
+      - "Version: {{ version }}"
+      - "Download ISO?: {{ iso_download }}"
+      - "ISO Source: {{ iso_url }}"
+      - "ISO File Destination: {{ destination }}{{ destination_iso_file }}"
+      - "Use license?: {{ license }}"
+      - "License Source: {{ source_license }}"
+      - "License File Destination: {{ destination }}{{ destination_license_file }}"
+      - "Install SQL Express/PostgreSQL?: {{ sql_express_setup }}"
+      - "SQL Instance: {{ sql_instance }}"
+      - "SQL Database: {{ sql_database }}"
+      - "SQL Service Account: {{ sql_service_username | default('not specified') }}"
+      - "SQL Install Account: {{ sql_install_username | default('not specified') }}"
+      - "VBR SQL Account: {{ sql_username }}"
+
+# Versions prior to 12.1 use the legacy process
 - name: Including Legacy Install tasks
   ansible.builtin.include_tasks: legacy_vbr_install.yml
   when:
-    - (version < 12) or (legacy | bool)
+    - legacy | bool
 
 # Versions 12.1 and later use the new process
 - name: Including New Install tasks
   ansible.builtin.include_tasks: new_vbr_install.yml
   when:
-    - (version > 12) or (not legacy | bool)
+    - not legacy | bool

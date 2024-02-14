@@ -24,7 +24,7 @@
 
 # PRE-INSTALL TASKS
 - name: Including common VBR pre-install tasks
-  ansible.builtin.include_tasks: vbr_install_pretasks.yml
+  ansible.builtin.include_tasks: legacy_vbr_install_pretasks.yml
 - name: Enable Windows Feature - IIS Web Server Role
   ansible.windows.win_optional_feature:
     name: IIS-WebServerRole
