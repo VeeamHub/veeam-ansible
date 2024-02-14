@@ -31,17 +31,23 @@
 
 			<!--[Optional] Parameter VBR_LICENSE_FILE specifies a full path to the license file. If you do not specify this parameter(or leave it empty value), Veeam Backup & Replication will be installed using current license file. To install Community Edition it must be set to 0-->
 				<!--Supported values: file path/0(to install CE)-->
-				<property name="VBR_LICENSE_FILE" value="{{ source_license }}" />
+				{% if license %}
+				<property name="VBR_LICENSE_FILE" value="{{ destination }}{{ destination_license_file }}" />
+				{% endif %}
 
 			<!--[Optional] Parameter VBR_LICENSE_AUTOUPDATE specifies if you want to update license automatically(enables usage reporting). If you do not specify this parameter, autoupdate will be enabled. For Community Edition, NFR and Evaluation licenses it must be set to 1. For licenses without license ID information it must be set to 0-->
 				<!--Supported values: 0/1-->
+				{% if license %}
 				<property name="VBR_LICENSE_AUTOUPDATE" value="{{ license_autoupdate }}" />
+				{% endif %}
 
 		<!--Service account-->
 
 			<!--[Optional] Parameter VBR_SERVICE_USER specifies the account under which the Veeam Backup Service will run after installation and upgrade. If you do not specify this parameter, the Veeam Backup Service will run under the LocalSystem account-->
 				<!--Supported values: domain\username-->
+				{% if service_account_username != 'LocalSystem' %}
 				<property name="VBR_SERVICE_USER" value="{{ service_account_username }}" />
+				{% endif %}
 
 			<!--[Optional] Parameter VBR_SERVICE_PASSWORD specifies a password for the account under which the Veeam Backup Service will run. You must specify this parameter together with VBR_SERVICE_USER parameter during installation. Required during upgrade if service account is not LocalSystem account-->
 			<!--Make sure you keep the answer file in a safe location whenever service account password is added to the answer file-->
@@ -55,7 +61,7 @@
 
 			<!--[Required] Parameter VBR_SQLSERVER_INSTALL specifies if bundled PostgreSQL server will be installed. If set to '0', an existing SQL server settings must be specified below-->
 				<!--Supported values: 0/1-->
-				{% if sql_express_setup == 'true' %}
+				{% if sql_express_setup %}
 				<property name="VBR_SQLSERVER_INSTALL" value="1" />
 				{% else %}
 				<property name="VBR_SQLSERVER_INSTALL" value="0" />
@@ -67,7 +73,7 @@
 
 			<!--[Optional] Parameter VBR_SQLSERVER_SERVER specifies a SQL server and instance on which the configuration database will be deployed. Required when VBR_SQLSERVER_INSTALL is set to '0'-->
 				<!--Supported values: MSSQLSERVER\DBINSTANCE or POSTGRESQLSERVER:PORT-->
-				{% if sql_express_setup == 'false' %}
+				{% if not sql_express_setup %}
 				<property name="VBR_SQLSERVER_SERVER" value="{{ sql_instance }}" />
 				{% endif %}
 
@@ -77,7 +83,7 @@
 
 			<!--[Optional] Parameter VBR_SQLSERVER_AUTHENTICATION specifies authentication mode to connect to the database server where the Veeam Backup & Replication configuration database is deployed. Required when VBR_SQLSERVER_INSTALL is set to '0'-->
 				<!--Supported values: 0 for Windows authentication/1 for SQL native authentication-->
-				{% if sql_express_setup == 'false' %}
+				{% if not sql_express_setup %}
 				<property name="VBR_SQLSERVER_AUTHENTICATION" value="{{ sql_authentication }}" />
 				{% endif %}
 
@@ -90,7 +96,7 @@
 			<!--[Optional] Parameter VBR_SQLSERVER_PASSWORD specifies a password to connect to the SQL server in the native authentication mode. Required when VBR_SQLSERVER_USERNAME is used-->
 			<!--Make sure you keep the answer file in a safe location whenever SQL server account password is added to the answer file-->
 				<!--Supported values: password in plain text-->
-				{% if sql_username != '' %}
+				{% if sql_authentication == '1' %}
 				<property name="VBR_SQLSERVER_PASSWORD" value="{{ sql_password }}" hidden="1"/>
 				{% endif %}
 
@@ -99,25 +105,25 @@
 
 			<!--[Optional] Parameter VBRC_SERVICE_PORT specifies a TCP port that will be used by the Veeam Guest Catalog Service. If you do not specify this parameter, default port '9393' is used-->
 				<!--Supported values: port-->
-				{% if catalog_service_port %}
+				{% if catalog_service_port is defined %}
 				<property name="VBRC_SERVICE_PORT" value="{{ catalog_service_port }}" />
 				{% endif %}
 
 			<!--[Optional] Parameter VBR_SERVICE_PORT specifies a TCP port that will be used by the Veeam Backup Service. If you do not specify this parameter, default port '9392' is used. If specified port number is occupied already, setup will assign the next available port number to the component-->
 				<!--Supported values: port-->
-				{% if vbr_service_port %}
+				{% if vbr_service_port is defined %}
 				<property name="VBR_SERVICE_PORT" value="{{ vbr_service_port }}" />
 				{% endif %}
 
 			<!--[Optional] Parameter VBR_SECURE_CONNECTIONS_PORT specifies a port used for communication between the mount server and the backup server. If you do not specify this parameter, default port '9401' is used-->
 				<!--Supported values: port-->
-				{% if vbr_secure_connections_port %}
+				{% if vbr_secure_connections_port is defined %}
 				<property name="VBR_SECURE_CONNECTIONS_PORT" value="{{ vbr_secure_connections_port }}" />
 				{% endif %}
 
 			<!--[Optional] Parameter VBR_RESTSERVICE_PORT specifies a port used for Veeam REST API service. If you do not specify this parameter, default port '9419' is used-->
 				<!--Supported values: port-->
-				{% if vbr_rest_api_port %}
+				{% if vbr_rest_api_port is defined %}
 				<property name="VBR_RESTSERVICE_PORT" value="{{ vbr_rest_api_port }}" />
 				{% endif %}
 
@@ -126,19 +132,19 @@
 
 			<!--[Optional] Parameter INSTALLDIR specifies Veeam Backup & Replication server installation path. If you do not specify this parameter, default installation path '%ProgramFiles%\Veeam\Backup and Replication' is used-->
 				<!--Supported values: file path-->
-				{% if vbr_install_directory %}
+				{% if vbr_install_directory is defined %}
 				<property name="INSTALLDIR" value="{{ vbr_install_directory }}" />
 				{% endif %}
 
 			<!--[Optional] Parameter VM_CATALOGPATH specifies a path to the catalog folder where index files will be stored. If you do not specify this parameter, a path is selected based on the free space across all available disks-->
 				<!--Supported values: file path-->
-				{% if catalog_path %}
+				{% if catalog_path is defined %}
 				<property name="VM_CATALOGPATH" value="{{ catalog_path }}" />
 				{% endif %}
 
 			<!--[Optional] Parameter VBR_IRCACHE specifies the folder where instant recovery cache will be stored. If you do not specify this parameter, a path is selected based on the free space across all available disks-->
 				<!--Supported values: file path-->
-				{% if instant_recovery_cache_path %}
+				{% if instant_recovery_cache_path is defined %}
 				<property name="VBR_IRCACHE" value="{{ instant_recovery_cache_path }}" />
 				{% endif %}
 

@@ -31,7 +31,7 @@
 
 			<!--[Required] Parameter VBREM_LICENSE_FILE specifies a full path to the license file. If you do not specify this parameter, Veeam Backup & Replication will be installed in the Community Edition mode or upgraded using current license file-->
 				<!--Supported values: file path-->    
-				<property name="VBREM_LICENSE_FILE" value="{{ source_license }}" />
+				<property name="VBREM_LICENSE_FILE" value="{{ destination }}{{ destination_license_file }}" />
 
 			<!--[Optional] Parameter VBREM_LICENSE_AUTOUPDATE specifies if you want to update license automatically. If you do not specify this parameter, autoupdate will be enabled. For NFR and Evaluation licenses it must be set to 1. For licenses without license ID information it must be set to 0-->
 				<!--Supported values: 0/1-->
@@ -52,7 +52,7 @@
 			<!--[Optional] Parameter VBREM_SQLSERVER_PASSWORD specifies a password to connect to the SQL server in the native authentication mode. Required when VBREM_SQLSERVER_USERNAME is used-->
 			<!--Make sure you keep the answer file in a safe location whenever SQL server account password is added to the answer file-->
 				<!--Supported values: password in plain text-->
-				{% if sql_username != '' %}
+				{% if sql_username is defined %}
 				<property name="VBREM_SQLSERVER_PASSWORD" value="{{ sql_password }}" hidden="1"/>
 				{% endif %}
 

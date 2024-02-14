@@ -31,7 +31,7 @@
 
 			<!--[Optional] Parameter INSTALLDIR specifies Veeam Backup & Replication Console installation path. If you do not specify this parameter, default installation path '%ProgramFiles%\Veeam\Backup and Replication' is used-->
 				<!--Supported values: file path-->
-				{% if vbr_install_directory %}
+				{% if vbr_install_directory is defined %}
 				<property name="INSTALLDIR" value="{{ vbr_install_directory }}" />
 				{% endif %}
 
