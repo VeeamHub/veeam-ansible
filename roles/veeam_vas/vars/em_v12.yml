@@ -1,8 +1,8 @@
 ---
 # EM v12 vars file for veeamhub.veeam_vas
 
-iso_url: "https://download2.veeam.com/VBR/v12/VeeamBackup&Replication_12.0.0.1420_P20230718_20230906.iso"
-iso_checksum: "a390ca763f4feb4aeab3922146def6655b39fd5a"
+iso_url: "https://download2.veeam.com/VBR/v12/VeeamBackup&Replication_12.1.1.56_20240127.iso"
+iso_checksum: "e5569c7fc592850265416c3b539f7542fb00d2f6"
 destination_iso_file: "vbr.iso"
 destination_license_file: "vbr-license.lic"
 sql_instance: "localhost"
