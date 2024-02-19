@@ -10,7 +10,7 @@
     - precheck.pending_reboot | bool
 - name: Including version-specific variables
   ansible.builtin.include_vars:
-    file: "vars/vbr_v{{ version }}.yml"
+    file: "vars/em_v{{ version }}.yml"
 - name: EM ISO Tasks
   ansible.builtin.include_tasks: mount_iso.yml
 

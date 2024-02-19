@@ -18,9 +18,6 @@
   when:
     - software.installed | bool
     - cloud_connect | bool
-- name: Including version-specific variables
-  ansible.builtin.include_vars:
-    file: "vars/em_v{{ version }}.yml"
 
 # PRE-INSTALL TASKS
 - name: Including common VBR pre-install tasks
