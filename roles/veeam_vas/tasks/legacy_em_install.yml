@@ -1,23 +1,5 @@
 ---
 # em_install tasks file for veeamhub.veeam_vas
-- name: Checking OS for pending reboots
-  pending_reboot_check:
-  register: precheck
-- name: Is there an existing pending reboot?
-  ansible.builtin.fail:
-    msg: "Windows server requires a reboot. After reboot, you can proceed with the Veeam Backup Enterprise Manager install."
-  when:
-    - precheck.pending_reboot | bool
-- name: Checking to see if Veeam Backup & Replication Server is installed
-  veeam_software_check:
-    name: "Veeam Backup & Replication Server"
-  register: software
-- name: Is Veeam Backup & Replication Server w/Cloud Connect installed?
-  ansible.builtin.fail:
-    msg: "Veeam Backup Enterprise Manager install on the same server as Cloud Connect is not supported by this role. Please proceed with a manual install."
-  when:
-    - software.installed | bool
-    - cloud_connect | bool
 
 # PRE-INSTALL TASKS
 - name: Including common VBR pre-install tasks

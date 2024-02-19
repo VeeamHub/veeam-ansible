@@ -5,9 +5,27 @@
   register: precheck
 - name: Is there an existing pending reboot?
   ansible.builtin.fail:
-    msg: "This Windows server requires a reboot prior to beginning the Veeam Backup & Replication upgrade. After rebooting this server, you can proceed with the upgrade."
+    msg: "This Windows server requires a reboot prior to beginning the Veeam Backup Enterprise Manager install. After rebooting this server, you can proceed with the installation."
   when:
     - precheck.pending_reboot | bool
+- name: Checking to see if Veeam Backup Enterprise Manager is installed
+  veeam_software_check:
+    name: "Veeam Backup Enterprise Manager"
+  register: software
+- name: Is Veeam Backup Enterprise Manager installed?
+  ansible.builtin.fail:
+    msg: "Veeam Backup Enterprise Manager must be installed on this server in order to upgrade it."
+  when: not (software.installed | bool)
+- name: Checking to see if Veeam Backup & Replication Server is installed
+  veeam_software_check:
+    name: "Veeam Backup & Replication Server"
+  register: software
+- name: Is Veeam Backup & Replication Server w/Cloud Connect installed?
+  ansible.builtin.fail:
+    msg: "Veeam Backup Enterprise Manager install on the same server as Cloud Connect is not supported by this role. Please proceed with a manual install."
+  when:
+    - software.installed | bool
+    - cloud_connect | bool
 - name: Including version-specific variables
   ansible.builtin.include_vars:
     file: "vars/em_v{{ version }}.yml"
