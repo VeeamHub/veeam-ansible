@@ -22,7 +22,7 @@
   async: 3600
   poll: 0
   register: async_result
-- name: Check on upgrade status
+- name: Check on Veeam Backup & Replication upgrade status
   ansible.builtin.async_status:
     jid: "{{ async_result.ansible_job_id }}"
   register: async_poll_results

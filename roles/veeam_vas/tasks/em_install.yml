@@ -52,7 +52,7 @@
       - "SQL Database: {{ sql_database }}"
       - "SQL Service Account: {{ sql_service_username | default('not specified') }}"
       - "SQL Install Account: {{ sql_install_username | default('not specified') }}"
-      - "EM SQL Account: {{ sql_username }}"
+      - "EM SQL Account: {{ sql_username | default('not specified') }}"
 
 # Versions prior to 12.1 use the legacy process
 - name: Including Legacy Install tasks

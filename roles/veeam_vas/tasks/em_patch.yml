@@ -20,7 +20,7 @@
       - "Patch Logs Folder: '{{ destination }}logs'"
       - "SQL Instance: {{ sql_instance }}"
       - "SQL Database: {{ sql_database }}"
-      - "SQL Connection Account: {{ sql_username }}"
+      - "SQL Connection Account: {{ sql_username | default('not specified') }}"
 - name: Create logs directory
   ansible.windows.win_file:
     path: "{{ destination }}logs"
