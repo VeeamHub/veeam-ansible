@@ -37,3 +37,8 @@ Bugfixes
 
 - Fixed lint errors - Made necessary changes to conform with current best practices
 - Added retry when starting Veeam services (https://github.com/VeeamHub/veeam-ansible/issues/54)
+
+Deprecations
+--------
+
+- Dropping support for installing version 10
