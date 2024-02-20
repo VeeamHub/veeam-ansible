@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<unattendedInstallationConfiguration bundle="VbrConsole" mode="upgrade" version="1.0">
+<!--[Required] Parameter 'mode' defines installation mode that silent install should operate in-->    
+<!--Supported values: install/upgrade/uninstall-->
+
+<!--Note: unused [Optional] parameters should be removed from the answer file-->
+
+	<properties>
+
+		<!--License agreements-->
+		<!--Specify parameters to accept all the license agreements during silent installation or upgrade-->
+
+			<!--[Required] Parameter ACCEPT_EULA specifies if you want to accept the Veeam license agreement. Specify '1' to accept the license agreement and proceed with installation or upgrade-->
+				<!--Supported values: 0/1-->
+				<property name="ACCEPT_EULA" value="1" />
+
+			<!--[Required] Parameter ACCEPT_LICENSING_POLICY specifies if you want to accept Veeam licensing policy. Specify '1' to accept the licensing policy and proceed with installation or upgrade-->
+				<!--Supported values: 0/1-->
+				<property name="ACCEPT_LICENSING_POLICY" value="1" />
+
+			<!--[Required] Parameter ACCEPT_THIRDPARTY_LICENSES specifies if you want to accept all the 3rd party licenses used. Specify '1' to accept the license agreements and proceed with installation or upgrade-->
+				<!--Supported values: 0/1-->
+				<property name="ACCEPT_THIRDPARTY_LICENSES" value="1" />
+
+			<!--[Required] Parameter ACCEPT_REQUIRED_SOFTWARE specifies if you want to accept all the required software licenses. Specify '1' to accept the license agreements and proceed with installation or upgrade-->
+				<!--Supported values: 0/1-->
+				<property name="ACCEPT_REQUIRED_SOFTWARE" value="1" />
+
+		<!--Setup settings-->
+		<!--Specify additional setup settings-->
+
+			<!--[Optional] Parameter REBOOT_IF_REQUIRED forces target server reboot, whenever it is required. If you do not specify this parameter, reboot is not performed automatically. Keep in mind that setup procedure will not be restarted after reboot-->
+				<!--Supported values: 0/1-->
+				<property name="REBOOT_IF_REQUIRED" value="0" />
+
+	</properties>
+</unattendedInstallationConfiguration>

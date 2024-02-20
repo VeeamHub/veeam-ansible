@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<unattendedInstallationConfiguration bundle="Em" mode="upgrade" version="1.0">
+<!--[Required] Parameter 'mode' defines installation mode that silent install should operate in-->    
+<!--Supported values: install/upgrade/uninstall-->
+
+<!--Note: unused [Optional] parameters should be removed from the answer file-->
+
+	<properties>
+
+		<!--License agreements-->
+		<!--Specify parameters to accept all the license agreements during silent installation or upgrade-->
+
+			<!--[Required] Parameter ACCEPT_EULA specifies if you want to accept the Veeam license agreement. Specify '1' to accept the license agreement and proceed with installation or upgrade-->
+				<!--Supported values: 0/1-->
+				<property name="ACCEPT_EULA" value="1" />
+
+			<!--[Required] Parameter ACCEPT_LICENSING_POLICY specifies if you want to accept Veeam licensing policy. Specify '1' to accept the licensing policy and proceed with installation or upgrade-->
+				<!--Supported values: 0/1-->
+				<property name="ACCEPT_LICENSING_POLICY" value="1" />
+
+			<!--[Required] Parameter ACCEPT_THIRDPARTY_LICENSES specifies if you want to accept all the 3rd party licenses used. Specify '1' to accept the license agreements and proceed with installation or upgrade-->
+				<!--Supported values: 0/1-->
+				<property name="ACCEPT_THIRDPARTY_LICENSES" value="1" />
+
+			<!--[Required] Parameter ACCEPT_REQUIRED_SOFTWARE specifies if you want to accept all the required software licenses. Specify '1' to accept the license agreements and proceed with installation or upgrade-->
+				<!--Supported values: 0/1-->
+				<property name="ACCEPT_REQUIRED_SOFTWARE" value="1" />
+
+		<!--License file-->
+		<!--Specify path to a license file and autoupdate option-->
+
+			<!--[Required] Parameter VBREM_LICENSE_FILE specifies a full path to the license file. If you do not specify this parameter, Veeam Backup & Replication will be installed in the Community Edition mode or upgraded using current license file-->
+				<!--Supported values: file path-->    
+				<property name="VBREM_LICENSE_FILE" value="{{ destination }}{{ destination_license_file }}" />
+
+			<!--[Optional] Parameter VBREM_LICENSE_AUTOUPDATE specifies if you want to update license automatically. If you do not specify this parameter, autoupdate will be enabled. For NFR and Evaluation licenses it must be set to 1. For licenses without license ID information it must be set to 0-->
+				<!--Supported values: 0/1-->
+				<property name="VBREM_LICENSE_AUTOUPDATE" value="{{ license_autoupdate }}" />
+
+		<!--Service account-->
+
+			<!--[Optional] Parameter VBREM_SERVICE_PASSWORD specifies a password for the account under which the Veeam Backup Enterprise Manager Service will run. You must specify this parameter together with VBREM_SERVICE_USER parameter during installation. Required during upgrade if service account is not LocalSystem account-->
+			<!--Make sure you keep the answer file in a safe location whenever service account password is added to the answer file-->
+				<!--Supported values: password in plain text-->
+				{% if service_account_username != 'LocalSystem' %}
+				<property name="VBREM_SERVICE_PASSWORD" value="{{ service_account_password }}" hidden="1"/>
+				{% endif %}
+
+		<!--Database configuration-->
+		<!--Specify database server installation options and required configuration parameters for Veeam Backup Enterprise Manager database-->
+
+			<!--[Optional] Parameter VBREM_SQLSERVER_PASSWORD specifies a password to connect to the SQL server in the native authentication mode. Required when VBREM_SQLSERVER_USERNAME is used-->
+			<!--Make sure you keep the answer file in a safe location whenever SQL server account password is added to the answer file-->
+				<!--Supported values: password in plain text-->
+				{% if sql_authentication == '1' %}
+				<property name="VBREM_SQLSERVER_PASSWORD" value="{{ sql_password }}" hidden="1"/>
+				{% endif %}
+
+		<!--Setup settings-->
+		<!--Specify additional setup settings-->
+
+			<!--[Optional] Parameter REBOOT_IF_REQUIRED forces target server reboot, whenever it is required. If you do not specify this parameter, reboot is not performed automatically. Keep in mind that setup procedure will not be restarted after reboot-->
+				<!--Supported values: 0/1-->
+				<property name="REBOOT_IF_REQUIRED" value="0" />
+
+	</properties>
+</unattendedInstallationConfiguration>

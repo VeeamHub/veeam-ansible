@@ -2,25 +2,25 @@
 
 ## PRE-INSTALL TASKS
 - name: Including version-specific variables
-  include_vars:
+  ansible.builtin.include_vars:
     file: "vars/em_v{{ version }}.yml"
   when: not (patch | bool)
 - name: Setting patch folder (from ISO)
-  set_fact:
+  ansible.builtin.set_fact:
     patch_folder: "Updates\\"
   when: patch | bool
 - name: Setting patch folder (not from ISO)
-  set_fact:
+  ansible.builtin.set_fact:
     patch_folder: ""
   when: not (patch | bool)
 - name: Print Patch Configuration
-  debug:
+  ansible.builtin.debug:
     msg:
       - "ISO Drive Letter: '{{ source }}{{ patch_folder }}{{ patch_file }}'"
       - "Patch Logs Folder: '{{ destination }}logs'"
       - "SQL Instance: {{ sql_instance }}"
       - "SQL Database: {{ sql_database }}"
-      - "SQL Connection Account: {{ sql_username }}"
+      - "SQL Connection Account: {{ sql_username | default('not specified') }}"
 - name: Create logs directory
   ansible.windows.win_file:
     path: "{{ destination }}logs"
@@ -40,7 +40,7 @@
 - name: Installing SqlServer PowerShell module
   community.windows.win_psmodule:
     name: SqlServer
-    skip_publisher_check: yes
+    skip_publisher_check: true
     state: present
   register: result
   until: result is not failed
@@ -68,6 +68,7 @@
 - name: Starting all Veeam services
   ansible.windows.win_shell: |
     Get-Service veeam* | Where-Object {$_.Name -ne "VeeamMBPDeploymentService"} | Start-Service
+  retries: 3
 - name: Stopping all Veeam services
   ansible.windows.win_shell: |
     Get-Service veeam* | Stop-Service

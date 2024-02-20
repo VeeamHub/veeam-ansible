@@ -1,0 +1,44 @@
+---
+# new_em_upgrade tasks file for veeamhub.veeam_vas
+
+# PRE-UPGRADE TASKS
+- name: Copy license file
+  ansible.windows.win_copy:
+    src: "{{ source_license }}"
+    dest: "{{ destination }}{{ destination_license_file }}"
+  when: license | bool
+- name: Create EM silent upgrade answer file
+  ansible.builtin.template:
+    src: templates/EM/EmAnswerFile_upgrade.xml.j2
+    dest: "{{ destination }}EmAnswerFile_upgrade.xml"
+    mode: '777'
+
+# UPGRADING VEEAM SOFTWARE
+- name: Upgrade Veeam Backup Enterprise Manager
+  ansible.windows.win_package:
+    path: "{{ source }}Setup\\Silent\\Veeam.Silent.Install.exe"
+    state: present
+    arguments: '/AnswerFile "{{ destination }}EmAnswerFile_upgrade.xml" /SkipNetworkLogonErrors /LogFolder "{{ destination }}logs"'
+  async: 3600
+  poll: 0
+  register: async_result
+- name: Check on Enterprise Manager upgrade status
+  ansible.builtin.async_status:
+    jid: "{{ async_result.ansible_job_id }}"
+  register: async_poll_results
+  until: async_poll_results.finished
+  retries: 60
+  delay: 60
+
+# POST-UPGRADE TASKS
+- name: Unmount ISO
+  community.windows.win_disk_image:
+    image_path: "{{ destination }}{{ destination_iso_file }}"
+    state: absent
+- name: Upgrade Complete! Checking OS for pending reboots
+  pending_reboot_check:
+  register: postcheck
+- name: Rebooting server if necessary
+  ansible.windows.win_reboot:
+    msg: Reboot initiated by Ansible to complete EM upgrade
+  when: postcheck.pending_reboot | bool

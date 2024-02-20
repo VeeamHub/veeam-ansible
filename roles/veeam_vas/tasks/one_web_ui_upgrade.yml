@@ -5,18 +5,18 @@
     name: "Veeam ONE Reporter Web"
   register: software
 - name: Is Veeam ONE Reporter Web installed?
-  fail:
+  ansible.builtin.fail:
     msg: "Veeam ONE Reporter Web must be installed on this server in order to upgrade it."
   when: not (software.installed | bool)
 - name: Including version-specific variables
-  include_vars:
+  ansible.builtin.include_vars:
     file: "vars/one_v{{ version }}.yml"
 
 # PRE-UPGRADE TASKS
 - name: Veeam ONE ISO Tasks
-  include_tasks: mount_iso.yml
+  ansible.builtin.include_tasks: mount_iso.yml
 - name: Print Upgrade Configuration
-  debug:
+  ansible.builtin.debug:
     msg:
       - "ISO Drive Letter: '{{ source }}'"
       - "Upgrade Logs Folder: '{{ destination }}logs'"
@@ -31,7 +31,7 @@
     path: "{{ destination }}logs"
     state: directory
 - name: Including Veeam ONE Common Pre-Install tasks
-  include_tasks: one_install_pretasks.yml
+  ansible.builtin.include_tasks: one_install_pretasks.yml
 
 # UPGRADING VEEAM SOFTWARE
 - name: Upgrade ONE Reporter Web UI (v12+)
@@ -75,19 +75,19 @@
 - name: Finding file(s) in '{{ source }}Updates' directory
   ansible.windows.win_find:
     paths: "{{ source }}Updates"
-    recurse: no
+    recurse: false
     file_type: file
-  ignore_errors: yes
+  ignore_errors: true
   register: file
 - name: Does Veeam ONE need to be patched?
-  set_fact:
+  ansible.builtin.set_fact:
     patch: "{{ file.matched }}"
 - name: Setting patch filename
-  set_fact:
+  ansible.builtin.set_fact:
     patch_file: "{{ file.files[0].filename }}"
   when: patch | bool
 - name: Including Veeam ONE patch tasks
-  include_tasks: one_patch.yml
+  ansible.builtin.include_tasks: one_patch.yml
   when: patch | bool
 
 # POST-UPGRADE TASKS

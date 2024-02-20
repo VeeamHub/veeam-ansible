@@ -1,0 +1,53 @@
+---
+# new_vbr_install tasks file for veeamhub.veeam_vas
+
+# PRE-INSTALL TASKS
+- name: Copy license file
+  ansible.windows.win_copy:
+    src: "{{ source_license }}"
+    dest: "{{ destination }}{{ destination_license_file }}"
+  when: license | bool
+- name: Create Veeam Service Account User
+  ansible.windows.win_user:
+    name: "{{ service_account_username }}"
+    password: "{{ service_account_password }}"
+    password_never_expires: true
+    state: present
+    groups:
+      - Administrators
+  when: create_service_account | bool
+- name: Create VBR silent install answer file
+  ansible.builtin.template:
+    src: templates/VBR/VbrAnswerFile_install.xml.j2
+    dest: "{{ destination }}VbrAnswerFile_install.xml"
+    mode: '777'
+
+# INSTALLING VEEAM SOFTWARE
+- name: Install Veeam Backup & Replication
+  ansible.windows.win_package:
+    path: "{{ source }}Setup\\Silent\\Veeam.Silent.Install.exe"
+    state: present
+    arguments: '/AnswerFile "{{ destination }}VbrAnswerFile_install.xml" /SkipNetworkLogonErrors /LogFolder "{{ destination }}logs"'
+  async: 3600
+  poll: 0
+  register: async_result
+- name: Check on Veeam Backup & Replication install status
+  ansible.builtin.async_status:
+    jid: "{{ async_result.ansible_job_id }}"
+  register: async_poll_results
+  until: async_poll_results.finished
+  retries: 60
+  delay: 60
+
+# POST-INSTALL TASKS
+- name: Unmount ISO
+  community.windows.win_disk_image:
+    image_path: "{{ destination }}{{ destination_iso_file }}"
+    state: absent
+- name: Installation Complete! Checking OS for pending reboots
+  pending_reboot_check:
+  register: postcheck
+- name: Rebooting server if necessary
+  ansible.windows.win_reboot:
+    msg: Reboot initiated by Ansible to complete VBR install
+  when: postcheck.pending_reboot | bool

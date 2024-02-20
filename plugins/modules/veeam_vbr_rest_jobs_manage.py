@@ -55,7 +55,7 @@ EXAMPLES = r'''
   hosts: localhost
   gather_facts: false
   vars:
-    - repo_name: '<Repository Name>'
+    repo_name: '<Repository Name>'
   tasks:
     - name: Get VBR Repos
       veeamhub.veeam.veeam_vbr_rest_repositories_info:
@@ -67,7 +67,7 @@ EXAMPLES = r'''
       ansible.builtin.debug:
         var: repo_testout
     - name: Filter Repo Object
-      set_fact:
+      ansible.builtin.set_fact:
         repo_id: "{{ repo_testout | json_query(repos_id_query) }}"
       vars:
         repos_id_query: "infrastructure_repositories.data[?name==`{{ repo_name }}`].id"
@@ -105,7 +105,7 @@ EXAMPLES = r'''
       ansible.builtin.debug:
         var: job_testout
     - name: Filter Job Object
-      set_fact:
+      ansible.builtin.set_fact:
         job_id: "{{ job_testout | json_query(jobs_id_query) }}"
       vars:
         jobs_id_query: "infrastructure_jobs.data[?name==`{{ job_name }}`].id"

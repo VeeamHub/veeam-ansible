@@ -1,14 +1,14 @@
 ---
 # one_server_install tasks file for veeamhub.veeam_vas
 - name: Including version-specific variables
-  include_vars:
+  ansible.builtin.include_vars:
     file: "vars/one_v{{ version }}.yml"
 
 # PRE-INSTALL TASKS
 - name: Veeam ONE ISO Tasks
-  include_tasks: mount_iso.yml
+  ansible.builtin.include_tasks: mount_iso.yml
 - name: Print Installation Configuration
-  debug:
+  ansible.builtin.debug:
     msg:
       - "ISO Drive Letter: '{{ source }}'"
       - "Installation Logs Folder: '{{ destination }}logs'"
@@ -32,12 +32,12 @@
     dest: "{{ destination }}{{ destination_license_file }}"
   when: license | bool
 - name: Including Veeam ONE Common Pre-Install tasks
-  include_tasks: one_install_pretasks.yml
+  ansible.builtin.include_tasks: one_install_pretasks.yml
 - name: Create SQL Service Account User
   ansible.windows.win_user:
     name: "{{ sql_service_username }}"
     password: "{{ sql_service_password }}"
-    password_never_expires: yes
+    password_never_expires: true
     state: present
     groups:
       - Users
@@ -63,7 +63,7 @@
       - "/UPDATEENABLED=1"
       - "/TCPENABLED=1"
       - "/NPENABLED=1"
-  become: yes
+  become: true
   become_flags: logon_type=batch
   vars:
     ansible_become_method: runas
@@ -117,7 +117,7 @@
     path: "{{ source }}Reporter\\VeeamONE.Reporter.Server.x64.msi"
     state: present
     arguments: '/L*v "{{ destination }}logs\VeeamONE.Reporter.Server.x64.log" EDITLICFILEPATH="{{ destination }}{{ destination_license_file }}" ACCEPT_THIRDPARTY_LICENSES=1 ACCEPT_EULA=1 ACCEPT_LICENSING_POLICY=1 ACCEPT_REQUIRED_SOFTWARE=1 VO_REPORTER_SERVICE_ACCOUNT_NAME="{{ one_username }}" VO_REPORTER_SERVICE_ACCOUNT_PASSWORD="{{ one_password }}" VO_REPORTER_SQL_SERVER_NAME="{{ sql_instance }}" VO_REPORTER_DATABASE_NAME="{{ sql_database }}" VO_REPORTER_AUTHENTICATION_TYPE_NAME=0 VO_REPORTER_SQL_USER_NAME="{{ one_username }}" VO_REPORTER_SQL_PASSWORD="{{ one_password }}" VO_INSTALLATION_TYPE="{{ one_installation_type }}"'
-  become: yes
+  become: true
   become_flags: logon_type=batch
   vars:
     ansible_become_method: runas
@@ -132,7 +132,7 @@
     path: "{{ source }}Reporter\\VeeamONE.Reporter.Server.x64.msi"
     state: present
     arguments: '/L*v "{{ destination }}logs\VeeamONE.Reporter.Server.x64.log" ACCEPT_THIRDPARTY_LICENSES=1 ACCEPT_EULA=1 ACCEPT_LICENSING_POLICY=1 ACCEPT_REQUIRED_SOFTWARE=1 VO_REPORTER_SERVICE_ACCOUNT_NAME="{{ one_username }}" VO_REPORTER_SERVICE_ACCOUNT_PASSWORD="{{ one_password }}" VO_REPORTER_SQL_SERVER_NAME="{{ sql_instance }}" VO_REPORTER_DATABASE_NAME="{{ sql_database }}" VO_REPORTER_AUTHENTICATION_TYPE_NAME=0 VO_REPORTER_SQL_USER_NAME="{{ one_username }}" VO_REPORTER_SQL_PASSWORD="{{ one_password }}" VO_INSTALLATION_TYPE="{{ one_installation_type }}"'
-  become: yes
+  become: true
   become_flags: logon_type=batch
   vars:
     ansible_become_method: runas
@@ -147,7 +147,7 @@
     path: "{{ source }}Reporter\\VeeamONE.Reporter.Server.x64.msi"
     state: present
     arguments: '/L*v "{{ destination }}logs\VeeamONE.Reporter.Server.x64.log" EDITLICFILEPATH="{{ destination }}{{ destination_license_file }}" ACCEPT_THIRDPARTY_LICENSES=1 ACCEPT_EULA=1 VO_REPORTER_SERVICE_ACCOUNT_NAME="{{ one_username }}" VO_REPORTER_SERVICE_ACCOUNT_PASSWORD="{{ one_password }}" VO_REPORTER_SQL_SERVER_NAME="{{ sql_instance }}" VO_REPORTER_DATABASE_NAME="{{ sql_database }}" VO_REPORTER_AUTHENTICATION_TYPE_NAME=0 VO_REPORTER_SQL_USER_NAME="{{ one_username }}" VO_REPORTER_SQL_PASSWORD="{{ one_password }}" VO_INSTALLATION_TYPE="{{ one_installation_type }}"'
-  become: yes
+  become: true
   become_flags: logon_type=batch
   vars:
     ansible_become_method: runas
@@ -162,7 +162,7 @@
     path: "{{ source }}Reporter\\VeeamONE.Reporter.Server.x64.msi"
     state: present
     arguments: '/L*v "{{ destination }}logs\VeeamONE.Reporter.Server.x64.log" ACCEPT_THIRDPARTY_LICENSES=1 ACCEPT_EULA=1 VO_REPORTER_SERVICE_ACCOUNT_NAME="{{ one_username }}" VO_REPORTER_SERVICE_ACCOUNT_PASSWORD="{{ one_password }}" VO_REPORTER_SQL_SERVER_NAME="{{ sql_instance }}" VO_REPORTER_DATABASE_NAME="{{ sql_database }}" VO_REPORTER_AUTHENTICATION_TYPE_NAME=0 VO_REPORTER_SQL_USER_NAME="{{ one_username }}" VO_REPORTER_SQL_PASSWORD="{{ one_password }}" VO_INSTALLATION_TYPE="{{ one_installation_type }}"'
-  become: yes
+  become: true
   become_flags: logon_type=batch
   vars:
     ansible_become_method: runas
@@ -212,7 +212,7 @@
     - reporter_server.changed | bool
   register: disk_image_out
 - name: Set ISO Drive Letter
-  set_fact:
+  ansible.builtin.set_fact:
     source: "{{ disk_image_out.mount_paths[0] }}"
   when:
     - monitor_server.changed | bool
@@ -234,19 +234,19 @@
 - name: Finding file(s) in '{{ source }}Updates' directory
   ansible.windows.win_find:
     paths: "{{ source }}Updates"
-    recurse: no
+    recurse: false
     file_type: file
-  ignore_errors: yes
+  ignore_errors: true
   register: file
 - name: Does Veeam ONE need to be patched?
-  set_fact:
+  ansible.builtin.set_fact:
     patch: "{{ file.matched }}"
 - name: Setting patch filename
-  set_fact:
+  ansible.builtin.set_fact:
     patch_file: "{{ file.files[0].filename }}"
   when: patch | bool
 - name: Including Veeam ONE patch tasks
-  include_tasks: one_patch.yml
+  ansible.builtin.include_tasks: one_patch.yml
   when: patch | bool
 
 # POST-INSTALL TASKS

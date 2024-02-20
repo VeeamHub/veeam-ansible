@@ -1,0 +1,220 @@
+---
+# vbr_install tasks file for veeamhub.veeam_vas
+
+# PRE-INSTALL TASKS
+- name: Including VBR Pre-Install tasks
+  ansible.builtin.include_tasks: legacy_vbr_install_pretasks.yml
+
+- name: Looking for .NET Core Runtime in Veeam ISO
+  ansible.windows.win_find:
+    paths: "{{ source }}Redistr\\x64"
+    patterns: dotnet-runtime-.*
+    recurse: false
+    file_type: file
+    use_regex: true
+  ignore_errors: true
+  register: file
+  when: version | int >= 11
+- name: Install Microsoft .NET Core Runtime
+  ansible.windows.win_package:
+    path: "{{ file.files[0].path }}"
+    product_id: Install .NET Core Runtime
+    state: present
+    arguments: '/install /quiet /norestart /log "{{ destination }}logs\\dotnet-runtime-x.x.x-win-x64.log"'
+  ignore_errors: true
+  when: version | int >= 11
+- name: Looking for ASP.NET Core Shared Framework in Veeam ISO
+  ansible.windows.win_find:
+    paths: "{{ source }}Redistr\\x64"
+    patterns: aspnetcore-runtime-.*
+    recurse: false
+    file_type: file
+    use_regex: true
+  ignore_errors: true
+  register: file
+  when: version | int >= 11
+- name: Install Microsoft ASP.NET Core Shared Framework
+  ansible.windows.win_package:
+    path: "{{ file.files[0].path }}"
+    product_id: Install ASP.NET Core Runtime
+    state: present
+    arguments: '/install /quiet /norestart /log "{{ destination }}logs\\aspnetcore-runtime-x.x.x-win-x64.log"'
+  when: version | int >= 11
+- name: Install Microsoft Visual C++ Redistributable
+  ansible.windows.win_package:
+    path: "{{ source }}Redistr\\x64\\vc_redist.x64.exe"
+    product_id: Install C++ Framework
+    state: present
+    arguments: '/install /quiet /norestart /log "{{ destination }}logs\\vc_redist.x64.log"'
+  ignore_errors: true
+  when: version | int >= 11
+
+# INSTALLING VEEAM SOFTWARE
+- name: Install Veeam Backup Catalog (v12+)
+  ansible.windows.win_package:
+    path: "{{ source }}Catalog\\VeeamBackupCatalog64.msi"
+    state: present
+    arguments: '/L*v "{{ destination }}logs\\VeeamBackupCatalog64.log" /norestart /qn ACCEPTEULA="YES" ACCEPT_LICENSING_POLICY="1" ACCEPT_REQUIRED_SOFTWARE="1" ACCEPT_THIRDPARTY_LICENSES="1"'
+  register: win_package_vbr_catalog
+  when: version | int >= 12
+- name: Install Veeam Backup Catalog (v11-)
+  ansible.windows.win_package:
+    path: "{{ source }}Catalog\\VeeamBackupCatalog64.msi"
+    state: present
+    arguments: '/L*v "{{ destination }}logs\\VeeamBackupCatalog64.log" /norestart /qn ACCEPTEULA="YES" ACCEPT_THIRDPARTY_LICENSES="1"'
+  register: win_package_vbr_catalog
+  when: version | int <= 11
+- name: Install Veeam Backup & Replication Server with license (v12+)
+  ansible.windows.win_package:
+    path: "{{ source }}Backup\\Server.x64.msi"
+    state: present
+    arguments: '/L*v "{{ destination }}logs\\BackupServer.log" VBR_SQLSERVER_AUTHENTICATION=1 VBR_LICENSE_FILE="{{ destination }}{{ destination_license_file }}" VBR_SQLSERVER_ENGINE="{{ sql_engine }}" VBR_SQLSERVER_SERVER="{{ sql_instance }}" VBR_SQLSERVER_DATABASE="{{ sql_database }}" VBR_SQLSERVER_USERNAME="{{ sql_username }}" VBR_SQLSERVER_PASSWORD="{{ sql_password }}" ACCEPT_LICENSING_POLICY="1" ACCEPT_REQUIRED_SOFTWARE="1" ACCEPT_THIRDPARTY_LICENSES=1 ACCEPTEULA=YES'
+  when:
+    - version | int >= 12
+    - license | bool
+  register: win_package_vbr_server
+- name: Install Veeam Backup & Replication Server without license (v12+)
+  ansible.windows.win_package:
+    path: "{{ source }}Backup\\Server.x64.msi"
+    state: present
+    arguments: '/L*v "{{ destination }}logs\\BackupServer.log" VBR_SQLSERVER_AUTHENTICATION=1 VBR_SQLSERVER_SERVER="{{ sql_instance }}" VBR_SQLSERVER_ENGINE="{{ sql_engine }}" VBR_SQLSERVER_DATABASE="{{ sql_database }}" VBR_SQLSERVER_USERNAME="{{ sql_username }}" VBR_SQLSERVER_PASSWORD="{{ sql_password }}" ACCEPT_LICENSING_POLICY="1" ACCEPT_REQUIRED_SOFTWARE="1" ACCEPT_THIRDPARTY_LICENSES=1 ACCEPTEULA=YES'
+  when:
+    - version | int >= 12
+    - not license | bool
+  register: win_package_vbr_server
+- name: Install Veeam Backup & Replication Server with license (v11-)
+  ansible.windows.win_package:
+    path: "{{ source }}Backup\\Server.x64.msi"
+    state: present
+    arguments: '/L*v "{{ destination }}logs\\BackupServer.log" VBR_SQLSERVER_AUTHENTICATION=1 VBR_LICENSE_FILE="{{ destination }}{{ destination_license_file }}" VBR_SQLSERVER_SERVER="{{ sql_instance }}" VBR_SQLSERVER_DATABASE="{{ sql_database }}" VBR_SQLSERVER_USERNAME="{{ sql_username }}" VBR_SQLSERVER_PASSWORD="{{ sql_password }}" ACCEPT_THIRDPARTY_LICENSES=1 ACCEPTEULA=YES'
+  when:
+    - version | int <= 11
+    - license | bool
+  register: win_package_vbr_server
+- name: Install Veeam Backup & Replication Server without license (v11-)
+  ansible.windows.win_package:
+    path: "{{ source }}Backup\\Server.x64.msi"
+    state: present
+    arguments: '/L*v "{{ destination }}logs\\BackupServer.log" VBR_SQLSERVER_AUTHENTICATION=1 VBR_SQLSERVER_SERVER="{{ sql_instance }}" VBR_SQLSERVER_DATABASE="{{ sql_database }}" VBR_SQLSERVER_USERNAME="{{ sql_username }}" VBR_SQLSERVER_PASSWORD="{{ sql_password }}" ACCEPT_THIRDPARTY_LICENSES=1 ACCEPTEULA=YES'
+  when:
+    - version | int <= 11
+    - not license | bool
+  register: win_package_vbr_server
+- name: Install Veeam Backup & Replication Console (v12+)
+  ansible.windows.win_package:
+    path: "{{ source }}Backup\\Shell.x64.msi"
+    state: present
+    arguments: '/L*v "{{ destination }}logs\\Shell.x64.log" /norestart /qn ACCEPTEULA="YES" ACCEPT_LICENSING_POLICY="1" ACCEPT_REQUIRED_SOFTWARE="1" ACCEPT_THIRDPARTY_LICENSES="1"'
+  register: win_package_vbr_console
+  when: version | int >= 12
+- name: Install Veeam Backup & Replication Console (v11-)
+  ansible.windows.win_package:
+    path: "{{ source }}Backup\\Shell.x64.msi"
+    state: present
+    arguments: '/L*v "{{ destination }}logs\\Shell.x64.log" /norestart /qn ACCEPTEULA="YES" ACCEPT_THIRDPARTY_LICENSES="1"'
+  register: win_package_vbr_console
+  when: version | int <= 11
+- name: Install Veeam Distribution Service
+  ansible.windows.win_package:
+    path: "{{ source }}Packages\\VeeamDistributionSvc.msi"
+    state: present
+    arguments: '/L*v "{{ destination }}logs\\VeeamDistributionSvc.log" /norestart /qn ACCEPTEULA="YES" ACCEPT_LICENSING_POLICY="1" ACCEPT_REQUIRED_SOFTWARE="1" ACCEPT_THIRDPARTY_LICENSES="1"'
+- name: Install Veeam Explorer for Active Directory
+  ansible.windows.win_package:
+    path: "{{ source }}Explorers\\VeeamExplorerForActiveDirectory.msi"
+    state: present
+    arguments: '/L*v "{{ destination }}logs\\VeeamExplorerForActiveDirectory.log" /norestart /qn ACCEPT_EULA="1" ACCEPT_THIRDPARTY_LICENSES="1"'
+- name: Install Veeam Explorer for Exchange
+  ansible.windows.win_package:
+    path: "{{ source }}Explorers\\VeeamExplorerForExchange.msi"
+    state: present
+    arguments: '/L*v "{{ destination }}logs\\VeeamExplorerForExchange.log" /norestart /qn ACCEPT_EULA="1" ACCEPT_THIRDPARTY_LICENSES="1"'
+- name: Install Veeam Explorer for Oracle
+  ansible.windows.win_package:
+    path: "{{ source }}Explorers\\VeeamExplorerForOracle.msi"
+    state: present
+    arguments: '/L*v "{{ destination }}logs\\VeeamExplorerForOracle.log" /norestart /qn ACCEPT_EULA="1" ACCEPT_THIRDPARTY_LICENSES="1"'
+- name: Install Veeam Explorer for Postres
+  ansible.windows.win_package:
+    path: "{{ source }}Explorers\\VeeamExplorerForPostgreSQL.msi"
+    state: present
+    arguments: '/L*v "{{ destination }}logs\\VeeamExplorerForPostgreSQL.log" /norestart /qn ACCEPT_EULA="1" ACCEPT_THIRDPARTY_LICENSES="1"'
+  when: version | int >= 12
+- name: Install Veeam Explorer for SharePoint
+  ansible.windows.win_package:
+    path: "{{ source }}Explorers\\VeeamExplorerForSharePoint.msi"
+    state: present
+    arguments: '/L*v "{{ destination }}logs\\VeeamExplorerForSharePoint.log" /norestart /qn ACCEPT_EULA="1" ACCEPT_THIRDPARTY_LICENSES="1"'
+- name: Install Veeam Explorer for SQL
+  ansible.windows.win_package:
+    path: "{{ source }}Explorers\\VeeamExplorerForSQL.msi"
+    state: present
+    arguments: '/L*v "{{ destination }}logs\\VeeamExplorerForSQL.log" /norestart /qn ACCEPT_EULA="1" ACCEPT_THIRDPARTY_LICENSES="1"'
+- name: Install Veeam Explorer for Microsoft Teams
+  ansible.windows.win_package:
+    path: "{{ source }}Explorers\\VeeamExplorerForTeams.msi"
+    state: present
+    arguments: '/L*v "{{ destination }}logs\\VeeamExplorerForTeams.log" /norestart /qn ACCEPT_EULA="1" ACCEPT_THIRDPARTY_LICENSES="1"'
+  when: version | int >= 11
+- name: Install Veeam Plug-ins for Enterprise Applications Redistributable
+  ansible.windows.win_package:
+    path: "{{ source }}Packages\\DbPluginRedist.msi"
+    state: present
+    arguments: '/L*v "{{ destination }}logs\\DbPluginRedist.log" /norestart /qn ACCEPTEULA="YES" ACCEPT_LICENSING_POLICY="1" ACCEPT_REQUIRED_SOFTWARE="1" ACCEPT_THIRDPARTY_LICENSES="1"'
+  when: version | int >= 12
+- name: Install Veeam Agent for Linux Redistributable
+  ansible.windows.win_package:
+    path: "{{ source }}Packages\\VALRedist.msi"
+    state: present
+    arguments: '/L*v "{{ destination }}logs\\VALRedist.log" /norestart /qn ACCEPTEULA="YES" ACCEPT_LICENSING_POLICY="1" ACCEPT_REQUIRED_SOFTWARE="1" ACCEPT_THIRDPARTY_LICENSES="1"'
+- name: Install Veeam Agent for MacOS Redistributable
+  ansible.windows.win_package:
+    path: "{{ source }}Packages\\VAMRedist.msi"
+    state: present
+    arguments: '/L*v "{{ destination }}logs\\VAMRedist.log" /norestart /qn ACCEPTEULA="YES" ACCEPT_LICENSING_POLICY="1" ACCEPT_REQUIRED_SOFTWARE="1" ACCEPT_THIRDPARTY_LICENSES="1"'
+  when: version | int >= 11
+- name: Install Veeam Agent for Microsoft Windows Redistributable
+  ansible.windows.win_package:
+    path: "{{ source }}Packages\\VAWRedist.msi"
+    state: present
+    arguments: '/L*v "{{ destination }}logs\\VAWRedist.log" /norestart /qn ACCEPTEULA="YES" ACCEPT_LICENSING_POLICY="1" ACCEPT_REQUIRED_SOFTWARE="1" ACCEPT_THIRDPARTY_LICENSES="1"'
+- name: Looking for Veeam Agent for Unix Redistributable
+  ansible.windows.win_stat:
+    path: "{{ source }}Packages\\VAURedist.msi"
+  register: file
+- name: Install Veeam Agent for Unix Redistributable
+  ansible.windows.win_package:
+    path: "{{ source }}Packages\\VAURedist.msi"
+    state: present
+    arguments: '/L*v "{{ destination }}logs\\VAURedist.log" /norestart /qn ACCEPTEULA="YES" ACCEPT_LICENSING_POLICY="1" ACCEPT_REQUIRED_SOFTWARE="1" ACCEPT_THIRDPARTY_LICENSES="1"'
+  when: file.stat.exists
+- name: Looking for patches in '{{ source }}Updates' directory
+  ansible.windows.win_find:
+    paths: "{{ source }}Updates"
+    recurse: false
+    file_type: file
+  ignore_errors: true
+  register: file
+- name: Does VBR need to be patched?
+  ansible.builtin.set_fact:
+    patch: "{{ file.matched }}"
+- name: Setting patch filename
+  ansible.builtin.set_fact:
+    patch_file: "{{ file.files[0].filename }}"
+  when: patch | bool
+- name: Including VBR patch tasks
+  ansible.builtin.include_tasks: vbr_patch.yml
+  when: patch | bool
+
+# POST-INSTALL TASKS
+- name: Unmount ISO
+  community.windows.win_disk_image:
+    image_path: "{{ destination }}{{ destination_iso_file }}"
+    state: absent
+- name: Installation Complete! Checking OS for pending reboots
+  pending_reboot_check:
+  register: postcheck
+- name: Rebooting server if necessary
+  ansible.windows.win_reboot:
+    msg: Reboot initiated by Ansible to complete VBR install
+  when: postcheck.pending_reboot | bool

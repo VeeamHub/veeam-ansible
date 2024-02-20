@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="utf-8"?>
+<unattendedInstallationConfiguration bundle="Em" mode="install" version="1.0">
+<!--[Required] Parameter 'mode' defines installation mode that silent install should operate in-->
+<!--Supported values: install/upgrade/uninstall-->
+
+<!--Note: unused [Optional] parameters should be removed from the answer file-->
+
+	<properties>
+
+		<!--License agreements-->
+		<!--Specify parameters to accept all the license agreements during silent installation or upgrade-->
+
+			<!--[Required] Parameter ACCEPT_EULA specifies if you want to accept the Veeam license agreement. Specify '1' to accept the license agreement and proceed with installation or upgrade-->
+				<!--Supported values: 0/1-->
+				<property name="ACCEPT_EULA" value="1" />
+
+			<!--[Required] Parameter ACCEPT_LICENSING_POLICY specifies if you want to accept Veeam licensing policy. Specify '1' to accept the licensing policy and proceed with installation or upgrade-->
+				<!--Supported values: 0/1-->
+				<property name="ACCEPT_LICENSING_POLICY" value="1" />
+
+			<!--[Required] Parameter ACCEPT_THIRDPARTY_LICENSES specifies if you want to accept all the 3rd party licenses used. Specify '1' to accept the license agreements and proceed with installation or upgrade-->
+				<!--Supported values: 0/1-->
+				<property name="ACCEPT_THIRDPARTY_LICENSES" value="1" />
+
+			<!--[Required] Parameter ACCEPT_REQUIRED_SOFTWARE specifies if you want to accept all the required software licenses. Specify '1' to accept the license agreements and proceed with installation or upgrade-->
+				<!--Supported values: 0/1-->
+				<property name="ACCEPT_REQUIRED_SOFTWARE" value="1" />
+
+		<!--License file-->
+		<!--Specify path to a license file and autoupdate option-->
+
+			<!--[Required] Parameter VBREM_LICENSE_FILE specifies a full path to the license file. If you do not specify this parameter, Veeam Backup & Replication will be installed in the Community Edition mode or upgraded using current license file-->
+				<!--Supported values: file path-->
+				<property name="VBREM_LICENSE_FILE" value="{{ destination }}{{ destination_license_file }}" />
+
+			<!--[Optional] Parameter VBREM_LICENSE_AUTOUPDATE specifies if you want to update license automatically. If you do not specify this parameter, autoupdate will be enabled. For NFR and Evaluation licenses it must be set to 1. For licenses without license ID information it must be set to 0-->
+				<!--Supported values: 0/1-->
+				<property name="VBREM_LICENSE_AUTOUPDATE" value="{{ license_autoupdate }}" />
+
+		<!--Service account-->
+
+			<!--[Optional] Parameter VBREM_SERVICE_USER specifies the account under which the Veeam Backup Enterprise Manager Service will run after installation and upgrade. If you do not specify this parameter, the Veeam Backup Enterprise Manager Service will run under the LocalSystem account-->
+				<!--Supported values: domain\username-->
+				{% if service_account_username != 'LocalSystem' %}
+				<property name="VBREM_SERVICE_USER" value="{{ service_account_username }}" />
+				{% endif %}
+
+			<!--[Optional] Parameter VBREM_SERVICE_PASSWORD specifies a password for the account under which the Veeam Backup Enterprise Manager Service will run. You must specify this parameter together with VBREM_SERVICE_USER parameter during installation. Required during upgrade if service account is not LocalSystem account-->
+			<!--Make sure you keep the answer file in a safe location whenever service account password is added to the answer file-->
+				<!--Supported values: password in plain text-->
+				{% if service_account_username != 'LocalSystem' %}
+				<property name="VBREM_SERVICE_PASSWORD" value="{{ service_account_password }}" hidden="1"/>
+				{% endif %}
+
+		<!--Database configuration-->
+		<!--Specify database server installation options and required configuration parameters for Veeam Backup Enterprise Manager database-->
+
+			<!--[Required] Parameter VBREM_SQLSERVER_INSTALL specifies if bundled PostgreSQL server will be installed. If set to '0', an existing SQL server settings must be specified below-->
+				<!--Supported values: 0/1-->
+				{% if sql_express_setup %}
+				<property name="VBREM_SQLSERVER_INSTALL" value="1" />
+				{% else %}
+				<property name="VBREM_SQLSERVER_INSTALL" value="0" />
+				{% endif %}
+
+			<!--[Optional] Parameter VBREM_SQLSERVER_ENGINE specifies SQL server type: '1' for PostgreSQL server, '0' for Microsoft SQL server.  Required when VBREM_SQLSERVER_INSTALL is set to '0'-->
+				<!--Supported values: 0/1-->
+				<property name="VBREM_SQLSERVER_ENGINE" value="{{ sql_engine }}" />
+
+			<!--[Optional] Parameter VBREM_SQLSERVER_SERVER specifies a SQL server and instance on which the configuration database will be deployed. Required when VBREM_SQLSERVER_INSTALL is set to '0'-->
+				<!--Supported values: MSSQLSERVER\DBINSTANCE or POSTGRESQLSERVER:PORT-->
+				{% if not sql_express_setup %}
+				<property name="VBREM_SQLSERVER_SERVER" value="{{ sql_instance }}" />
+				{% endif %}
+
+			<!--[Optional] Parameter VBREM_SQLSERVER_DATABASE specifies a name for the configuration database. If you do not specify this parameter, default name 'VeeamBackupReporting' is used-->
+				<!--Supported values: database name-->
+				<property name="VBREM_SQLSERVER_DATABASE" value="{{ sql_database }}" />
+
+			<!--[Optional] Parameter VBREM_SQLSERVER_AUTHENTICATION specifies authentication mode to connect to the database server where the Veeam Backup Enterprise Manager configuration database is deployed. Required when VBREM_SQLSERVER_INSTALL is set to '0'-->
+				<!--Supported values: 0 for Windows authentication/1 for SQL native authentication-->
+				{% if not sql_express_setup %}
+				<property name="VBREM_SQLSERVER_AUTHENTICATION" value="{{ sql_authentication }}" />
+				{% endif %}
+
+			<!--[Optional] Parameter VBREM_SQLSERVER_USERNAME specifies a LoginID to connect to the SQL server in the native authentication mode. Required when VBR_SQLSERVER_AUTHENTICATION is set to '1'-->
+				<!--Supported values: username-->
+				{% if sql_authentication == '1' %}
+				<property name="VBREM_SQLSERVER_USERNAME" value="{{ sql_username }}" />
+				{% endif %}
+
+			<!--[Optional] Parameter VBREM_SQLSERVER_PASSWORD specifies a password to connect to the SQL server in the native authentication mode. Required when VBREM_SQLSERVER_USERNAME is used-->
+			<!--Make sure you keep the answer file in a safe location whenever SQL server account password is added to the answer file-->
+				<!--Supported values: password in plain text-->
+				{% if sql_authentication == '1' %}
+				<property name="VBREM_SQLSERVER_PASSWORD" value="{{ sql_password }}" hidden="1"/>
+				{% endif %}
+
+		<!--Ports configuration-->
+		<!--Specify Veeam Backup Enterprise Manager used ports configuration-->
+
+			<!--[Optional] Parameter VBRC_SERVICE_PORT specifies a TCP port that will be used by the Veeam Guest Catalog Service. If you do not specify this parameter, default port '9393' is used-->
+				<!--Supported values: port-->
+				{% if catalog_service_port is defined %}
+				<property name="VBRC_SERVICE_PORT" value="{{ catalog_service_port }}" />
+				{% endif %}
+
+			<!--[Optional] Parameter VBREM_SERVICE_PORT specifies a TCP port that will be used by the Veeam Backup Enterprise Manager Service. If you do not specify this parameter, default port '9394' is used-->
+				<!--Supported values: port-->
+				{% if em_service_port is defined %}
+				<property name="VBREM_SERVICE_PORT" value="{{ em_service_port }}" />
+				{% endif %}
+
+			<!--[Optional] Parameter VBREM_TCPPORT specifies a TCP port that will be used by the Veeam Backup Enterprise Manager website. If you do not specify this parameter, default port '9080' is used-->
+				<!--Supported values: port-->
+				{% if em_http_website_port is defined %}
+				<property name="VBREM_TCPPORT" value="{{ em_http_website_port }}" />
+				{% endif %}
+
+			<!--[Optional] Parameter VBREM_SSLPORT specifies a SSL port that will be used by the Veeam Backup Enterprise Manager website. If you do not specify this parameter, default port '9443' is used-->
+				<!--Supported values: port-->
+				{% if em_https_website_port is defined %}
+				<property name="VBREM_SSLPORT" value="{{ em_https_website_port }}" />
+				{% endif %}
+
+			<!--[Optional] Parameter VBREM_RESTAPISVC_PORT specifies a TCP port used for Veeam Backup Enterprise Manager REST API Service. If you do not specify this parameter, default port '9399' is used-->
+				<!--Supported values: port-->
+				{% if em_http_api_port is defined %}
+				<property name="VBREM_RESTAPISVC_PORT" value="{{ em_http_api_port }}" />
+				{% endif %}
+
+			<!--[Optional] Parameter VBREM_RESTAPISVC_SSLPORT specifies a SSL port used for Veeam Backup Enterprise Manager REST API Service. If you do not specify this parameter, default port '9398' is used-->
+				<!--Supported values: port-->
+				{% if em_https_api_port is defined %}
+				<property name="VBREM_RESTAPISVC_SSLPORT" value="{{ em_https_api_port }}" />
+				{% endif %}
+
+			<!--[Optional] Parameter VBCP_SSLPORT specifies a SSL port used for the Veeam Cloud Connect Portal website. If you do not specify this parameter, default port '6443' is used-->
+				<!--Supported values: port-->
+				{% if em_cloud_connect_website_port is defined %}
+				<property name="VBCP_SSLPORT" value="{{ em_cloud_connect_website_port }}" />
+				{% endif %}
+
+		<!--Certificate configuration-->
+		<!--Specify Veeam Backup Enterprise Manager certificate-->
+
+			<!--[Optional] Parameter VBREM_THUMBPRINT specifies the certificate to be used by Veeam Backup Enterprise Manager Service and Veeam Backup Enterprise Manager REST API Service. If you do not specify this parameter, a new certificate will be generated by openssl.exe-->
+				<!--Supported values: port-->
+				{% if em_thumbprint is defined %}
+				<property name="VBREM_THUMBPRINT" value="{{ em_thumbprint }}" />
+				{% endif %}
+
+		<!--Data locations-->
+		<!--Specify Veeam Backup Enterprise Manager installation path and catalog folder location-->
+
+			<!--[Optional] Parameter INSTALLDIR specifies Veeam Backup Enterprise Manager server installation path. If you do not specify this parameter, default installation path '%ProgramFiles%\Veeam\Backup and Replication' is used-->
+				<!--Supported values: file path-->
+				{% if vbr_install_directory is defined %}
+				<property name="INSTALLDIR" value="{{ vbr_install_directory }}" />
+				{% endif %}
+
+			<!--[Optional] Parameter VM_CATALOGPATH specifies a path to the catalog folder where index files will be stored. If you do not specify this parameter, a path is selected based on the free space across all available disks-->
+				<!--Supported values: file path-->
+				{% if catalog_path is defined %}
+				<property name="VM_CATALOGPATH" value="{{ catalog_path }}" />
+				{% endif %}
+
+		<!--Automatic update settings-->
+		<!--Specify Veeam Backup Enterprise Manager autoupdate settings-->
+
+			<!--[Optional] Parameter VBREM_CHECK_UPDATES specifies if you want Veeam Backup Enterprise Manager to automatically check for new product versions and updates. If you do not specify this parameter, Veeam Backup Backup Enterprise Manager will automatically check for available updates and patches-->
+				<!--Supported values: 0/1-->
+				<property name="VBREM_CHECK_UPDATES" value="{{ vbr_check_updates }}" />
+
+		<!--Setup settings-->
+		<!--Specify additional setup settings-->
+
+			<!--[Optional] Parameter VBCP_INSTALL specifies if Veeam Cloud Connect Portal will be installed. If you do not specify this parameter, it will not be installed-->
+				<!--Supported values: 0/1-->
+				{% if cloud_connect %}
+				<property name="VBCP_INSTALL" value="1" />
+				{% endif %}
+
+			<!--[Optional] Parameter VBREM_CONFIG_SCHANNEL specifies if the TLS 1.2 protocol will be used for secure communication with the Veeam Backup Enterprise Manager website-->
+				<!--Supported values: 0/1-->
+				<property name="VBREM_CONFIG_SCHANNEL" value="{{ em_tls }}" />
+
+			<!--[Optional] Parameter REBOOT_IF_REQUIRED forces target server reboot, whenever it is required. If you do not specify this parameter, reboot is not performed automatically. Keep in mind that setup procedure will not be restarted after reboot-->
+				<!--Supported values: 0/1-->
+				<property name="REBOOT_IF_REQUIRED" value="0" />
+
+	</properties>
+</unattendedInstallationConfiguration>

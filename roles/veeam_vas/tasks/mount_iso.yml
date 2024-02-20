@@ -12,16 +12,27 @@
     url: "{{ iso_url }}"
     dest: "{{ destination }}{{ destination_iso_file }}"
     checksum: "{{ iso_checksum }}"
-    checksum_algorithm: sha256
+    checksum_algorithm: "{{ iso_checksum_algorithm }}"
     force: true
-  when: iso_download | bool
   register: win_get_url_out
+  retries: 3
+  async: 3600
+  poll: 0
+  when: iso_download | bool
+- name: Check on download status
+  ansible.builtin.async_status:
+    jid: "{{ win_get_url_out.ansible_job_id }}"
+  register: async_poll_results
+  until: async_poll_results.finished
+  retries: 120
+  delay: 30
+  when: iso_download | bool
 - name: Debug Download Result
-  debug:
+  ansible.builtin.debug:
     var: win_get_url_out
   when: iso_download | bool
 - name: Clearing 'iso_url' variable as it isn't needed
-  set_fact:
+  ansible.builtin.set_fact:
     iso_url: "not specified"
   when: not iso_download | bool
 
@@ -32,7 +43,7 @@
     state: present
   register: disk_image_out
 - name: Set ISO Drive Letter
-  set_fact:
+  ansible.builtin.set_fact:
     source: "{{ disk_image_out.mount_paths[0] }}"
 - name: "Obtain version information about '{{ source }}Setup.exe' (v11-)"
   community.windows.win_file_version:
@@ -40,7 +51,7 @@
   register: iso_version
   when: version | int <= 11
 - name: "Does the ISO version ({{ iso_version.win_file_version.file_major_part }}) match the version specified in the playbook ({{ version }})?"
-  fail:
+  ansible.builtin.fail:
     msg: "Please either specify the correct 'version' in your playbook or the correct ISO to be used. Halting Ansible now as this can cause adverse effects."
   when:
     - version | int <= 11
@@ -51,7 +62,7 @@
   register: iso_version
   when: version | int >= 12
 - name: "Does the ISO version match the version specified in the playbook ({{ version }})?"
-  fail:
+  ansible.builtin.fail:
     msg: "Please either specify the correct 'version' in your playbook or the correct ISO to be used. Halting Ansible now as this can cause adverse effects."
   when:
     - version | int >= 12

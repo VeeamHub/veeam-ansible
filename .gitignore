@@ -1,7 +1,5 @@
 .DS_Store
 .vscode
 .cache
-
-# Ansible
+__pycache__
 *.retry
-plugins/modules/__pycache__

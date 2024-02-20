@@ -2,26 +2,6 @@
 # vbr_install_pretasks tasks file for veeamhub.veeam_vas
 
 # VBR PRE-INSTALL TASKS
-- name: VBR ISO Tasks
-  include_tasks: mount_iso.yml
-- name: Print Installation Configuration
-  debug:
-    msg:
-      - "ISO Drive Letter: '{{ source }}'"
-      - "Installation Logs Folder: '{{ destination }}logs'"
-      - "Version: {{ version }}"
-      - "Download ISO?: {{ iso_download }}"
-      - "ISO Source: {{ iso_url }}"
-      - "ISO File Destination: {{ destination }}{{ destination_iso_file }}"
-      - "Use license?: {{ license }}"
-      - "License Source: {{ source_license }}"
-      - "License File Destination: {{ destination }}{{ destination_license_file }}"
-      - "Install SQL Express/PostgreSQL?: {{ sql_express_setup }}"
-      - "SQL Instance: {{ sql_instance }}"
-      - "SQL Database: {{ sql_database }}"
-      - "SQL Service Account: {{ sql_service_username | default('not specified') }}"
-      - "SQL Install Account: {{ sql_install_username | default('not specified') }}"
-      - "VBR SQL Account: {{ sql_username }}"
 - name: Create logs directory
   ansible.windows.win_file:
     path: "{{ destination }}logs"
@@ -35,7 +15,7 @@
   ansible.windows.win_user:
     name: "{{ sql_install_username }}"
     password: "{{ sql_install_password }}"
-    password_never_expires: yes
+    password_never_expires: true
     state: present
     groups:
       - Administrators
@@ -44,7 +24,7 @@
   ansible.windows.win_user:
     name: "{{ sql_service_username }}"
     password: "{{ sql_service_password }}"
-    password_never_expires: yes
+    password_never_expires: true
     state: present
     groups:
       - Users
@@ -63,7 +43,7 @@
     path: "{{ source }}Redistr\\ReportViewer.msi"
     state: present
 - name: .NET Framework
-  include_tasks: install_net_framework.yml
+  ansible.builtin.include_tasks: install_net_framework.yml
 - name: Install SQL Express
   ansible.windows.win_package:
     path: "{{ sql_express_file }}"
@@ -82,7 +62,7 @@
       - "/UPDATEENABLED=1"
       - "/TCPENABLED=1"
       - "/NPENABLED=1"
-  become: yes
+  become: true
   become_flags: logon_type=batch
   vars:
     ansible_become_method: runas
@@ -91,9 +71,20 @@
   when:
     - version | int <= 11
     - sql_express_setup | bool
+- name: Looking for PostgreSQL in Veeam ISO
+  ansible.windows.win_find:
+    paths: "{{ source }}Redistr\\x64\\PostgreSQL"
+    patterns: postgresql-.*
+    recurse: true
+    file_type: file
+    use_regex: true
+  register: postgres
+  when:
+    - version | int >= 12
+    - sql_express_setup | bool
 - name: Install PostgreSQL
   ansible.windows.win_package:
-    path: "{{ postgres_file }}"
+    path: "{{ postgres.files[0].path }}"
     creates_service: VeeamPostgreSqlSvc
     arguments:
       - --mode
@@ -110,7 +101,7 @@
       - "{{ sql_password }}"
       - --enable_acledit
       - 1
-  become: yes
+  become: true
   become_flags: logon_type=batch
   vars:
     ansible_become_method: runas

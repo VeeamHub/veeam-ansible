@@ -7,19 +7,37 @@ version: "12" # "10", & "11" are also accepted
 # ISO & License files
 skip_iso_check: false
 iso_download: false
+iso_checksum_algorithm: "sha1"
 license: false
+license_autoupdate: 1 # NFR and Evaluation licenses must be set to 1 - Licenses without license ID information must be set to 0
 source_license: ""
 destination: "C:\\install\\"
 
 # Default common variables
-patch: false
+sql_authentication: "0" # 0-Windows 1-Native SQL Authentication Mode
 sql_engine: "1" # 0-MSSQL / 1-Postgres (only for v12 and newer)
 sql_express_setup: true # Starting with v12, this means a local PostgreSQL install
 sql_instance: "(local)\\VEEAMSQL2016"
+patch: false
+legacy: false
 
 # VBR/EM-specific default variables
 vbr_jobs_file: "{{ destination }}DisabledJobs{{ ansible_date_time.iso8601_basic_short }}.csv"
 cloud_connect: false # Is the server a Cloud Connect server? (If in doubt, 'false')
+create_service_account: false
+service_account_username: "LocalSystem" # Account used to run the Veeam service being installed
+vbr_auto_upgrade: "1" # 1-Automatic 0-Disabled Upgrade backup infrastructure components during the upgrade process
+vbr_check_updates: "1" # 1-Enabled 0-Disabled Automatically check for new product versions and notify in the VBR Console
+em_tls: "1" # 1-Enabled 0-Disabled Use TLS 1.2 protocol for secure communication
+
+# VBR Plug-in installation (only for v12.1 and newer)
+# 1-Install 0-Do not install
+vbr_ahv_install: "1" # Veeam Backup for Nutanix AHV
+vbr_rhv_install: "1" # Veeam Backup for Red Hat Virtualization
+vbr_aws_install: "1" # Veeam Backup for AWS
+vbr_azure_install: "1" # Veeam Backup for Azure
+vbr_gcp_install: "1" # Veeam Backup for GCP
+vbr_kasten_install: "1" # Veeam Plug-in for Kasten
 
 # Veeam ONE-specific default variables
 one_create_service_account: true

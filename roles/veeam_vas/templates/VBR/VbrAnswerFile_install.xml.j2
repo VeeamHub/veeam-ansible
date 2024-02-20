@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="utf-8"?>
+<unattendedInstallationConfiguration bundle="Vbr" mode="install" version="1.0">
+<!--[Required] Parameter 'mode' defines installation mode that silent install should operate in-->
+<!--Supported values: install/upgrade/uninstall-->
+
+<!--Note: unused [Optional] parameters should be removed from the answer file-->
+
+	<properties>
+
+		<!--License agreements-->
+		<!--Specify parameters to accept all the license agreements during silent installation or upgrade-->
+
+			<!--[Required] Parameter ACCEPT_EULA specifies if you want to accept the Veeam license agreement. Specify '1' to accept the license agreement and proceed with installation or upgrade-->
+				<!--Supported values: 0/1-->
+				<property name="ACCEPT_EULA" value="1" />
+
+			<!--[Required] Parameter ACCEPT_LICENSING_POLICY specifies if you want to accept Veeam licensing policy. Specify '1' to accept the licensing policy and proceed with installation or upgrade-->
+				<!--Supported values: 0/1-->
+				<property name="ACCEPT_LICENSING_POLICY" value="1" />
+
+			<!--[Required] Parameter ACCEPT_THIRDPARTY_LICENSES specifies if you want to accept all the 3rd party licenses used. Specify '1' to accept the license agreements and proceed with installation or upgrade-->
+				<!--Supported values: 0/1-->
+				<property name="ACCEPT_THIRDPARTY_LICENSES" value="1" />
+
+			<!--[Required] Parameter ACCEPT_REQUIRED_SOFTWARE specifies if you want to accept all the required software licenses. Specify '1' to accept the license agreements and proceed with installation or upgrade-->
+				<!--Supported values: 0/1-->
+				<property name="ACCEPT_REQUIRED_SOFTWARE" value="1" />
+
+		<!--License file-->
+		<!--Specify path to a license file and autoupdate option-->
+
+			<!--[Optional] Parameter VBR_LICENSE_FILE specifies a full path to the license file. If you do not specify this parameter(or leave it empty value), Veeam Backup & Replication will be installed using current license file. To install Community Edition it must be set to 0-->
+				<!--Supported values: file path/0(to install CE)-->
+				{% if license %}
+				<property name="VBR_LICENSE_FILE" value="{{ destination }}{{ destination_license_file }}" />
+				{% endif %}
+
+			<!--[Optional] Parameter VBR_LICENSE_AUTOUPDATE specifies if you want to update license automatically(enables usage reporting). If you do not specify this parameter, autoupdate will be enabled. For Community Edition, NFR and Evaluation licenses it must be set to 1. For licenses without license ID information it must be set to 0-->
+				<!--Supported values: 0/1-->
+				{% if license %}
+				<property name="VBR_LICENSE_AUTOUPDATE" value="{{ license_autoupdate }}" />
+				{% endif %}
+
+		<!--Service account-->
+
+			<!--[Optional] Parameter VBR_SERVICE_USER specifies the account under which the Veeam Backup Service will run after installation and upgrade. If you do not specify this parameter, the Veeam Backup Service will run under the LocalSystem account-->
+				<!--Supported values: domain\username-->
+				{% if service_account_username != 'LocalSystem' %}
+				<property name="VBR_SERVICE_USER" value="{{ service_account_username }}" />
+				{% endif %}
+
+			<!--[Optional] Parameter VBR_SERVICE_PASSWORD specifies a password for the account under which the Veeam Backup Service will run. You must specify this parameter together with VBR_SERVICE_USER parameter during installation. Required during upgrade if service account is not LocalSystem account-->
+			<!--Make sure you keep the answer file in a safe location whenever service account password is added to the answer file-->
+				<!--Supported values: password in plain text-->
+				{% if service_account_username != 'LocalSystem' %}
+				<property name="VBR_SERVICE_PASSWORD" value="{{ service_account_password }}" hidden="1"/>
+				{% endif %}
+
+		<!--Database configuration-->
+		<!--Specify database server installation options and required configuration parameters for Veeam Backup & Replication database-->
+
+			<!--[Required] Parameter VBR_SQLSERVER_INSTALL specifies if bundled PostgreSQL server will be installed. If set to '0', an existing SQL server settings must be specified below-->
+				<!--Supported values: 0/1-->
+				{% if sql_express_setup %}
+				<property name="VBR_SQLSERVER_INSTALL" value="1" />
+				{% else %}
+				<property name="VBR_SQLSERVER_INSTALL" value="0" />
+				{% endif %}
+
+			<!--[Optional] Parameter VBR_SQLSERVER_ENGINE specifies SQL server type: '1' for PostgreSQL server, '0' for Microsoft SQL server.  Required when VBR_SQLSERVER_INSTALL is set to '0'-->
+				<!--Supported values: 0/1-->
+				<property name="VBR_SQLSERVER_ENGINE" value="{{ sql_engine }}" />
+
+			<!--[Optional] Parameter VBR_SQLSERVER_SERVER specifies a SQL server and instance on which the configuration database will be deployed. Required when VBR_SQLSERVER_INSTALL is set to '0'-->
+				<!--Supported values: MSSQLSERVER\DBINSTANCE or POSTGRESQLSERVER:PORT-->
+				{% if not sql_express_setup %}
+				<property name="VBR_SQLSERVER_SERVER" value="{{ sql_instance }}" />
+				{% endif %}
+
+			<!--[Optional] Parameter VBR_SQLSERVER_DATABASE specifies a name for the configuration database. If you do not specify this parameter, default name 'VeeamBackup' is used-->
+				<!--Supported values: database name-->
+				<property name="VBR_SQLSERVER_DATABASE" value="{{ sql_database }}" />
+
+			<!--[Optional] Parameter VBR_SQLSERVER_AUTHENTICATION specifies authentication mode to connect to the database server where the Veeam Backup & Replication configuration database is deployed. Required when VBR_SQLSERVER_INSTALL is set to '0'-->
+				<!--Supported values: 0 for Windows authentication/1 for SQL native authentication-->
+				{% if not sql_express_setup %}
+				<property name="VBR_SQLSERVER_AUTHENTICATION" value="{{ sql_authentication }}" />
+				{% endif %}
+
+			<!--[Optional] Parameter VBR_SQLSERVER_USERNAME specifies a LoginID to connect to the SQL server in the native authentication mode. Required when VBR_SQLSERVER_AUTHENTICATION is set to '1'-->
+				<!--Supported values: username-->
+				{% if sql_authentication == '1' %}
+				<property name="VBR_SQLSERVER_USERNAME" value="{{ sql_username }}" />
+				{% endif %}
+
+			<!--[Optional] Parameter VBR_SQLSERVER_PASSWORD specifies a password to connect to the SQL server in the native authentication mode. Required when VBR_SQLSERVER_USERNAME is used-->
+			<!--Make sure you keep the answer file in a safe location whenever SQL server account password is added to the answer file-->
+				<!--Supported values: password in plain text-->
+				{% if sql_authentication == '1' %}
+				<property name="VBR_SQLSERVER_PASSWORD" value="{{ sql_password }}" hidden="1"/>
+				{% endif %}
+
+		<!--Ports configuration-->
+		<!--Specify Veeam Backup & Replication used ports configuration-->
+
+			<!--[Optional] Parameter VBRC_SERVICE_PORT specifies a TCP port that will be used by the Veeam Guest Catalog Service. If you do not specify this parameter, default port '9393' is used-->
+				<!--Supported values: port-->
+				{% if catalog_service_port is defined %}
+				<property name="VBRC_SERVICE_PORT" value="{{ catalog_service_port }}" />
+				{% endif %}
+
+			<!--[Optional] Parameter VBR_SERVICE_PORT specifies a TCP port that will be used by the Veeam Backup Service. If you do not specify this parameter, default port '9392' is used. If specified port number is occupied already, setup will assign the next available port number to the component-->
+				<!--Supported values: port-->
+				{% if vbr_service_port is defined %}
+				<property name="VBR_SERVICE_PORT" value="{{ vbr_service_port }}" />
+				{% endif %}
+
+			<!--[Optional] Parameter VBR_SECURE_CONNECTIONS_PORT specifies a port used for communication between the mount server and the backup server. If you do not specify this parameter, default port '9401' is used-->
+				<!--Supported values: port-->
+				{% if vbr_secure_connections_port is defined %}
+				<property name="VBR_SECURE_CONNECTIONS_PORT" value="{{ vbr_secure_connections_port }}" />
+				{% endif %}
+
+			<!--[Optional] Parameter VBR_RESTSERVICE_PORT specifies a port used for Veeam REST API service. If you do not specify this parameter, default port '9419' is used-->
+				<!--Supported values: port-->
+				{% if vbr_rest_api_port is defined %}
+				<property name="VBR_RESTSERVICE_PORT" value="{{ vbr_rest_api_port }}" />
+				{% endif %}
+
+		<!--Data locations-->
+		<!--Specify Veeam Backup & Replication installation path, catalog and cache folders location-->
+
+			<!--[Optional] Parameter INSTALLDIR specifies Veeam Backup & Replication server installation path. If you do not specify this parameter, default installation path '%ProgramFiles%\Veeam\Backup and Replication' is used-->
+				<!--Supported values: file path-->
+				{% if vbr_install_directory is defined %}
+				<property name="INSTALLDIR" value="{{ vbr_install_directory }}" />
+				{% endif %}
+
+			<!--[Optional] Parameter VM_CATALOGPATH specifies a path to the catalog folder where index files will be stored. If you do not specify this parameter, a path is selected based on the free space across all available disks-->
+				<!--Supported values: file path-->
+				{% if catalog_path is defined %}
+				<property name="VM_CATALOGPATH" value="{{ catalog_path }}" />
+				{% endif %}
+
+			<!--[Optional] Parameter VBR_IRCACHE specifies the folder where instant recovery cache will be stored. If you do not specify this parameter, a path is selected based on the free space across all available disks-->
+				<!--Supported values: file path-->
+				{% if instant_recovery_cache_path is defined %}
+				<property name="VBR_IRCACHE" value="{{ instant_recovery_cache_path }}" />
+				{% endif %}
+
+		<!--Automatic update settings-->
+		<!--Specify Veeam Backup & Replication autoupdate settings-->
+
+			<!--[Optional] Parameter VBR_CHECK_UPDATES specifies if you want Veeam Backup & Replication to automatically check for new product versions and updates. If you do not specify this parameter, Veeam Backup & Replication will automatically check and notify about available updates and patches-->
+				<!--Supported values: 0/1-->
+				<property name="VBR_CHECK_UPDATES" value="{{ vbr_check_updates }}" />
+
+		<!--Plug-ins for Veeam Backup & Replication-->
+		<!--Specify additional components to install-->
+
+			<!--[Optional] Parameter AHV_INSTALL specifies if Nutanix AHV Plug-in for Veeam Backup & Replication will be installed. If you do not specify this parameter, plug-in will not be installed-->
+				<!--Supported values: 0/1-->
+				<property name="AHV_INSTALL" value="{{ vbr_ahv_install }}" />
+
+			<!--[Optional] Parameter RHV_INSTALL specifies if Red Hat Virtualization Plug-in for Veeam Backup & Replication will be installed. If you do not specify this parameter, plug-in will not be installed-->
+				<!--Supported values: 0/1-->
+				<property name="RHV_INSTALL" value="{{ vbr_rhv_install }}" />
+
+			<!--[Optional] Parameter AWS_INSTALL specifies if AWS Plug-in for Veeam Backup & Replication will be installed. If you do not specify this parameter, plug-in will be installed-->
+				<!--Supported values: 0/1-->
+				<property name="AWS_INSTALL" value="{{ vbr_aws_install }}" />
+
+			<!--[Optional] Parameter AZURE_INSTALL specifies if Microsoft Azure Plug-in for Veeam Backup & Replication will be installed. If you do not specify this parameter, plug-in will be installed-->
+				<!--Supported values: 0/1-->
+				<property name="AZURE_INSTALL" value="{{ vbr_azure_install }}" />
+
+			<!--[Optional] Parameter GCP_INSTALL specifies if Google Cloud Plug-in for Veeam Backup & Replication will be installed. If you do not specify this parameter, plug-in will be installed-->
+				<!--Supported values: 0/1-->
+				<property name="GCP_INSTALL" value="{{ vbr_gcp_install }}" />
+
+			<!--[Optional] Parameter KASTEN_INSTALL specifies if Kasten K10 Plug-in for Veeam Backup & Replication will be installed. If you do not specify this parameter, plug-in will be installed-->
+				<!--Supported values: 0/1-->
+				<property name="KASTEN_INSTALL" value="{{ vbr_kasten_install }}" />
+
+		<!--Setup settings-->
+		<!--Specify additional setup settings-->
+
+			<!--[Optional] Parameter REBOOT_IF_REQUIRED forces target server reboot, whenever it is required. If you do not specify this parameter, reboot is not performed automatically. Keep in mind that setup procedure will not be restarted after reboot-->
+				<!--Supported values: 0/1-->
+				<property name="REBOOT_IF_REQUIRED" value="0" />
+
+	</properties>
+</unattendedInstallationConfiguration>

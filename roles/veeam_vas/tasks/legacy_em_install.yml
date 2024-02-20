@@ -1,0 +1,107 @@
+---
+# em_install tasks file for veeamhub.veeam_vas
+
+# PRE-INSTALL TASKS
+- name: Including common VBR pre-install tasks
+  ansible.builtin.include_tasks: legacy_vbr_install_pretasks.yml
+- name: Enable Windows Feature - IIS Web Server Role
+  ansible.windows.win_optional_feature:
+    name: IIS-WebServerRole
+    state: present
+- name: Enable Windows Feature - IIS Web Server
+  ansible.windows.win_optional_feature:
+    name: IIS-WebServer
+    state: present
+- name: Enable Windows Feature - IIS Common HTTP Features
+  ansible.windows.win_optional_feature:
+    name: IIS-CommonHttpFeatures
+    state: present
+- name: Enable Windows Feature - IIS Windows Authentication Component
+  ansible.windows.win_optional_feature:
+    name: IIS-WindowsAuthentication
+    state: present
+- name: Enable Windows Feature - IIS WebSocket Protocol Component
+  ansible.windows.win_optional_feature:
+    name: IIS-WebSockets
+    state: present
+- name: Enable Windows Feature - .NET Extended support for ASP.NET 4.5
+  ansible.windows.win_optional_feature:
+    name: NetFx4Extended-ASPNET45
+    state: present
+- name: Enable Windows Feature - IIS .NET 4.5 Extensibility Component
+  ansible.windows.win_optional_feature:
+    name: IIS-NetFxExtensibility45
+    state: present
+- name: Enable Windows Feature - IIS ASP.NET 4.5 Component
+  ansible.windows.win_optional_feature:
+    name: IIS-ASPNET45
+    include_parent: true
+    state: present
+- name: Install IIS URL Rewrite Module
+  ansible.windows.win_package:
+    path: "{{ source }}Redistr\\x64\\rewrite_amd64.msi"
+    state: present
+
+# INSTALLING VEEAM SOFTWARE
+- name: Install Veeam Backup Catalog (v12+)
+  ansible.windows.win_package:
+    path: "{{ source }}Catalog\\VeeamBackupCatalog64.msi"
+    state: present
+    arguments: '/L*v "{{ destination }}logs\\VeeamBackupCatalog64.log" /norestart /qn ACCEPTEULA="YES" ACCEPT_LICENSING_POLICY="1" ACCEPT_REQUIRED_SOFTWARE="1" ACCEPT_THIRDPARTY_LICENSES="1"'
+  register: win_package_vbr_catalog
+  when: version | int >= 12
+- name: Install Veeam Backup Catalog (v11-)
+  ansible.windows.win_package:
+    path: "{{ source }}Catalog\\VeeamBackupCatalog64.msi"
+    state: present
+    arguments: '/L*v "{{ destination }}logs\\VeeamBackupCatalog64.log" /norestart /qn ACCEPTEULA="YES" ACCEPT_THIRDPARTY_LICENSES="1"'
+  register: win_package_vbr_catalog
+  when: version | int <= 11
+- name: Install Veeam Backup Enterprise Manager (v12+)
+  ansible.windows.win_package:
+    path: "{{ source }}EnterpriseManager\\BackupWeb_x64.msi"
+    state: present
+    arguments: '/L*v "{{ destination }}logs\\EnterpriseManager.log" VBREM_LICENSE_FILE="{{ destination }}{{ destination_license_file }}" VBREM_SQLSERVER_ENGINE="{{ sql_engine }}" VBREM_SQLSERVER_AUTHENTICATION=1 VBREM_SQLSERVER_SERVER="{{ sql_instance }}" VBREM_SQLSERVER_DATABASE="{{ sql_database }}" VBREM_SQLSERVER_USERNAME="{{ sql_username }}" VBREM_SQLSERVER_PASSWORD="{{ sql_password }}" ACCEPT_LICENSING_POLICY="1" ACCEPT_REQUIRED_SOFTWARE="1" ACCEPT_THIRDPARTY_LICENSES=1 ACCEPTEULA=YES'
+  when: version | int >= 12
+- name: Install Veeam Backup Enterprise Manager (v11-)
+  ansible.windows.win_package:
+    path: "{{ source }}EnterpriseManager\\BackupWeb_x64.msi"
+    state: present
+    arguments: '/L*v "{{ destination }}logs\\EnterpriseManager.log" VBREM_LICENSE_FILE="{{ destination }}{{ destination_license_file }}" VBREM_SQLSERVER_AUTHENTICATION=1 VBREM_SQLSERVER_SERVER="{{ sql_instance }}" VBREM_SQLSERVER_DATABASE="{{ sql_database }}" VBREM_SQLSERVER_USERNAME="{{ sql_username }}" VBREM_SQLSERVER_PASSWORD="{{ sql_password }}" ACCEPT_THIRDPARTY_LICENSES=1 ACCEPTEULA=YES'
+  when: version | int <= 11
+- name: Install Veeam Cloud Connect Portal
+  ansible.windows.win_package:
+    path: "{{ source }}Cloud Portal\\BackupCloudPortal_x64.msi"
+    state: present
+    arguments: '/L*v "{{ destination }}logs\\BackupCloudPortal_x64.log" /norestart /qn ACCEPTEULA="YES" ACCEPT_THIRDPARTY_LICENSES="1"'
+  when: cloud_connect | bool
+- name: Looking for patches in '{{ source }}Updates' directory
+  ansible.windows.win_find:
+    paths: "{{ source }}Updates"
+    recurse: false
+    file_type: file
+  ignore_errors: true
+  register: file
+- name: Does EM need to be patched?
+  ansible.builtin.set_fact:
+    patch: "{{ file.matched }}"
+- name: Setting patch filename & id
+  ansible.builtin.set_fact:
+    patch_file: "{{ file.files[0].filename }}"
+  when: patch | bool
+- name: Including EM patch tasks
+  ansible.builtin.include_tasks: em_patch.yml
+  when: patch | bool
+
+# POST-INSTALL TASKS
+- name: Unmount ISO
+  community.windows.win_disk_image:
+    image_path: "{{ destination }}{{ destination_iso_file }}"
+    state: absent
+- name: Installation Complete! Checking OS for pending reboots
+  pending_reboot_check:
+  register: postcheck
+- name: Rebooting server if necessary
+  ansible.windows.win_reboot:
+    msg: Reboot initiated by Ansible to complete EM install
+  when: postcheck.pending_reboot | bool

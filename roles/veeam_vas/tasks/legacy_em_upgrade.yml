@@ -1,0 +1,108 @@
+---
+# em_upgrade tasks file for veeamhub.veeam_vas
+
+# PRE-UPGRADE TASKS
+- name: Create logs directory
+  ansible.windows.win_file:
+    path: "{{ destination }}logs"
+    state: directory
+- name: Copy license file
+  ansible.windows.win_copy:
+    src: "{{ source_license }}"
+    dest: "{{ destination }}{{ destination_license_file }}"
+  when: license | bool
+- name: Stopping all Veeam Backup Jobs (Only if VBR installed on same server as EM)
+  ansible.windows.win_shell: |
+    if (-Not (Get-Module -ListAvailable -Name Veeam.Backup.PowerShell)){Add-PSSnapin -PassThru VeeamPSSnapIn -ErrorAction Stop | Out-Null}
+    Get-VBRJob | Stop-VBRJob | Out-Null
+  when: software.installed | bool
+- name: Stopping all Veeam services prior to upgrade
+  ansible.windows.win_shell: |
+    Stop-Process -Name "Veeam.Backup.Shell" -Force -ErrorAction SilentlyContinue
+    Get-Service veeam* | Stop-Service
+- name: Ensure the required NuGet package provider version is installed
+  ansible.windows.win_shell: |
+    [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+    Find-PackageProvider -Name Nuget -ForceBootstrap -IncludeDependencies -Force
+  when: sql_instance != '(local)\\VEEAMSQL2016'
+- name: Installing SqlServer PowerShell module
+  community.windows.win_psmodule:
+    name: SqlServer
+    skip_publisher_check: true
+    state: present
+  register: result
+  until: result is not failed
+  retries: 1  # allows PowerShellGet to be upgraded if needed
+  when: sql_instance != '(local)\\VEEAMSQL2016'
+- name: Start adhoc EM database backup to default SQL backup location
+  ansible.windows.win_shell: |
+    $secureString = ConvertTo-SecureString "{{ sql_password }}" -AsPlainText -Force
+    $credential = New-Object System.Management.Automation.PSCredential ("{{ sql_username }}", $secureString)
+    Backup-SqlDatabase -ServerInstance "{{ sql_instance }}" -Database "{{ sql_database }}" -Credential $credential
+  no_log: true
+- name: .NET Framework
+  ansible.builtin.include_tasks: install_net_framework.yml
+
+# UPGRADING VEEAM SOFTWARE
+- name: Upgrade Veeam Backup Catalog (v12+)
+  ansible.windows.win_package:
+    path: "{{ source }}Catalog\\VeeamBackupCatalog64.msi"
+    state: present
+    arguments: '/L*v "{{ destination }}logs\\VeeamBackupCatalog64.log" /norestart /qn ACCEPTEULA="YES" ACCEPT_LICENSING_POLICY="1" ACCEPT_REQUIRED_SOFTWARE="1" ACCEPT_THIRDPARTY_LICENSES="1"'
+  register: win_package_vbr_catalog
+  when: version | int >= 12
+- name: Upgrade Veeam Backup Catalog (v11-)
+  ansible.windows.win_package:
+    path: "{{ source }}Catalog\\VeeamBackupCatalog64.msi"
+    state: present
+    arguments: '/L*v "{{ destination }}logs\\VeeamBackupCatalog64.log" /norestart /qn ACCEPTEULA="YES" ACCEPT_THIRDPARTY_LICENSES="1"'
+  register: win_package_vbr_catalog
+  when: version | int <= 11
+- name: Upgrade Veeam Backup Enterprise Manager (v12+)
+  ansible.windows.win_package:
+    path: "{{ source }}EnterpriseManager\\BackupWeb_x64.msi"
+    state: present
+    arguments: '/L*v "{{ destination }}logs\\EnterpriseManager.log" VBREM_LICENSE_FILE="{{ destination }}{{ destination_license_file }}"  ACCEPT_LICENSING_POLICY="1" ACCEPT_REQUIRED_SOFTWARE="1" ACCEPT_THIRDPARTY_LICENSES=1 ACCEPTEULA=YES'
+  when: version | int >= 12
+- name: Upgrade Veeam Backup Enterprise Manager (v11-)
+  ansible.windows.win_package:
+    path: "{{ source }}EnterpriseManager\\BackupWeb_x64.msi"
+    state: present
+    arguments: '/L*v "{{ destination }}logs\\EnterpriseManager.log" VBREM_LICENSE_FILE="{{ destination }}{{ destination_license_file }}"  ACCEPT_THIRDPARTY_LICENSES=1 ACCEPTEULA=YES'
+  when: version | int <= 11
+- name: Checking to see if Veeam Cloud Connect Portal is installed
+  veeam_software_check:
+    name: "Veeam Cloud Connect Portal"
+  register: software
+- name: Upgrade Veeam Cloud Connect Portal
+  ansible.windows.win_package:
+    path: "{{ source }}Cloud Portal\\BackupCloudPortal_x64.msi"
+    state: present
+    arguments: '/L*v "{{ destination }}logs\\BackupCloudPortal_x64.log" /norestart /qn ACCEPTEULA="YES" ACCEPT_THIRDPARTY_LICENSES="1"'
+  when: software.installed | bool
+- name: Finding file(s) in '{{ source }}Updates' directory
+  ansible.windows.win_find:
+    paths: "{{ source }}Updates"
+    recurse: false
+    file_type: file
+  ignore_errors: true
+  register: file
+- name: Does EM need to be patched?
+  ansible.builtin.set_fact:
+    patch: "{{ file.matched }}"
+- name: Setting patch filename
+  ansible.builtin.set_fact:
+    patch_file: "{{ file.files[0].filename }}"
+  when: patch | bool
+- name: Including EM patch tasks
+  ansible.builtin.include_tasks: em_patch.yml
+  when: patch | bool
+
+# POST-UPGRADE TASKS
+- name: Unmount ISO
+  community.windows.win_disk_image:
+    image_path: "{{ destination }}{{ destination_iso_file }}"
+    state: absent
+- name: Rebooting server now to complete upgrade
+  ansible.windows.win_reboot:
+    msg: Reboot initiated by Ansible to complete EM upgrade

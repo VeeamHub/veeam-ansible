@@ -205,7 +205,7 @@ End-to-End Create Veeam Job:
           ansible.builtin.debug:
             var: repo_testout
         - name: Filter Repo Object
-          set_fact:
+          ansible.builtin.set_fact:
             repo_id: "{{ repo_testout | json_query(repos_id_query) }}"
           vars:
             repos_id_query: "infrastructure_repositories.data[?name==`{{ repo_name }}`].id"
@@ -247,7 +247,7 @@ End-to-End Delete Veeam Job:
           ansible.builtin.debug:
             var: job_testout
         - name: Filter Job Object
-          set_fact:
+          ansible.builtin.set_fact:
             job_id: "{{ job_testout | json_query(jobs_id_query) }}"
           vars:
             jobs_id_query: "infrastructure_jobs.data[?name==`{{ job_name }}`].id"

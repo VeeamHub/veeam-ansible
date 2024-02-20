@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<unattendedInstallationConfiguration bundle="VbrConsole" mode="install" version="1.0">
+<!--[Required] Parameter 'mode' defines installation mode that silent install should operate in-->    
+<!--Supported values: install/upgrade/uninstall-->
+
+<!--Note: unused [Optional] parameters should be removed from the answer file-->
+
+	<properties>
+
+		<!--License agreements-->
+		<!--Specify parameters to accept all the license agreements during silent installation or upgrade-->
+
+			<!--[Required] Parameter ACCEPT_EULA specifies if you want to accept the Veeam license agreement. Specify '1' to accept the license agreement and proceed with installation or upgrade-->
+				<!--Supported values: 0/1-->
+				<property name="ACCEPT_EULA" value="1" />
+
+			<!--[Required] Parameter ACCEPT_LICENSING_POLICY specifies if you want to accept Veeam licensing policy. Specify '1' to accept the licensing policy and proceed with installation or upgrade-->
+				<!--Supported values: 0/1-->
+				<property name="ACCEPT_LICENSING_POLICY" value="1" />
+
+			<!--[Required] Parameter ACCEPT_THIRDPARTY_LICENSES specifies if you want to accept all the 3rd party licenses used. Specify '1' to accept the license agreements and proceed with installation or upgrade-->
+				<!--Supported values: 0/1-->
+				<property name="ACCEPT_THIRDPARTY_LICENSES" value="1" />
+
+			<!--[Required] Parameter ACCEPT_REQUIRED_SOFTWARE specifies if you want to accept all the required software licenses. Specify '1' to accept the license agreements and proceed with installation or upgrade-->
+				<!--Supported values: 0/1-->
+				<property name="ACCEPT_REQUIRED_SOFTWARE" value="1" />
+
+		<!--Data locations-->
+		<!--Specify Veeam Backup & Replication Console installation path-->
+
+			<!--[Optional] Parameter INSTALLDIR specifies Veeam Backup & Replication Console installation path. If you do not specify this parameter, default installation path '%ProgramFiles%\Veeam\Backup and Replication' is used-->
+				<!--Supported values: file path-->
+				{% if vbr_install_directory is defined %}
+				<property name="INSTALLDIR" value="{{ vbr_install_directory }}" />
+				{% endif %}
+
+		<!--Plug-ins for Veeam Backup & Replication-->
+		<!--Specify additional components to install-->
+
+			<!--[Optional] Parameter AHV_INSTALL specifies if Nutanix AHV Plug-in for Veeam Backup & Replication will be installed. If you do not specify this parameter, plug-in will not be installed-->
+				<!--Supported values: 0/1-->            
+				<property name="AHV_INSTALL" value="{{ vbr_ahv_install }}" />
+
+			<!--[Optional] Parameter RHV_INSTALL specifies if Red Hat Virtualization Plug-in for Veeam Backup & Replication will be installed. If you do not specify this parameter, plug-in will not be installed-->
+				<!--Supported values: 0/1-->
+				<property name="RHV_INSTALL" value="{{ vbr_rhv_install }}" />
+
+			<!--[Optional] Parameter AWS_INSTALL specifies if AWS Plug-in for Veeam Backup & Replication will be installed. If you do not specify this parameter, plug-in will be installed-->
+				<!--Supported values: 0/1-->
+				<property name="AWS_INSTALL" value="{{ vbr_aws_install }}" />
+
+			<!--[Optional] Parameter AZURE_INSTALL specifies if Microsoft Azure Plug-in for Veeam Backup & Replication will be installed. If you do not specify this parameter, plug-in will be installed-->
+				<!--Supported values: 0/1-->
+				<property name="AZURE_INSTALL" value="{{ vbr_azure_install }}" />
+
+			<!--[Optional] Parameter GCP_INSTALL specifies if Google Cloud Plug-in for Veeam Backup & Replication will be installed. If you do not specify this parameter, plug-in will be installed-->
+				<!--Supported values: 0/1-->
+				<property name="GCP_INSTALL" value="{{ vbr_gcp_install }}" />
+
+			<!--[Optional] Parameter KASTEN_INSTALL specifies if Kasten K10 Plug-in for Veeam Backup & Replication will be installed. If you do not specify this parameter, plug-in will be installed-->
+				<!--Supported values: 0/1-->
+				<property name="KASTEN_INSTALL" value="{{ vbr_kasten_install }}" />
+
+		<!--Setup settings-->
+		<!--Specify additional setup settings-->
+
+			<!--[Optional] Parameter REBOOT_IF_REQUIRED forces target server reboot, whenever it is required. If you do not specify this parameter, reboot is not performed automatically. Keep in mind that setup procedure will not be restarted after reboot-->
+				<!--Supported values: 0/1-->
+				<property name="REBOOT_IF_REQUIRED" value="0" />
+
+	</properties>
+</unattendedInstallationConfiguration>
