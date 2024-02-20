@@ -19,6 +19,8 @@ Major Changes
 
 - Added support for new silent install process available in version 12.1 (https://helpcenter.veeam.com/docs/backup/vsphere/install_vbr_answer_file.html?ver=120)
 - Added support for new silent install process available in version 12.1 (https://helpcenter.veeam.com/docs/backup/vsphere/upgrade_vbr_answer_file.html?ver=120)
+- Added support for Veeam Backup & Replication Console 12.1 install (https://helpcenter.veeam.com/docs/backup/vsphere/install_console_answer_file.html?ver=120)
+- Added support for Veeam Backup & Replication Console 12.1 upgrade (https://helpcenter.veeam.com/docs/backup/vsphere/upgrade_console_answer_file.html?ver=120)
 
 Minor Changes
 -------------
