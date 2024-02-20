@@ -6,7 +6,7 @@ An Ansible Role to administer the [Veeam Availability Suite](https://www.veeam.c
 - [Veeam Backup Enterprise Manager](https://www.veeam.com/backup-enterprise-manager.html)
 - [Veeam ONE](https://www.veeam.com/virtualization-management-one-solution.html)
 
-Starting with version 12.1, the Veeam Backup & Replication Console can now be installed & upgrade!
+Starting with version 12.1, the Veeam Backup & Replication Console can now be installed & upgraded!
 
 A big thanks to Markus Kraus ([@vMarkus_K](https://twitter.com/vMarkus_K))! I used his [code](https://github.com/mycloudrevolution/veeam_setup) as a starting point for this project.
 
@@ -79,7 +79,7 @@ This collection depends on Windows modules (`ansible.windows` & `community.windo
 
 ### Ansible
 
-- Ansible 2.12+
+- Ansible 2.14+
 
 ### OS
 
@@ -89,15 +89,12 @@ This collection depends on Windows modules (`ansible.windows` & `community.windo
 ### Veeam Software
 
 - Veeam Backup & Replication
-  - 10
   - 11
   - 12
 - Veeam Backup Enterprise Manager
-  - 10
   - 11
   - 12
 - Veeam ONE
-  - 10
   - 11
   - 12
 
