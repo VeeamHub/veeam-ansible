@@ -1,4 +1,7 @@
+---
 name: Deploy Ansible Galaxy Collection
+
+# Trigger the workflow however you prefer
 on:
   push:
     branches:
@@ -9,22 +12,9 @@ jobs:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/master'
     steps:
-      # Important: This sets up your GITHUB_WORKSPACE environment variable
-      - uses: actions/checkout@v2
-      - name: Retrieving variables from galaxy.yml
-        run: |
-          echo "COLLECTION_NAMESPACE=`grep 'namespace:' galaxy.yml | tail -n1 | awk '{ print $2}' | tr -d \\"`" >> $GITHUB_ENV
-          echo "COLLECTION_NAME=`grep 'name:' galaxy.yml | tail -n1 | awk '{ print $2}' | tr -d \\"`" >> $GITHUB_ENV
-          echo "VERSION=`grep 'version:' galaxy.yml | tail -n1 | awk '{ print $2}' | tr -d \\"`" >> $GITHUB_ENV
-      - name: Printing Ansible version & custom variables
-        run: |
-          ansible --version
-          echo $COLLECTION_NAMESPACE
-          echo $COLLECTION_NAME
-          echo $VERSION
-      # Building collection
-      - run: |
-          ansible-galaxy collection build
-      # Deploying collection
-      - run: |
-          ansible-galaxy collection publish ./$COLLECTION_NAMESPACE-$COLLECTION_NAME-$VERSION.tar.gz --api-key ${{ secrets.ANSIBLE_GALAXY_TOKEN }}
+      - uses: actions/checkout@v3
+
+      - name: Build and Deploy Collection
+        uses: artis3n/ansible_galaxy_collection@v2
+        with:
+          api_key: '${{ secrets.ANSIBLE_GALAXY_TOKEN }}'
