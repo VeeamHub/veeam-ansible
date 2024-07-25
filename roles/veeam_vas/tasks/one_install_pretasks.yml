@@ -15,7 +15,7 @@
     groups:
       - Administrators
   when:
-    - create_service_account | bool
+    - one_create_service_account | bool
     - one_username.find("\\") == -1 # skips account creation if domain account is specified
 - name: Install System CLR Types
   ansible.windows.win_package:
