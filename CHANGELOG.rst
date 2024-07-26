@@ -6,6 +6,21 @@ veeamhub.veeam Release Notes
 
 This changelog describes changes after version 1.5.0.
 
+v2.2.3
+======
+
+Minor Changes
+-------------
+
+- Updated ISO to version 12.1.2.172 20240515 (https://github.com/VeeamHub/veeam-ansible/issues/64)
+
+Bugfixes
+--------
+
+- Added playbook validation for unsupported SQL server settings (https://github.com/VeeamHub/veeam-ansible/issues/68)
+- Updated Veeam ONE sample playbooks (https://github.com/VeeamHub/veeam-ansible/issues/69)
+
+
 v2.2.2
 ======
 

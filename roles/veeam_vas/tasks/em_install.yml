@@ -8,6 +8,12 @@
     msg: "Windows server requires a reboot. After reboot, you can proceed with the Veeam Backup Enterprise Manager install."
   when:
     - precheck.pending_reboot | bool
+- name: Are unsupported SQL server settings specified in playbook?
+  ansible.builtin.fail:
+    msg: "Windows authentication is not supported for remote SQL server with LOCAL SYSTEM service account. Specify a different service account, or use native SQL authentication."
+  when:
+    - sql_authentication == "0"
+    - service_account_username == "LocalSystem"
 - name: Checking to see if Veeam Backup & Replication Server is installed
   veeam_software_check:
     name: "Veeam Backup & Replication Server"
