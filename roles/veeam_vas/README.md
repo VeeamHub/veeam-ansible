@@ -276,7 +276,7 @@ Please note there are more configurations than the examples shown below. If you 
         version: "12"
         license: true
         source_license: "/root/ansible/license.lic"
-        sql_express_setup: false        
+        sql_express_setup: false
         sql_authentication: "1" # 0-Windows (default) 1-Native
         sql_instance: "sql.contoso.local"
         sql_username: "svc_veeam"
@@ -323,7 +323,7 @@ Please note there are more configurations than the examples shown below. If you 
         version: "12"
         license: true
         source_license: "/root/ansible/license.lic"
-        sql_express_setup: false        
+        sql_express_setup: false
         sql_instance: "sql.contoso.local"
         sql_username: "svc_veeam"
         sql_password: "ChangeM3!"
@@ -772,7 +772,7 @@ Please note there are more configurations than the examples shown below. If you 
     sql_express_setup: true
     sql_service_username: "svc_sql"
     sql_service_password: "ChangeM3!"
-    create_service_account: true #true==local false==domain
+    one_create_service_account: true #true==local false==domain
     one_username: "svc_one"
     one_password: "ChangeM3!"
     # https://docs.ansible.com/ansible/latest/user_guide/playbooks_vault.html#single-encrypted-variable
@@ -806,7 +806,7 @@ Please note there are more configurations than the examples shown below. If you 
     sql_express_setup: true
     sql_service_username: "svc_sql"
     sql_service_password: "ChangeM3!"
-    create_service_account: true #true==local false==domain
+    one_create_service_account: true #true==local false==domain
     one_username: "svc_one"
     one_password: "ChangeM3!"
     # https://docs.ansible.com/ansible/latest/user_guide/playbooks_vault.html#single-encrypted-variable
@@ -847,7 +847,7 @@ Please note there are more configurations than the examples shown below. If you 
         sql_instance: "sql.contoso.local"
         sql_database: "VeeamOne"
         one_installation_type: "1" #1-Advanced | 2-Backup data only | 3-Typical
-        create_service_account: false #true==local false==domain
+        one_create_service_account: false #true==local false==domain
         one_username: "contoso\\jsmith"
         one_password: "ChangeM3!"
         # https://docs.ansible.com/ansible/latest/user_guide/playbooks_vault.html#single-encrypted-variable
@@ -863,7 +863,7 @@ Please note there are more configurations than the examples shown below. If you 
       vars:
         version: "12"
         iso_download: true
-        create_service_account: false #true==local false==domain
+        one_create_service_account: false #true==local false==domain
         one_username: "contoso\\jsmith"
         one_password: "ChangeM3!"
         one_server: "server.contoso.local"
@@ -898,7 +898,7 @@ Please note there are more configurations than the examples shown below. If you 
     sql_express_setup: false
     sql_instance: "sql.contoso.local"
     sql_database: "VeeamOne"
-    create_service_account: false #true==local false==domain
+    one_create_service_account: false #true==local false==domain
     one_username: "contoso\\jsmith"
     one_password: "ChangeM3!"
     # https://docs.ansible.com/ansible/latest/user_guide/playbooks_vault.html#single-encrypted-variable
