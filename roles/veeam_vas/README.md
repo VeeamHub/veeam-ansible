@@ -178,7 +178,7 @@ Please note there are more configurations than the examples shown below. If you 
         sql_service_password: "ChangeM3!"
         sql_username: "postgres"
         sql_password: "ChangeM3!"
-        # https://docs.ansible.com/ansible/latest/user_guide/playbooks_vault.html#single-encrypted-variable
+        # https://docs.ansible.com/ansible/latest/vault_guide/vault_encrypting_content.html#creating-encrypted-variables
 ```
 
 ### Veeam Backup & Replication Community Edition Install with ISO Download (v11-)
@@ -199,7 +199,7 @@ Please note there are more configurations than the examples shown below. If you 
         sql_service_password: "ChangeM3!"
         sql_username: "sa"
         sql_password: "ChangeM3!"
-        # https://docs.ansible.com/ansible/latest/user_guide/playbooks_vault.html#single-encrypted-variable
+        # https://docs.ansible.com/ansible/latest/vault_guide/vault_encrypting_content.html#creating-encrypted-variables
 ```
 
 ### Veeam Backup & Replication Install with ISO Download (v12.1+)
@@ -238,7 +238,7 @@ Please note there are more configurations than the examples shown below. If you 
         sql_service_password: "ChangeM3!"
         sql_username: "sa"
         sql_password: "ChangeM3!"
-        # https://docs.ansible.com/ansible/latest/user_guide/playbooks_vault.html#single-encrypted-variable
+        # https://docs.ansible.com/ansible/latest/vault_guide/vault_encrypting_content.html#creating-encrypted-variables
 ```
 
 ### Veeam Backup & Replication Install with ISO Download and remote Microsoft SQL (v12.1+)
@@ -260,7 +260,7 @@ Please note there are more configurations than the examples shown below. If you 
         sql_instance: "sql.contoso.local"
         sql_username: "svc_veeam"
         sql_password: "ChangeM3!"
-        # https://docs.ansible.com/ansible/latest/user_guide/playbooks_vault.html#single-encrypted-variable
+        # https://docs.ansible.com/ansible/latest/vault_guide/vault_encrypting_content.html#creating-encrypted-variables
 ```
 
 ### Veeam Backup & Replication Install with ISO Download and remote PostgreSQL (v12.1+)
@@ -281,7 +281,7 @@ Please note there are more configurations than the examples shown below. If you 
         sql_instance: "sql.contoso.local"
         sql_username: "svc_veeam"
         sql_password: "ChangeM3!"
-        # https://docs.ansible.com/ansible/latest/user_guide/playbooks_vault.html#single-encrypted-variable
+        # https://docs.ansible.com/ansible/latest/vault_guide/vault_encrypting_content.html#creating-encrypted-variables
     - name: Applying tuning on a remote PostgreSQL server running as the VBR DB
        veeamhub.veeam.veeam_vbr_set_postgres_database_server_limits:
          os_type: Windows
@@ -307,7 +307,7 @@ Please note there are more configurations than the examples shown below. If you 
         sql_instance: "sql.contoso.local"
         sql_username: "svc_veeam"
         sql_password: "ChangeM3!"
-        # https://docs.ansible.com/ansible/latest/user_guide/playbooks_vault.html#single-encrypted-variable
+        # https://docs.ansible.com/ansible/latest/vault_guide/vault_encrypting_content.html#creating-encrypted-variables
 ```
 
 ### Veeam Backup & Replication Install with ISO Download and remote PostgreSQL (v12)
@@ -327,7 +327,7 @@ Please note there are more configurations than the examples shown below. If you 
         sql_instance: "sql.contoso.local"
         sql_username: "svc_veeam"
         sql_password: "ChangeM3!"
-        # https://docs.ansible.com/ansible/latest/user_guide/playbooks_vault.html#single-encrypted-variable
+        # https://docs.ansible.com/ansible/latest/vault_guide/vault_encrypting_content.html#creating-encrypted-variables
     - name: Applying tuning on a remote PostgreSQL server running as the VBR DB
        veeamhub.veeam.veeam_vbr_set_postgres_database_server_limits:
          os_type: Windows
@@ -352,7 +352,7 @@ Please note there are more configurations than the examples shown below. If you 
         sql_instance: "sql.contoso.local"
         sql_username: "svc_veeam"
         sql_password: "ChangeM3!"
-        # https://docs.ansible.com/ansible/latest/user_guide/playbooks_vault.html#single-encrypted-variable
+        # https://docs.ansible.com/ansible/latest/vault_guide/vault_encrypting_content.html#creating-encrypted-variables
 ```
 
 ### Veeam Backup & Replication Community Edition Install without ISO Download
@@ -374,7 +374,7 @@ Please note there are more configurations than the examples shown below. If you 
         sql_service_password: "ChangeM3!"
         sql_username: "sa"
         sql_password: "ChangeM3!"
-        # https://docs.ansible.com/ansible/latest/user_guide/playbooks_vault.html#single-encrypted-variable
+        # https://docs.ansible.com/ansible/latest/vault_guide/vault_encrypting_content.html#creating-encrypted-variables
 ```
 
 ### Veeam Backup & Replication Upgrade - Native Auth (v12.1+)
@@ -498,7 +498,7 @@ Please note there are more configurations than the examples shown below. If you 
         sql_service_password: "ChangeM3!"
         sql_username: "sa"
         sql_password: "ChangeM3!"
-        # https://docs.ansible.com/ansible/latest/user_guide/playbooks_vault.html#single-encrypted-variable
+        # https://docs.ansible.com/ansible/latest/vault_guide/vault_encrypting_content.html#creating-encrypted-variables
 ```
 
 ### Veeam Backup Enterprise Manager Install with ISO Download and remote Microsoft SQL (v12.1+)
@@ -522,7 +522,7 @@ Please note there are more configurations than the examples shown below. If you 
         sql_instance: "sql.contoso.local"
         sql_username: "svc_veeam"
         sql_password: "ChangeM3!"
-        # https://docs.ansible.com/ansible/latest/user_guide/playbooks_vault.html#single-encrypted-variable
+        # https://docs.ansible.com/ansible/latest/vault_guide/vault_encrypting_content.html#creating-encrypted-variables
 ```
 
 ### Veeam Backup Enterprise Manager Install with ISO Download and remote PostgreSQL (v12.1+)
@@ -545,7 +545,7 @@ Please note there are more configurations than the examples shown below. If you 
         sql_instance: "sql.contoso.local"
         sql_username: "svc_veeam"
         sql_password: "ChangeM3!"
-        # https://docs.ansible.com/ansible/latest/user_guide/playbooks_vault.html#single-encrypted-variable
+        # https://docs.ansible.com/ansible/latest/vault_guide/vault_encrypting_content.html#creating-encrypted-variables
 ```
 
 ### Veeam Backup Enterprise Manager Install with ISO Download and remote Microsoft SQL (v12)
@@ -568,7 +568,7 @@ Please note there are more configurations than the examples shown below. If you 
         sql_instance: "sql.contoso.local"
         sql_username: "svc_veeam"
         sql_password: "ChangeM3!"
-        # https://docs.ansible.com/ansible/latest/user_guide/playbooks_vault.html#single-encrypted-variable
+        # https://docs.ansible.com/ansible/latest/vault_guide/vault_encrypting_content.html#creating-encrypted-variables
 ```
 
 ### Veeam Backup Enterprise Manager Install with ISO Download and remote PostgreSQL (v12)
@@ -590,7 +590,7 @@ Please note there are more configurations than the examples shown below. If you 
         sql_instance: "sql.contoso.local"
         sql_username: "svc_veeam"
         sql_password: "ChangeM3!"
-        # https://docs.ansible.com/ansible/latest/user_guide/playbooks_vault.html#single-encrypted-variable
+        # https://docs.ansible.com/ansible/latest/vault_guide/vault_encrypting_content.html#creating-encrypted-variables
 ```
 
 ### Veeam Backup Enterprise Manager Install with ISO Download and remote SQL (v11-)
@@ -612,7 +612,7 @@ Please note there are more configurations than the examples shown below. If you 
         sql_instance: "sql.contoso.local"
         sql_username: "svc_veeam"
         sql_password: "ChangeM3!"
-        # https://docs.ansible.com/ansible/latest/user_guide/playbooks_vault.html#single-encrypted-variable
+        # https://docs.ansible.com/ansible/latest/vault_guide/vault_encrypting_content.html#creating-encrypted-variables
 ```
 
 ### Veeam Backup Enterprise Manager Install including Cloud Connect Portal
@@ -637,7 +637,7 @@ Please note there are more configurations than the examples shown below. If you 
         sql_service_password: "ChangeM3!"
         sql_username: "sa"
         sql_password: "ChangeM3!"
-        # https://docs.ansible.com/ansible/latest/user_guide/playbooks_vault.html#single-encrypted-variable
+        # https://docs.ansible.com/ansible/latest/vault_guide/vault_encrypting_content.html#creating-encrypted-variables
 ```
 
 ### Veeam Backup Enterprise Manager Upgrade - Native Auth (v12.1+)
@@ -692,7 +692,7 @@ Please note there are more configurations than the examples shown below. If you 
         sql_database: "VeeamBackupReporting"
         sql_username: "sa"
         sql_password: "ChangeM3!"
-        # https://docs.ansible.com/ansible/latest/user_guide/playbooks_vault.html#single-encrypted-variable
+        # https://docs.ansible.com/ansible/latest/vault_guide/vault_encrypting_content.html#creating-encrypted-variables
 ```
 
 ### Veeam Backup Enterprise Manager Patch
@@ -711,7 +711,7 @@ Please note there are more configurations than the examples shown below. If you 
         sql_database: "VeeamBackupReporting"
         sql_username: "sa"
         sql_password: "ChangeM3!"
-        # https://docs.ansible.com/ansible/latest/user_guide/playbooks_vault.html#single-encrypted-variable
+        # https://docs.ansible.com/ansible/latest/vault_guide/vault_encrypting_content.html#creating-encrypted-variables
 ```
 
 ### Veeam Backup & Replication Console Install
@@ -775,7 +775,7 @@ Please note there are more configurations than the examples shown below. If you 
     one_create_service_account: true #true==local false==domain
     one_username: "svc_one"
     one_password: "ChangeM3!"
-    # https://docs.ansible.com/ansible/latest/user_guide/playbooks_vault.html#single-encrypted-variable
+    # https://docs.ansible.com/ansible/latest/vault_guide/vault_encrypting_content.html#creating-encrypted-variables
   tasks:
     - name: Veeam ONE Server installation tasks
       include_role:
@@ -809,7 +809,7 @@ Please note there are more configurations than the examples shown below. If you 
     one_create_service_account: true #true==local false==domain
     one_username: "svc_one"
     one_password: "ChangeM3!"
-    # https://docs.ansible.com/ansible/latest/user_guide/playbooks_vault.html#single-encrypted-variable
+    # https://docs.ansible.com/ansible/latest/vault_guide/vault_encrypting_content.html#creating-encrypted-variables
   tasks:
     - name: Veeam ONE Server installation tasks
       include_role:
@@ -850,7 +850,7 @@ Please note there are more configurations than the examples shown below. If you 
         one_create_service_account: false #true==local false==domain
         one_username: "contoso\\jsmith"
         one_password: "ChangeM3!"
-        # https://docs.ansible.com/ansible/latest/user_guide/playbooks_vault.html#single-encrypted-variable
+        # https://docs.ansible.com/ansible/latest/vault_guide/vault_encrypting_content.html#creating-encrypted-variables
 
 - name: Veeam ONE Advanced Deployment - Veeam Web UI
   gather_facts: false
@@ -867,7 +867,7 @@ Please note there are more configurations than the examples shown below. If you 
         one_username: "contoso\\jsmith"
         one_password: "ChangeM3!"
         one_server: "server.contoso.local"
-        # https://docs.ansible.com/ansible/latest/user_guide/playbooks_vault.html#single-encrypted-variable
+        # https://docs.ansible.com/ansible/latest/vault_guide/vault_encrypting_content.html#creating-encrypted-variables
 
 - name: Veeam ONE Advanced Deployment - Monitoring Client
   gather_facts: false
@@ -901,7 +901,7 @@ Please note there are more configurations than the examples shown below. If you 
     one_create_service_account: false #true==local false==domain
     one_username: "contoso\\jsmith"
     one_password: "ChangeM3!"
-    # https://docs.ansible.com/ansible/latest/user_guide/playbooks_vault.html#single-encrypted-variable
+    # https://docs.ansible.com/ansible/latest/vault_guide/vault_encrypting_content.html#creating-encrypted-variables
   tasks:
     - name: Veeam ONE Server installation tasks
       include_role:
@@ -933,7 +933,7 @@ Please note there are more configurations than the examples shown below. If you 
     source_license: "/root/ansible/license.lic"
     one_username: "svc_one"
     one_password: "ChangeM3!"
-    # https://docs.ansible.com/ansible/latest/user_guide/playbooks_vault.html#single-encrypted-variable
+    # https://docs.ansible.com/ansible/latest/vault_guide/vault_encrypting_content.html#creating-encrypted-variables
   tasks:
     - name: Veeam ONE Server upgrade tasks
       include_role:
@@ -974,7 +974,7 @@ Please note there are more configurations than the examples shown below. If you 
         sql_database: "VeeamOne"
         one_username: "contoso\\jsmith"
         one_password: "ChangeM3!"
-        # https://docs.ansible.com/ansible/latest/user_guide/playbooks_vault.html#single-encrypted-variable
+        # https://docs.ansible.com/ansible/latest/vault_guide/vault_encrypting_content.html#creating-encrypted-variables
 
 - name: Veeam ONE Advanced Deployment - Veeam Web UI
   hosts: web
@@ -990,7 +990,7 @@ Please note there are more configurations than the examples shown below. If you 
         one_username: "contoso\\jsmith"
         one_password: "ChangeM3!"
         one_server: "server.contoso.local"
-        # https://docs.ansible.com/ansible/latest/user_guide/playbooks_vault.html#single-encrypted-variable
+        # https://docs.ansible.com/ansible/latest/vault_guide/vault_encrypting_content.html#creating-encrypted-variables
 
 - name: Veeam ONE Advanced Deployment - Monitoring Client
   hosts: client
@@ -1019,5 +1019,5 @@ Please note there are more configurations than the examples shown below. If you 
         source: "C:\\install\\"
         patch_file: "VeeamONE_9.5.4.4587_Update#4a.exe"
         one_password: "ChangeM3!"
-        # https://docs.ansible.com/ansible/latest/user_guide/playbooks_vault.html#single-encrypted-variable
+        # https://docs.ansible.com/ansible/latest/vault_guide/vault_encrypting_content.html#creating-encrypted-variables
 ```
