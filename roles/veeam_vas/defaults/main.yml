@@ -32,8 +32,11 @@ em_tls: "1" # 1-Enabled 0-Disabled Use TLS 1.2 protocol for secure communication
 
 # VBR Plug-in installation (only for v12.1 and newer)
 # 1-Install 0-Do not install
+vbr_entra_id_install: "1" # Veeam Backup for Microsoft Entra ID
 vbr_ahv_install: "1" # Veeam Backup for Nutanix AHV
-vbr_rhv_install: "1" # Veeam Backup for Red Hat Virtualization
+vbr_rhv_install: "1" # Veeam Backup for Red Hat Virtualization (now Oracle KVM)
+vbr_kvm_install: "1" # Veeam Backup for Oracle KVM
+vbr_pve_install: "1" # Veeam Backup for Proxmox
 vbr_aws_install: "1" # Veeam Backup for AWS
 vbr_azure_install: "1" # Veeam Backup for Azure
 vbr_gcp_install: "1" # Veeam Backup for GCP
