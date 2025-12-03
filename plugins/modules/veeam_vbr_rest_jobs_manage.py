@@ -138,7 +138,10 @@ def run_module():
         type=dict(type='str', choices=("VirtualMachine", "vCenterServer"), default="VirtualMachine"),
         backupRepositoryId=dict(type='str', required=False),
         description=dict(type='str', required=False),
-        validate_certs=dict(type='bool', default='false')
+        validate_certs=dict(type='bool', default='false'),
+        runAutomatically=dict(type='bool', required=False, default='false'),
+        jobTime=dict(type=str, required=False),
+        retentionDays=dict(type=int, required=False)
     )
 
     required_if_args = [
@@ -208,6 +211,9 @@ def run_module():
         objectId = module.params['objectId']
         description = module.params['description']
         backupRepositoryId = module.params['backupRepositoryId']
+        runAutomatically = module.params['runAutomatically']
+        jobTime = module.params['jobTime']
+        retentionDays = module.params['retentionDays']
 
         body = {
             "name": jobName,
@@ -232,7 +238,7 @@ def run_module():
                 },
                 "retentionPolicy": {
                 "type": "Days",
-                "quantity": 7
+                "quantity": retentionDays if retentionDays is not None else 7  
                 }
             },
             "guestProcessing": {
@@ -255,11 +261,11 @@ def run_module():
                 }
             },
             "schedule": {
-                "runAutomatically": "false",
+                "runAutomatically": runAutomatically if runAutomatically is not None else False,
                 "daily": {
                     "dailyKind": "Everyday",
                     "isEnabled": "true",
-                    "localTime": "22:00",
+                    "localTime": jobTime,
                     "days": [
                         "sunday",
                         "monday",
@@ -410,6 +416,7 @@ def run_module():
                 }
             }
         }
+        
         bodyjson = json.dumps(body)
         headers = {
             'x-api-version': apiversion,
