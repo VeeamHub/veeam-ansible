@@ -4,6 +4,10 @@
 # Major version of Veeam software being installed
 version: "12" # "10", & "11" are also accepted
 
+# Retries allowed for long-running Veeam operations (ISO download, install, upgrade)
+# Each retry is 60 seconds apart, so 60 retries = max 1 hour wait time
+veeam_retries: 60
+
 # ISO & License files
 skip_iso_check: false
 iso_download: false
