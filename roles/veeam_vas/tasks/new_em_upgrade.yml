@@ -12,6 +12,15 @@
     src: templates/EM/EmAnswerFile_upgrade.xml.j2
     dest: "{{ destination }}EmAnswerFile_upgrade.xml"
     mode: '777'
+- name: Stopping all Veeam Backup Jobs (Only if VBR installed on same server as EM)
+  ansible.windows.win_shell: |
+    if (-Not (Get-Module -ListAvailable -Name Veeam.Backup.PowerShell)){Add-PSSnapin -PassThru VeeamPSSnapIn -ErrorAction Stop | Out-Null}
+    Get-VBRJob | Stop-VBRJob | Out-Null
+  when: software.installed | bool
+- name: Stopping all Veeam services prior to upgrade
+  ansible.windows.win_shell: |
+    Stop-Process -Name "Veeam.Backup.Shell" -Force -ErrorAction SilentlyContinue
+    Get-Service veeam* | Stop-Service
 
 # UPGRADING VEEAM SOFTWARE
 - name: Upgrade Veeam Backup Enterprise Manager
