@@ -15,7 +15,6 @@
     - not sql_express_setup
     - sql_authentication == "0"
     - service_account_username == "LocalSystem"
-    - not sql_express_setup
 - name: Including version-specific variables
   ansible.builtin.include_vars:
     file: "vars/vbr_v{{ version }}.yml"
