@@ -4,8 +4,8 @@ on: [push, pull_request]
 jobs:
   build:
     name: Ansible Lint # Naming the build is important to use it as a status check
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - name: Run ansible-lint
-        uses: ansible/ansible-lint@v6.22.2 # or version tag instead of 'main'
+        uses: ansible/ansible-lint@v25.12.1 # or version tag instead of 'main'
