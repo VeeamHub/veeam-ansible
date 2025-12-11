@@ -16,6 +16,10 @@
     groups:
       - Administrators
   when: create_service_account | bool
+- name: If PostgreSQL is installed, there's no reason to install for Entra
+  ansible.builtin.set_fact:
+    vbr_entra_id_install: "0"
+  when: postgres.installed | bool
 - name: Create VBR silent install answer file
   ansible.builtin.template:
     src: templates/VBR/VbrAnswerFile_install.xml.j2
