@@ -41,6 +41,12 @@
 				<property name="VBR_LICENSE_AUTOUPDATE" value="{{ license_autoupdate }}" />
 				{% endif %}
 
+			{% if version | int >= 13 %}
+			<!--  [Optional] Parameter VBR_PROACTIVE_SUPPORT specifies if you want to receive proactive support (enables diagnostic data sharing). If you do not specify this parameter, proactive support will be enabled. For Community Edition, NFR and Evaluation licenses it must be set to 1. For licenses without license ID information it must be set to 0 -->
+				<!--  Supported values: 0/1  -->
+				<property name="VBR_PROACTIVE_SUPPORT" value="{{ proactive_support }}"/>
+			{% endif %}
+
 		<!--Service account-->
 
 			<!--[Optional] Parameter VBR_SERVICE_PASSWORD specifies a password for the account under which the Veeam Backup Service is running. Required during upgrade if service account is not LocalSystem account-->
@@ -53,22 +59,11 @@
 		<!--Database configuration-->
 		<!--Specify database server installation options and required configuration parameters for Veeam Backup & Replication database-->
 
-			<!--[Optional] Parameter VBR_SQLSERVER_PASSWORD specifies a password to connect to the SQL server in the native authentication mode-->
-			<!--Make sure you keep the answer file in a safe location whenever SQL server account password is added to the answer file-->
-				<!--Supported values: password in plain text-->
-				{% if sql_authentication == '1' %}
-				<property name="VBR_SQLSERVER_PASSWORD" value="{{ sql_password }}" hidden="1"/>
-				{% endif %}
-
 			<!-- Microsoft Entra ID Database configuration -->
 			<!-- Specify Microsoft Entra ID database server installation options. -->
 			<!-- [Optional] Parameter VBR_ENTRAID_DATABASE_INSTALL specifies if bundled PostgreSQL server for Microsoft EntraID will be installed. If set to '0', PostgreSQL Database won't be installed -->
 				<!-- Supported values: 0/1 -->
-				{% if vbr_entra_id_install %}
-				<property name="VBR_ENTRAID_DATABASE_INSTALL" value="1"/>
-				{% else %}
-				<property name="VBR_ENTRAID_DATABASE_INSTALL" value="0"/>
-				{% endif %}
+				<property name="VBR_ENTRAID_DATABASE_INSTALL" value="{{ vbr_entra_id_install }}"/>
 
 		<!--Automatic update settings-->
 		<!--Specify Veeam B&R autoupdate settings-->

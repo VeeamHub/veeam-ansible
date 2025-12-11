@@ -14,6 +14,7 @@ iso_download: false
 iso_checksum_algorithm: "sha1"
 license: false
 license_autoupdate: 1 # NFR and Evaluation licenses must be set to 1 - Licenses without license ID information must be set to 0
+proactive_support: 1 # NFR and Evaluation licenses must be set to 1 - Enable Proactive Support (v13 and above)
 source_license: ""
 destination: "C:\\install\\"
 

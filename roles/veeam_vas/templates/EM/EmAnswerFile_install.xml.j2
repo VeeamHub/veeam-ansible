@@ -175,12 +175,6 @@
 		<!--Setup settings-->
 		<!--Specify additional setup settings-->
 
-			<!--[Optional] Parameter VBCP_INSTALL specifies if Veeam Cloud Connect Portal will be installed. If you do not specify this parameter, it will not be installed-->
-				<!--Supported values: 0/1-->
-				{% if cloud_connect %}
-				<property name="VBCP_INSTALL" value="1" />
-				{% endif %}
-
 			<!--[Optional] Parameter VBREM_CONFIG_SCHANNEL specifies if the TLS 1.2 protocol will be used for secure communication with the Veeam Backup Enterprise Manager website-->
 				<!--Supported values: 0/1-->
 				<property name="VBREM_CONFIG_SCHANNEL" value="{{ em_tls }}" />

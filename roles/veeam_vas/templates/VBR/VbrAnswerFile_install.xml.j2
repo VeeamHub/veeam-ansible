@@ -71,11 +71,7 @@
 				<!-- Specify Microsoft Entra ID database server installation options. -->
 				<!-- [Optional] Parameter VBR_ENTRAID_DATABASE_INSTALL specifies if bundled PostgreSQL server for Microsoft EntraID will be installed. If set to '0', PostgreSQL Database won't be installed -->
 				<!-- Supported values: 0/1 -->
-				{% if vbr_entra_id_install %}
-				<property name="VBR_ENTRAID_DATABASE_INSTALL" value="1"/>
-				{% else %}
-				<property name="VBR_ENTRAID_DATABASE_INSTALL" value="0"/>
-				{% endif %}
+				<property name="VBR_ENTRAID_DATABASE_INSTALL" value="{{ vbr_entra_id_install }}"/>
 
 			<!--[Optional] Parameter VBR_SQLSERVER_ENGINE specifies SQL server type: '1' for PostgreSQL server, '0' for Microsoft SQL server.  Required when VBR_SQLSERVER_INSTALL is set to '0'-->
 				<!--Supported values: 0/1-->
