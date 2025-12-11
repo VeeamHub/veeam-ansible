@@ -12,6 +12,7 @@
   ansible.builtin.fail:
     msg: "Windows authentication is not supported for remote SQL server with LOCAL SYSTEM service account. Specify a different service account, or use native SQL authentication."
   when:
+    - sql_express_setup == false
     - sql_authentication == "0"
     - service_account_username == "LocalSystem"
     - not sql_express_setup
@@ -34,11 +35,13 @@
   community.windows.win_file_version:
     path: "{{ file.files[0].path }}"
   register: file_version
-  when: file.matched | bool
+  when: file.matched > 0
 - name: Legacy install process will be used
   ansible.builtin.set_fact:
     legacy: true
-  when: not file.matched | bool or file_version.win_file_version.file_version == '1.0.0.0'
+  when:
+  - file.matched == 0
+  - file_version.win_file_version.file_version == '1.0.0.0'
 
 # Print Installation Configuration
 - name: Print Installation Configuration
