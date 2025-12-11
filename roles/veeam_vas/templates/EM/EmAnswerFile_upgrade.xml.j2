@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <unattendedInstallationConfiguration bundle="Em" mode="upgrade" version="1.0">
-<!--[Required] Parameter 'mode' defines installation mode that silent install should operate in-->    
+<!--[Required] Parameter 'mode' defines installation mode that silent install should operate in-->
 <!--Supported values: install/upgrade/uninstall-->
 
 <!--Note: unused [Optional] parameters should be removed from the answer file-->
@@ -30,12 +30,18 @@
 		<!--Specify path to a license file and autoupdate option-->
 
 			<!--[Required] Parameter VBREM_LICENSE_FILE specifies a full path to the license file. If you do not specify this parameter, Veeam Backup & Replication will be installed in the Community Edition mode or upgraded using current license file-->
-				<!--Supported values: file path-->    
+				<!--Supported values: file path-->
 				<property name="VBREM_LICENSE_FILE" value="{{ destination }}{{ destination_license_file }}" />
 
 			<!--[Optional] Parameter VBREM_LICENSE_AUTOUPDATE specifies if you want to update license automatically. If you do not specify this parameter, autoupdate will be enabled. For NFR and Evaluation licenses it must be set to 1. For licenses without license ID information it must be set to 0-->
 				<!--Supported values: 0/1-->
 				<property name="VBREM_LICENSE_AUTOUPDATE" value="{{ license_autoupdate }}" />
+
+			{% if version | int >= 13 %}
+			<!--  [Optional] Parameter VBREM_PROACTIVE_SUPPORT specifies if you want to receive proactive support (enables diagnostic data sharing). If you do not specify this parameter, proactive support will be enabled. For Community Edition, NFR and Evaluation licenses it must be set to 1. For licenses without license ID information it must be set to 0 -->
+				<!--  Supported values: 0/1  -->
+				<property name="VBREM_PROACTIVE_SUPPORT" value="{{ proactive_support }}"/>
+			{% endif %}
 
 		<!--Service account-->
 
@@ -44,16 +50,6 @@
 				<!--Supported values: password in plain text-->
 				{% if service_account_username != 'LocalSystem' %}
 				<property name="VBREM_SERVICE_PASSWORD" value="{{ service_account_password }}" hidden="1"/>
-				{% endif %}
-
-		<!--Database configuration-->
-		<!--Specify database server installation options and required configuration parameters for Veeam Backup Enterprise Manager database-->
-
-			<!--[Optional] Parameter VBREM_SQLSERVER_PASSWORD specifies a password to connect to the SQL server in the native authentication mode. Required when VBREM_SQLSERVER_USERNAME is used-->
-			<!--Make sure you keep the answer file in a safe location whenever SQL server account password is added to the answer file-->
-				<!--Supported values: password in plain text-->
-				{% if sql_authentication == '1' %}
-				<property name="VBREM_SQLSERVER_PASSWORD" value="{{ sql_password }}" hidden="1"/>
 				{% endif %}
 
 		<!--Setup settings-->

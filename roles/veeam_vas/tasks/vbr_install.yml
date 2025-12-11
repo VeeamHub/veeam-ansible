@@ -8,14 +8,17 @@
     msg: "This Windows server requires a reboot prior to beginning the Veeam Backup & Replication install. After rebooting this server, you can proceed with the installation."
   when:
     - precheck.pending_reboot | bool
+- name: Checking to see if PostgreSQL is installed
+  veeam_software_check:
+    name: "postgres*"
+  register: postgres
 - name: Are unsupported SQL server settings specified in playbook?
   ansible.builtin.fail:
     msg: "Windows authentication is not supported for remote SQL server with LOCAL SYSTEM service account. Specify a different service account, or use native SQL authentication."
   when:
-    - sql_express_setup == false
+    - not sql_express_setup and not (postgres.installed | bool)
     - sql_authentication == "0"
     - service_account_username == "LocalSystem"
-    - not sql_express_setup
 - name: Including version-specific variables
   ansible.builtin.include_vars:
     file: "vars/vbr_v{{ version }}.yml"
@@ -40,8 +43,8 @@
   ansible.builtin.set_fact:
     legacy: true
   when:
-  - file.matched == 0
-  - file_version.win_file_version.file_version == '1.0.0.0'
+    - file.matched == 0
+    - file_version.win_file_version.file_version == '1.0.0.0'
 
 # Print Installation Configuration
 - name: Print Installation Configuration

@@ -27,7 +27,7 @@
   community.windows.win_file_version:
     path: "{{ file.files[0].path }}"
   register: file_version
-  when: file.matched | bool
+  when: file.matched > 0
 - name: Using Unsupported Version
   ansible.builtin.fail:
     msg: "Veeam Backup & Replication Console upgrade is only supported for version 12.1 and later. If an incorrect ISO was used, please correct and try again."
@@ -58,7 +58,7 @@
     path: "{{ source }}Setup\\Silent\\Veeam.Silent.Install.exe"
     state: present
     arguments: '/AnswerFile "{{ destination }}VbrConsoleAnswerFile_upgrade.xml" /SkipNetworkLogonErrors /LogFolder "{{ destination }}logs"'
-  async: 3600
+  async: "{{ veeam_retries * 60 | int }}" # see main.yml for more info
   poll: 0
   register: async_result
 - name: Check on upgrade status
@@ -66,8 +66,8 @@
     jid: "{{ async_result.ansible_job_id }}"
   register: async_poll_results
   until: async_poll_results.finished
-  retries: 60
-  delay: 60
+  retries: "{{ veeam_retries | int }}" # see main.yml for more info
+  delay: 60 # 60 retries + 60 seconds = max 1 hour wait time
 
 # POST-UPGRADE TASKS
 - name: Unmount ISO

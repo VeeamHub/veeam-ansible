@@ -4,12 +4,17 @@
 # Major version of Veeam software being installed
 version: "12" # "10", & "11" are also accepted
 
+# Retries allowed for long-running Veeam operations (ISO download, install, upgrade)
+# Each retry is 60 seconds apart, so 60 retries = max 1 hour wait time
+veeam_retries: 60
+
 # ISO & License files
 skip_iso_check: false
 iso_download: false
 iso_checksum_algorithm: "sha1"
 license: false
 license_autoupdate: 1 # NFR and Evaluation licenses must be set to 1 - Licenses without license ID information must be set to 0
+proactive_support: 1 # NFR and Evaluation licenses must be set to 1 - Enable Proactive Support (v13 and above)
 source_license: ""
 destination: "C:\\install\\"
 
@@ -32,8 +37,11 @@ em_tls: "1" # 1-Enabled 0-Disabled Use TLS 1.2 protocol for secure communication
 
 # VBR Plug-in installation (only for v12.1 and newer)
 # 1-Install 0-Do not install
+vbr_entra_id_install: "1" # Veeam Backup for Microsoft Entra ID
 vbr_ahv_install: "1" # Veeam Backup for Nutanix AHV
-vbr_rhv_install: "1" # Veeam Backup for Red Hat Virtualization
+vbr_rhv_install: "1" # Veeam Backup for Red Hat Virtualization (now Oracle KVM)
+vbr_kvm_install: "1" # Veeam Backup for Oracle KVM
+vbr_pve_install: "1" # Veeam Backup for Proxmox
 vbr_aws_install: "1" # Veeam Backup for AWS
 vbr_azure_install: "1" # Veeam Backup for Azure
 vbr_gcp_install: "1" # Veeam Backup for GCP

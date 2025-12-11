@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <unattendedInstallationConfiguration bundle="VbrConsole" mode="install" version="1.0">
-<!--[Required] Parameter 'mode' defines installation mode that silent install should operate in-->    
+<!--[Required] Parameter 'mode' defines installation mode that silent install should operate in-->
 <!--Supported values: install/upgrade/uninstall-->
 
 <!--Note: unused [Optional] parameters should be removed from the answer file-->
@@ -39,12 +39,20 @@
 		<!--Specify additional components to install-->
 
 			<!--[Optional] Parameter AHV_INSTALL specifies if Nutanix AHV Plug-in for Veeam Backup & Replication will be installed. If you do not specify this parameter, plug-in will not be installed-->
-				<!--Supported values: 0/1-->            
+				<!--Supported values: 0/1-->
 				<property name="AHV_INSTALL" value="{{ vbr_ahv_install }}" />
 
 			<!--[Optional] Parameter RHV_INSTALL specifies if Red Hat Virtualization Plug-in for Veeam Backup & Replication will be installed. If you do not specify this parameter, plug-in will not be installed-->
 				<!--Supported values: 0/1-->
 				<property name="RHV_INSTALL" value="{{ vbr_rhv_install }}" />
+
+			<!--[Optional] Parameter KVM_INSTALL specifies if oVirt KVM Plug-in for Veeam Backup & Replication will be installed. If you do not specify this parameter, plug-in will not be installed-->
+				<!--Supported values: 0/1-->
+				<property name="KVM_INSTALL" value="{{ vbr_kvm_install }}" />
+
+			<!--[Optional] Parameter PVE_INSTALL specifies if Proxmox Virtual Environment Plug-in for Veeam Backup & Replication will be installed. If you do not specify this parameter, plug-in will not be installed-->
+			<!--Supported values: 0/1-->
+				<property name="PVE_INSTALL" value="{{ vbr_pve_install }}" />
 
 			<!--[Optional] Parameter AWS_INSTALL specifies if AWS Plug-in for Veeam Backup & Replication will be installed. If you do not specify this parameter, plug-in will be installed-->
 				<!--Supported values: 0/1-->

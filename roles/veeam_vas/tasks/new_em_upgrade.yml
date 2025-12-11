@@ -12,6 +12,17 @@
     src: templates/EM/EmAnswerFile_upgrade.xml.j2
     dest: "{{ destination }}EmAnswerFile_upgrade.xml"
     mode: '777'
+- name: Stopping all Veeam Backup Jobs (Only if VBR installed on same server as EM)
+  ansible.windows.win_shell: |
+    if (-Not (Get-Module -ListAvailable -Name Veeam.Backup.PowerShell)){Add-PSSnapin -PassThru VeeamPSSnapIn -ErrorAction Stop | Out-Null}
+    Get-VBRJob | Stop-VBRJob | Out-Null
+  when: software.installed | bool
+- name: Stopping all Veeam services prior to upgrade
+  ansible.windows.win_shell: |
+    Stop-Process -Name "Veeam.Backup.Shell" -Force -ErrorAction SilentlyContinue
+    $service = Get-Service veeam* | Where-Object {"Running" -eq $_.Status}
+    if ($service) {$service | Stop-Service -Force -ErrorAction SilentlyContinue}
+  retries: 3
 
 # UPGRADING VEEAM SOFTWARE
 - name: Upgrade Veeam Backup Enterprise Manager
@@ -19,7 +30,7 @@
     path: "{{ source }}Setup\\Silent\\Veeam.Silent.Install.exe"
     state: present
     arguments: '/AnswerFile "{{ destination }}EmAnswerFile_upgrade.xml" /SkipNetworkLogonErrors /LogFolder "{{ destination }}logs"'
-  async: 3600
+  async: "{{ veeam_retries * 60 | int }}" # see main.yml for more info
   poll: 0
   register: async_result
 - name: Check on Enterprise Manager upgrade status
@@ -27,8 +38,8 @@
     jid: "{{ async_result.ansible_job_id }}"
   register: async_poll_results
   until: async_poll_results.finished
-  retries: 60
-  delay: 60
+  retries: "{{ veeam_retries | int }}" # see main.yml for more info
+  delay: 60 # 60 retries + 60 seconds = max 1 hour wait time
 
 # POST-UPGRADE TASKS
 - name: Unmount ISO

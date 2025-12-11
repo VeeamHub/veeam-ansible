@@ -67,6 +67,12 @@
 				<property name="VBR_SQLSERVER_INSTALL" value="0" />
 				{% endif %}
 
+				<!-- Microsoft Entra ID Database configuration -->
+				<!-- Specify Microsoft Entra ID database server installation options. -->
+				<!-- [Optional] Parameter VBR_ENTRAID_DATABASE_INSTALL specifies if bundled PostgreSQL server for Microsoft EntraID will be installed. If set to '0', PostgreSQL Database won't be installed -->
+				<!-- Supported values: 0/1 -->
+				<property name="VBR_ENTRAID_DATABASE_INSTALL" value="{{ vbr_entra_id_install }}"/>
+
 			<!--[Optional] Parameter VBR_SQLSERVER_ENGINE specifies SQL server type: '1' for PostgreSQL server, '0' for Microsoft SQL server.  Required when VBR_SQLSERVER_INSTALL is set to '0'-->
 				<!--Supported values: 0/1-->
 				<property name="VBR_SQLSERVER_ENGINE" value="{{ sql_engine }}" />
@@ -163,8 +169,17 @@
 				<property name="AHV_INSTALL" value="{{ vbr_ahv_install }}" />
 
 			<!--[Optional] Parameter RHV_INSTALL specifies if Red Hat Virtualization Plug-in for Veeam Backup & Replication will be installed. If you do not specify this parameter, plug-in will not be installed-->
+			<!--WILL BE REMOVED ONCE THIS COLLECTION STOPS SUPPORTING <12.1-->
 				<!--Supported values: 0/1-->
 				<property name="RHV_INSTALL" value="{{ vbr_rhv_install }}" />
+
+			<!--[Optional] Parameter KVM_INSTALL specifies if oVirt KVM Plug-in for Veeam Backup & Replication will be installed. If you do not specify this parameter, plug-in will not be installed-->
+				<!--Supported values: 0/1-->
+				<property name="KVM_INSTALL" value="{{ vbr_kvm_install }}" />
+
+			<!--[Optional] Parameter PVE_INSTALL specifies if Proxmox Virtual Environment Plug-in for Veeam Backup & Replication will be installed. If you do not specify this parameter, plug-in will not be installed-->
+				<!--Supported values: 0/1-->
+				<property name="PVE_INSTALL" value="{{ vbr_pve_install }}" />
 
 			<!--[Optional] Parameter AWS_INSTALL specifies if AWS Plug-in for Veeam Backup & Replication will be installed. If you do not specify this parameter, plug-in will be installed-->
 				<!--Supported values: 0/1-->

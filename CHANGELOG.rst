@@ -6,6 +6,50 @@ veeamhub.veeam Release Notes
 
 This changelog describes changes after version 1.5.0.
 
+v2.3.4
+======
+
+Major Changes
+-------------
+
+- Added support for v13
+
+Minor Changes
+-------------
+
+- Updated ISO references to latest versions (https://github.com/VeeamHub/veeam-ansible/issues/75)
+- Added logic to enable/disable Cloud Connect maintenance mode before/after Veeam Backup & Replication upgrade
+- Added support to adjust time to wait for long running tasks to complete (https://github.com/VeeamHub/veeam-ansible/issues/73)
+
+Bugfixes
+-------------
+
+- Added logic to disable/enable backup jobs before/after Veeam Backup & Replication upgrade (https://github.com/VeeamHub/veeam-ansible/issues/74)
+- Added logic to ensure Veeam services are started before proceeding with upgrade (https://github.com/VeeamHub/veeam-ansible/issues/27)
+
+
+Breaking Changes
+-------------
+
+- Deprecated support for installing Veeam Backup & Replication version 11 and earlier.
+- Deprecated support for installing Veeam ONE. Depending on demand, Veeam ONE support may be reintroduced in a future release.
+
+v2.2.5
+======
+
+Minor Changes
+-------------
+
+- Added options to configuration additional Veeam Backup & Replication jobs settings (https://github.com/VeeamHub/veeam-ansible/pull/79)
+
+v2.2.4
+======
+
+Bugfixes
+--------
+
+- Fixed being unable to deploy VBR using LocalSystem account on a local PostgreSQL instance (https://github.com/VeeamHub/veeam-ansible/issues/80)
+
 v2.2.3
 ======
 

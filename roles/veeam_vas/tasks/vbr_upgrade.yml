@@ -39,11 +39,13 @@
   community.windows.win_file_version:
     path: "{{ file.files[0].path }}"
   register: file_version
-  when: file.matched | bool
+  when: file.matched > 0
 - name: Legacy install process will be used
   ansible.builtin.set_fact:
     legacy: true
-  when: not file.matched | bool or file_version.win_file_version.file_version == '1.0.0.0'
+  when:
+    - file.matched == 0
+    - file_version.win_file_version.file_version == '1.0.0.0'
 
 # Print Upgrade Configuration
 - name: Print Upgrade Configuration

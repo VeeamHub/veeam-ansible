@@ -31,7 +31,9 @@
 - name: Stopping all Veeam services prior to upgrade
   ansible.windows.win_shell: |
     Stop-Process -Name "Veeam.Backup.Shell" -Force -ErrorAction SilentlyContinue
-    Get-Service veeam* | Stop-Service
+    $service = Get-Service veeam* | Where-Object {"Running" -eq $_.Status}
+    if ($service) {$service | Stop-Service -Force -ErrorAction SilentlyContinue}
+  retries: 3
 - name: .NET Framework
   ansible.builtin.include_tasks: install_net_framework.yml
 - name: Looking for .NET Core Runtime in Veeam ISO
@@ -280,7 +282,9 @@
   ansible.windows.win_shell: |
     if (-Not (Get-Module -ListAvailable -Name Veeam.Backup.PowerShell)){Add-PSSnapin -PassThru VeeamPSSnapIn -ErrorAction Stop | Out-Null}
     Get-VBRJob | Stop-VBRJob | Out-Null
-    Get-Service veeam* | Stop-Service
+    $service = Get-Service veeam* | Where-Object {"Running" -eq $_.Status}
+    if ($service) {$service | Stop-Service -Force -ErrorAction SilentlyContinue}
+  retries: 3
 - name: Unmount ISO
   community.windows.win_disk_image:
     image_path: "{{ destination }}{{ destination_iso_file }}"

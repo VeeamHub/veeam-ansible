@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <unattendedInstallationConfiguration bundle="Vbr" mode="upgrade" version="1.0">
-<!--[Required] Parameter 'mode' defines installation mode that silent install should operate in-->    
+<!--[Required] Parameter 'mode' defines installation mode that silent install should operate in-->
 <!--Supported values: install/upgrade/uninstall-->
 
 <!--Note: unused [Optional] parameters should be removed from the answer file-->
@@ -30,7 +30,7 @@
 		<!--Specify path to a license file and autoupdate option-->
 
 			<!--[Optional] Parameter VBR_LICENSE_FILE specifies a full path to the license file. If you do not specify this parameter(or leave it empty value), Veeam Backup & Replication will be installed using current license file. To install Community Edition it must be set to 0-->
-				<!--Supported values: file path/0(to install CE)-->    
+				<!--Supported values: file path/0(to install CE)-->
 				{% if license %}
 				<property name="VBR_LICENSE_FILE" value="{{ destination }}{{ destination_license_file }}" />
 				{% endif %}
@@ -40,6 +40,12 @@
 				{% if license %}
 				<property name="VBR_LICENSE_AUTOUPDATE" value="{{ license_autoupdate }}" />
 				{% endif %}
+
+			{% if version | int >= 13 %}
+			<!--  [Optional] Parameter VBR_PROACTIVE_SUPPORT specifies if you want to receive proactive support (enables diagnostic data sharing). If you do not specify this parameter, proactive support will be enabled. For Community Edition, NFR and Evaluation licenses it must be set to 1. For licenses without license ID information it must be set to 0 -->
+				<!--  Supported values: 0/1  -->
+				<property name="VBR_PROACTIVE_SUPPORT" value="{{ proactive_support }}"/>
+			{% endif %}
 
 		<!--Service account-->
 
@@ -53,12 +59,11 @@
 		<!--Database configuration-->
 		<!--Specify database server installation options and required configuration parameters for Veeam Backup & Replication database-->
 
-			<!--[Optional] Parameter VBR_SQLSERVER_PASSWORD specifies a password to connect to the SQL server in the native authentication mode-->
-			<!--Make sure you keep the answer file in a safe location whenever SQL server account password is added to the answer file-->
-				<!--Supported values: password in plain text-->
-				{% if sql_authentication == '1' %}
-				<property name="VBR_SQLSERVER_PASSWORD" value="{{ sql_password }}" hidden="1"/>
-				{% endif %}
+			<!-- Microsoft Entra ID Database configuration -->
+			<!-- Specify Microsoft Entra ID database server installation options. -->
+			<!-- [Optional] Parameter VBR_ENTRAID_DATABASE_INSTALL specifies if bundled PostgreSQL server for Microsoft EntraID will be installed. If set to '0', PostgreSQL Database won't be installed -->
+				<!-- Supported values: 0/1 -->
+				<property name="VBR_ENTRAID_DATABASE_INSTALL" value="{{ vbr_entra_id_install }}"/>
 
 		<!--Automatic update settings-->
 		<!--Specify Veeam B&R autoupdate settings-->

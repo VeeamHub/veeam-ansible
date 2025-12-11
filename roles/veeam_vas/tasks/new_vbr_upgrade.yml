@@ -7,11 +7,42 @@
     src: "{{ source_license }}"
     dest: "{{ destination }}{{ destination_license_file }}"
   when: license | bool
+- name: Checking to see if PostgreSQL is installed
+  veeam_software_check:
+    name: "postgres*"
+  register: postgres
+- name: If PostgreSQL is installed, there's no reason to install for Entra
+  ansible.builtin.set_fact:
+    vbr_entra_id_install: "0"
+  when: postgres.installed | bool
 - name: Create VBR silent upgrade answer file
   ansible.builtin.template:
     src: templates/VBR/VbrAnswerFile_upgrade.xml.j2
     dest: "{{ destination }}VbrAnswerFile_upgrade.xml"
     mode: '777'
+- name: Enable Cloud Connect Maintenance Mode
+  veeam_vbr_cloud_connect_maintenance:
+    state: enable
+  when: cloud_connect | bool
+- name: Start adhoc VBR configuration backup job
+  veeam_vbr_config_backup:
+    state: adhoc
+- name: Stopping and disabling all backup jobs
+  veeam_vbr_upgrade_job_prep:
+    state: disable
+    jobs_file: "{{ vbr_jobs_file }}"
+  when: not (cloud_connect | bool)
+  register: jobs
+- name: Print Backup Jobs backup file name
+  ansible.builtin.debug:
+    var: jobs
+  when: not (cloud_connect | bool)
+- name: Stopping all Veeam services prior to upgrade
+  ansible.windows.win_shell: |
+    Stop-Process -Name "Veeam.Backup.Shell" -Force -ErrorAction SilentlyContinue
+    $service = Get-Service veeam* | Where-Object {"Running" -eq $_.Status}
+    if ($service) {$service | Stop-Service -Force -ErrorAction SilentlyContinue}
+  retries: 3
 
 # UPGRADING VEEAM SOFTWARE
 - name: Upgrade Veeam Backup & Replication
@@ -19,7 +50,7 @@
     path: "{{ source }}Setup\\Silent\\Veeam.Silent.Install.exe"
     state: present
     arguments: '/AnswerFile "{{ destination }}VbrAnswerFile_upgrade.xml" /SkipNetworkLogonErrors /LogFolder "{{ destination }}logs"'
-  async: 3600
+  async: "{{ veeam_retries * 60 | int }}" # see main.yml for more info
   poll: 0
   register: async_result
 - name: Check on Veeam Backup & Replication upgrade status
@@ -27,8 +58,8 @@
     jid: "{{ async_result.ansible_job_id }}"
   register: async_poll_results
   until: async_poll_results.finished
-  retries: 60
-  delay: 60
+  retries: "{{ veeam_retries | int }}" # see main.yml for more info
+  delay: 60 # 60 retries + 60 seconds = max 1 hour wait time
 
 # POST-UPGRADE TASKS
 - name: Unmount ISO
@@ -42,3 +73,79 @@
   ansible.windows.win_reboot:
     msg: Reboot initiated by Ansible to complete VBR upgrade
   when: postcheck.pending_reboot | bool
+- name: Ensure Veeam is running (v12 and below)
+  ansible.windows.win_service_info:
+    name: VeeamBackupSvc
+  register: service_status
+  until:
+    - service_status.exists
+    - service_status.services[0].state == "started"
+  retries: 60
+  delay: 10 # 10 seconds * 60 retries = ~10 minutes max wait
+  when: version | int <= 12
+- name: Ensure Veeam is running (v13 and above)
+  ansible.windows.win_service_info:
+    name: VeeamWebSvc
+  register: service_status
+  until:
+    - service_status.exists
+    - service_status.services[0].state == "started"
+  retries: 60
+  delay: 10 # 10 seconds * 60 retries = ~10 minutes max wait
+  when: version | int >= 13
+- name: Disable Cloud Connect Maintenance Mode (v12 and below)
+  veeam_vbr_cloud_connect_maintenance:
+    state: disable
+  when:
+    - cloud_connect | bool
+    - version | int <= 12
+- name: Enabling all backup jobs in specified file (v12 and below)
+  veeam_vbr_upgrade_job_prep:
+    state: enable
+    jobs_file: "{{ vbr_jobs_file }}"
+  when:
+    - not (cloud_connect | bool)
+    - version | int <= 12
+- name: Disable Cloud Connect Maintenance Mode (v13 and above)
+  ansible.windows.win_powershell:
+    script: |
+      $Ansible.Changed = $false
+      try {
+        Connect-VBRServer -Server localhost -ForceAcceptTlsCertificate
+        Disable-VBRCloudMaintenanceMode | Out-Null
+        $Ansible.Changed = $true
+      }
+      catch {
+        Write-Error "Failed to disable Cloud Connect Maintenance Mode: $_"
+      }
+    executable: pwsh.exe
+    arguments:
+      - -ExecutionPolicy
+      - ByPass
+  when:
+    - cloud_connect | bool
+    - version | int >= 13
+- name: Enabling all backup jobs in specified file (v13 and above)
+  ansible.windows.win_powershell:
+    script: |
+      $Ansible.Changed = $false
+      try {
+        $file = Import-Csv "{{ vbr_jobs_file }}"
+        if ($file.Count -ne 0) {
+            Connect-VBRServer -Server localhost -ForceAcceptTlsCertificate
+        }
+        foreach ($job in $file){
+            Enable-VBRJob -Job $job.Name | Out-Null
+            $Ansible.Changed = $true
+        }
+      }
+      catch {
+        Write-Error "Failed to enable backup jobs: $_"
+      }
+    executable: pwsh.exe
+    arguments:
+      - -ExecutionPolicy
+      - ByPass
+  when:
+    - not (cloud_connect | bool)
+    - version | int >= 13

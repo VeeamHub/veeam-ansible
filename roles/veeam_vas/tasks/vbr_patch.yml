@@ -46,7 +46,9 @@
 - name: Stopping all Veeam services prior to applying VBR patch
   ansible.windows.win_shell: |
     Stop-Process -Name "Veeam.Backup.Shell" -Force -ErrorAction SilentlyContinue
-    Get-Service veeam* | Stop-Service
+    $service = Get-Service veeam* | Where-Object {"Running" -eq $_.Status}
+    if ($service) {$service | Stop-Service -Force -ErrorAction SilentlyContinue}
+  retries: 3
 
 ## INSTALLING PATCH
 - name: Install VBR patch
@@ -79,7 +81,9 @@
   ansible.windows.win_shell: |
     if (-Not (Get-Module -ListAvailable -Name Veeam.Backup.PowerShell)){Add-PSSnapin -PassThru VeeamPSSnapIn -ErrorAction Stop | Out-Null}
     Get-VBRJob | Stop-VBRJob | Out-Null
-    Get-Service veeam* | Stop-Service
+    $service = Get-Service veeam* | Where-Object {"Running" -eq $_.Status}
+    if ($service) {$service | Stop-Service -Force -ErrorAction SilentlyContinue}
+  retries: 3
   when: not (patch | bool)
 - name: Rebooting server now to complete VBR patch installation
   ansible.windows.win_reboot:

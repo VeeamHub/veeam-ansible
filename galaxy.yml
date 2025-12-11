@@ -1,7 +1,7 @@
 ---
 namespace: "veeamhub"
 name: "veeam"
-version: "2.2.5"
+version: "2.3.4"
 readme: "readme_galaxy.md"
 authors:
   - "Chris Arceneaux (https://www.arsano.ninja/)"
@@ -25,7 +25,7 @@ tags:
   - vem
   - em
 dependencies:
-  ansible.windows: '2.2.0'
-  community.windows: '2.1.0'
+  ansible.windows: '3.3.0'
+  community.windows: '3.1.0'
 repository: "https://github.com/VeeamHub/veeam-ansible"
 issues: "https://github.com/VeeamHub/veeam-ansible/issues"
