@@ -58,6 +58,7 @@ switch ( $module.Params.state) {
     "disable" {
         try {
             # Stopping all running Backup Jobs
+            # Stop-VBRJob can't stop 'BackupCopy' jobs, so filter them out and stop them separately
             Get-VBRJob | Where-Object { $_.GetLastState() -eq 'Working' -and $_.TypeToString -ne 'Backup Copy' } | Stop-VBRJob
             Get-VBRBackupCopyJob | Where-Object { $_.LastState -eq 'Working' } | Stop-VBRBackupCopyJob
 
