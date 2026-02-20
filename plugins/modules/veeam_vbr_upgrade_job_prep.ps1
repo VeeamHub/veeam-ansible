@@ -58,7 +58,8 @@ switch ( $module.Params.state) {
     "disable" {
         try {
             # Stopping all running Backup Jobs
-            Get-VBRJob | Where-Object { $_.GetLastState() -eq 'Working' } | Stop-VBRJob
+            Get-VBRJob | Where-Object { $_.GetLastState() -eq 'Working' -and $_.TypeToString -ne 'Backup Copy' } | Stop-VBRJob
+            Get-VBRBackupCopyJob | Where-Object { $_.LastState -eq 'Working' } | Stop-VBRBackupCopyJob
 
             # Backing up scheduled Backup Jobs
             Get-VBRJob | Where-Object { $_.IsScheduleEnabled -eq $True } | Select-Object Name | Export-Csv $file
