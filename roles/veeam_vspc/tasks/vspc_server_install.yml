@@ -1,0 +1,250 @@
+---
+# vspc_server_install tasks file for veeamhub.veeam_vspc
+# Reference: https://helpcenter.veeam.com/docs/vac/deployment/silent_install_server.html?ver=9.2
+- name: Checking OS for pending reboots
+  pending_reboot_check:
+  register: precheck
+- name: Is there an existing pending reboot?
+  ansible.builtin.fail:
+    msg: "This Windows server requires a reboot prior to beginning the Veeam Service Provider Console Server install. After rebooting this server, you can proceed with the installation."
+  when:
+    - precheck.pending_reboot | bool
+- name: Checking to see if Veeam Service Provider Console Server is already installed
+  veeam_software_check:
+    name: "Veeam Service Provider Console"
+  register: software
+- name: Is Veeam Service Provider Console Server already installed?
+  ansible.builtin.fail:
+    msg: "Veeam Service Provider Console Server is already installed on this server. Please use the upgrade task (vspc_server_upgrade) instead."
+  when: software.installed | bool
+- name: Is a valid service account specified?
+  ansible.builtin.fail:
+    msg: "A valid service_account_username and service_account_password must be specified."
+  when:
+    - service_account_username is not defined or service_account_username == ""
+      or service_account_password is not defined or service_account_password == ""
+- name: If using remote SQL with SQL authentication, were sql_username and sql_password specified?
+  ansible.builtin.fail:
+    msg: "sql_username and sql_password must be specified when using SQL authentication with a remote SQL server."
+  when:
+    - not sql_express_setup | bool
+    - sql_authentication == "1"
+    - sql_username is not defined or sql_password is not defined
+- name: Including version-specific variables
+  ansible.builtin.include_vars:
+    file: "vars/vspc_v{{ version }}.yml"
+- name: VSPC ISO Tasks
+  ansible.builtin.include_tasks: mount_iso.yml
+
+# Print Installation Configuration
+- name: Print Installation Configuration
+  ansible.builtin.debug:
+    msg:
+      - "ISO Drive Letter: '{{ source }}'"
+      - "Installation Logs Folder: '{{ destination }}logs'"
+      - "Version: {{ version }}"
+      - "Download ISO?: {{ iso_download }}"
+      - "ISO File Destination: {{ destination }}{{ destination_iso_file }}"
+      - "License Source: {{ source_license }}"
+      - "License File Destination: {{ destination }}{{ destination_license_file }}"
+      - "License Auto-Update: {{ vspc_license_autoupdate }}"
+      - "Install SQL Express?: {{ sql_express_setup }}"
+      - "SQL Instance: {{ sql_instance }}"
+      - "SQL Database: {{ sql_database }}"
+      - "SQL Authentication Mode: {{ sql_authentication }}"
+      - "VSPC Service Account: {{ service_account_username }}"
+      - "VSPC Server Management Port: {{ vspc_server_management_port }}"
+      - "VSPC Connection Hub Port: {{ vspc_connection_hub_port }}"
+      - "VSPC Product Updates: {{ vspc_product_updates }}"
+      - "VSPC Certificate Thumbprint: {{ vspc_server_certificate_thumbprint | default('not specified') }}"
+      - "Install ConnectWise Manage Plugin?: {{ vspc_connectwise_plugin }}"
+      - "Install File-Level Restore Plugin?: {{ vspc_flr_restore_plugin }}"
+
+# PRE-INSTALL TASKS
+- name: Create logs directory
+  ansible.windows.win_file:
+    path: "{{ destination }}logs"
+    state: directory
+- name: Copy license file
+  ansible.windows.win_copy:
+    src: "{{ source_license }}"
+    dest: "{{ destination }}{{ destination_license_file }}"
+- name: Create VSPC service account user
+  ansible.windows.win_user:
+    name: "{{ service_account_username }}"
+    password: "{{ service_account_password }}"
+    password_never_expires: true
+    state: present
+    groups:
+      - Administrators
+  when: create_service_account | bool
+- name: Grant service account 'Log on as a service' user right
+  ansible.windows.win_user_right:
+    name: SeServiceLogonRight
+    users:
+      - "{{ service_account_username }}"
+    action: add
+
+# INSTALLING SQL EXPRESS (if required)
+# When sql_express_setup is true, a local SQL Express instance is installed from the ISO redistributables
+- name: Looking for SQL Express installer in Veeam ISO
+  ansible.windows.win_find:
+    paths: "{{ source }}Redistr\\x64\\SqlExpress"
+    patterns: "SQLEXPR*.exe"
+    recurse: false
+    file_type: file
+    use_regex: false
+  register: sql_express_file
+  when: sql_express_setup | bool
+- name: Install SQL Express
+  ansible.windows.win_package:
+    path: "{{ sql_express_file.files[0].path }}"
+    creates_service: MSSQL$VEEAMSQL2017
+    arguments:
+      - "/q"
+      - "/ACTION=Install"
+      - "/IACCEPTSQLSERVERLICENSETERMS"
+      - "/FEATURES=SQL"
+      - "/INSTANCENAME=VEEAMSQL2017"
+      - "/SQLSVCACCOUNT=NT AUTHORITY\\Network Service"
+      - "/SQLSYSADMINACCOUNTS={{ service_account_username }}"
+      - "/UPDATEENABLED=1"
+      - "/TCPENABLED=1"
+      - "/NPENABLED=1"
+  become: true
+  become_flags: logon_type=batch
+  vars:
+    ansible_become_method: runas
+    ansible_become_user: "{{ service_account_username }}"
+    ansible_become_pass: "{{ service_account_password }}"
+  when:
+    - sql_express_setup | bool
+    - sql_express_file.matched > 0
+
+# INSTALLING PREREQUISITES
+- name: Install Microsoft Report Viewer 2015 Runtime
+  ansible.windows.win_package:
+    path: "{{ source }}Redistr\\ReportViewer.msi"
+    state: present
+    arguments: '/L*v "{{ destination }}logs\\ReportViewer.log" /qn /norestart'
+- name: Install .NET Runtime 8
+  ansible.windows.win_package:
+    path: "{{ source }}Redistr\\x64\\dotnet-runtime-8.0.25-win-x64.exe"
+    state: present
+    arguments: '/install /quiet /norestart /log "{{ destination }}logs\\dotnet-runtime.log"'
+- name: Install Windows Desktop Runtime 8
+  ansible.windows.win_package:
+    path: "{{ source }}Redistr\\x64\\windowsdesktop-runtime-8.0.25-win-x64.exe"
+    state: present
+    arguments: '/install /quiet /norestart /log "{{ destination }}logs\\windowsdesktop-runtime.log"'
+- name: Install ASP.NET Core Runtime 8
+  ansible.windows.win_package:
+    path: "{{ source }}Redistr\\x64\\aspnetcore-runtime-8.0.25-win-x64.exe"
+    state: present
+    arguments: '/install /quiet /norestart /log "{{ destination }}logs\\aspnetcore-runtime.log"'
+
+
+
+# - name: Install .NET Hosting Bundle 8
+#   ansible.windows.win_package:
+#     path: "{{ source }}Redistr\\x64\\dotnet-hosting-8.0.25-win.exe"
+#     state: present
+#     arguments: '/install /quiet /norestart /log "{{ destination }}logs\\dotnet-hosting.log"'
+# - name: Install Visual C++ Redistributable
+#   ansible.windows.win_package:
+#     path: "{{ source }}Redistr\\x64\\VC_redist.x64.exe"
+#     product_id: Install C++ Framework
+#     state: present
+#     arguments: '/install /quiet /norestart /log "{{ destination }}logs\\vc_redist.x64.log"'
+#   ignore_errors: true
+
+
+
+- name: Install Microsoft SQL Server CLR Types
+  ansible.windows.win_package:
+    path: "{{ source }}Redistr\\x64\\SQLSysClrTypes.msi"
+    state: present
+    arguments: '/L*v "{{ destination }}logs\\SQLSysClrTypes.log" /qn /norestart'
+
+
+
+# - name: Install Microsoft SQL Server Shared Management Objects
+#   ansible.windows.win_package:
+#     path: "{{ source }}Redistr\\x64\\SharedManagementObjects.msi"
+#     state: present
+#     arguments: '/L*v "{{ destination }}logs\\SharedManagementObjects.log" /qn /norestart'
+
+
+
+- name: Install Microsoft OLE DB Driver for SQL Server
+  ansible.windows.win_package:
+    path: "{{ source }}Redistr\\x64\\msoledbsql.msi"
+    state: present
+    arguments: '/L*v "{{ destination }}logs\\msoledbsql.log" /qn /norestart IACCEPTMSOLEDBSQLLICENSETERMS=YES'
+
+# INSTALLING VEEAM SERVICE PROVIDER CONSOLE SERVER
+# Silent install reference: https://helpcenter.veeam.com/docs/vac/deployment/silent_install_server.html?ver=9.2
+- name: Set certificate thumbprint argument if specified
+  ansible.builtin.set_fact:
+    vspc_cert_arg: >-
+      {%- if vspc_server_certificate_thumbprint is defined and vspc_server_certificate_thumbprint != '' -%}
+      VAC_SERVER_CERTIFICATE_THUMBPRINT="{{ vspc_server_certificate_thumbprint }}"
+      {%- else -%}
+      {%- endif -%}
+- name: Install VSPC Server (Windows Authentication)
+  ansible.windows.win_package:
+    path: "{{ source }}ApplicationServer\\VAC.ApplicationServer.x64.msi"
+    #product_id: "{4105A05C-CBB1-4E3C-8415-BD293085B4BB}"
+    state: present
+    arguments: '/L*v "{{ destination }}logs\VAC.ApplicationServer.x64.log" /qn ACCEPT_EULA="1" ACCEPT_LICENSING_POLICY="1" ACCEPT_THIRDPARTY_LICENSES="1" ACCEPT_REQUIRED_SOFTWARE="1" VAC_LICENSE_FILE="{{ destination }}{{ destination_license_file }}" VSPC_LICENSE_AUTOUPDATE="{{ vspc_license_autoupdate }}" VAC_SERVICE_ACCOUNT_NAME="{{ service_account_username }}" VAC_SERVICE_ACCOUNT_PASSWORD="{{ service_account_password }}" VAC_SQL_SERVER="{{ sql_instance }}" VAC_DATABASE_NAME="{{ sql_database }}" VAC_AUTHENTICATION_MODE="{{ sql_authentication }}" VAC_SERVER_MANAGEMENT_PORT="{{ vspc_server_management_port }}" VAC_CONNECTION_HUB_PORT="{{ vspc_connection_hub_port }}" VSPC_PRODUCT_UPDATES="{{ vspc_product_updates }}" {{ vspc_cert_arg }}'
+  become: true
+  become_flags: logon_type=interactive
+  vars:
+    ansible_become_method: runas
+    ansible_become_user: "{{ service_account_username }}"
+    ansible_become_pass: "{{ service_account_password }}"
+  when: sql_authentication == "0"
+- name: Install VSPC Server (SQL Authentication)
+  ansible.windows.win_package:
+    path: "{{ source }}ApplicationServer\\VAC.ApplicationServer.x64.msi"
+    #product_id: "{4105A05C-CBB1-4E3C-8415-BD293085B4BB}"
+    state: present
+    arguments: '/L*v "{{ destination }}logs\VAC.ApplicationServer.x64.log" /qn ACCEPT_EULA="1" ACCEPT_LICENSING_POLICY="1" ACCEPT_THIRDPARTY_LICENSES="1" ACCEPT_REQUIRED_SOFTWARE="1" VAC_LICENSE_FILE="{{ destination }}{{ destination_license_file }}" VSPC_LICENSE_AUTOUPDATE="{{ vspc_license_autoupdate }}" VAC_SERVICE_ACCOUNT_NAME="{{ service_account_username }}" VAC_SERVICE_ACCOUNT_PASSWORD="{{ service_account_password }}" VAC_SQL_SERVER="{{ sql_instance }}" VAC_DATABASE_NAME="{{ sql_database }}" VAC_AUTHENTICATION_MODE="{{ sql_authentication }}" VAC_SQL_USER="{{ sql_username }}" VAC_SQL_USER_PASSWORD="{{ sql_password }}" VAC_SERVER_MANAGEMENT_PORT="{{ vspc_server_management_port }}" VAC_CONNECTION_HUB_PORT="{{ vspc_connection_hub_port }}" VSPC_PRODUCT_UPDATES="{{ vspc_product_updates }}" {{ vspc_cert_arg }}'
+  become: true
+  become_flags: logon_type=interactive
+  vars:
+    ansible_become_method: runas
+    ansible_become_user: "{{ service_account_username }}"
+    ansible_become_pass: "{{ service_account_password }}"
+  when: sql_authentication == "1"
+
+# INSTALLING CONNECTWISE MANAGE PLUGIN SERVER COMPONENT (if required)
+# Silent install reference: https://helpcenter.veeam.com/docs/vac/deployment/silent_install_cwm.html?ver=9.2
+- name: Install ConnectWise Manage Plugin Server Component
+  ansible.windows.win_package:
+    path: "{{ source }}Plugins\\ConnectWiseManage\\VAC.ConnectorService.x64.msi"
+    state: present
+    arguments: '/L*v "{{ destination }}logs\\VAC.ConnectorService.x64.log" /qn ACCEPT_EULA="1" ACCEPT_LICENSING_POLICY="1" ACCEPT_THIRDPARTY_LICENSES="1" ACCEPT_REQUIRED_SOFTWARE="1" USERNAME="{{ vspc_cwm_username }}" PASSWORD="{{ vspc_cwm_password }}" SERVER_ACCOUNT_NAME="{{ vspc_cwm_server_account_name }}" SERVER_ACCOUNT_PASSWORD="{{ vspc_cwm_server_account_password }}" SERVER_NAME="{{ vspc_cwm_server_name }}" VAC_SERVER_MANAGEMENT_PORT="{{ vspc_server_management_port }}"'
+  when: vspc_connectwise_plugin | bool
+
+# INSTALLING FILE-LEVEL RESTORE PLUGIN SERVER COMPONENT (if required)
+# Silent install reference: https://helpcenter.veeam.com/docs/vac/deployment/silent_install_flr.html?ver=9.2
+- name: Install File-Level Restore Plugin Server Component
+  ansible.windows.win_package:
+    path: "{{ source }}Plugins\\FileLevelRestore\\VSPC.VeeamAgentsSelfServicePortal.x64.msi"
+    state: present
+    arguments: '/L*v "{{ destination }}logs\\VSPC.VeeamAgentsSelfServicePortal.x64.log" /qn ACCEPT_EULA="1" ACCEPT_LICENSING_POLICY="1" ACCEPT_THIRDPARTY_LICENSES="1" ACCEPT_REQUIRED_SOFTWARE="1" VAC_FLR_SERVICE_ACCOUNT_NAME="{{ vspc_flr_service_account_name }}" VAC_FLR_SERVICE_ACCOUNT_PASSWORD="{{ vspc_flr_service_account_password }}"'
+  when: vspc_flr_restore_plugin | bool
+
+# POST-INSTALL TASKS
+- name: Unmount ISO
+  community.windows.win_disk_image:
+    image_path: "{{ destination }}{{ destination_iso_file }}"
+    state: absent
+- name: Installation Complete! Checking OS for pending reboots
+  pending_reboot_check:
+  register: postcheck
+- name: Rebooting server if necessary
+  ansible.windows.win_reboot:
+    msg: Reboot initiated by Ansible to complete VSPC Server install
+  when: postcheck.pending_reboot | bool

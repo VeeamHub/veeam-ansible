@@ -1,0 +1,89 @@
+---
+# vspc_upgrade tasks file for veeamhub.veeam_vspc
+# Reference: https://helpcenter.veeam.com/docs/vac/deployment/silent_install_server.html?ver=9.2
+- name: Checking OS for pending reboots
+  pending_reboot_check:
+  register: precheck
+- name: Is there an existing pending reboot?
+  ansible.builtin.fail:
+    msg: "This Windows server requires a reboot prior to beginning the Veeam Service Provider Console upgrade. After rebooting this server, you can proceed with the upgrade."
+  when:
+    - precheck.pending_reboot | bool
+- name: Checking to see if Veeam Service Provider Console is installed
+  veeam_software_check:
+    name: "Veeam Service Provider Console"
+  register: software
+- name: Is Veeam Service Provider Console installed?
+  ansible.builtin.fail:
+    msg: "Veeam Service Provider Console must be installed on this server in order to upgrade it."
+  when: not (software.installed | bool)
+- name: Ensure Veeam Service Provider Console services are running
+  ansible.windows.win_service:
+    name: "VeeamVAC*"
+    state: started
+  ignore_errors: true
+- name: Including version-specific variables
+  ansible.builtin.include_vars:
+    file: "vars/vspc_v{{ version }}.yml"
+- name: VSPC ISO Tasks
+  ansible.builtin.include_tasks: mount_iso.yml
+
+# Print Upgrade Configuration
+- name: Print Upgrade Configuration
+  ansible.builtin.debug:
+    msg:
+      - "ISO Drive Letter: '{{ source }}'"
+      - "Upgrade Logs Folder: '{{ destination }}logs'"
+      - "Version: {{ version }}"
+      - "Download ISO?: {{ iso_download }}"
+      - "ISO File Destination: {{ destination }}{{ destination_iso_file }}"
+      - "License Source: {{ source_license }}"
+      - "License File Destination: {{ destination }}{{ destination_license_file }}"
+      - "License Auto-Update: {{ vspc_license_autoupdate }}"
+      - "VSPC Service Account: {{ service_account_username }}"
+      - "VSPC Product Updates: {{ vspc_product_updates }}"
+
+# PRE-UPGRADE TASKS
+- name: Create logs directory
+  ansible.windows.win_file:
+    path: "{{ destination }}logs"
+    state: directory
+- name: Copy license file
+  ansible.windows.win_copy:
+    src: "{{ source_license }}"
+    dest: "{{ destination }}{{ destination_license_file }}"
+- name: Stopping all Veeam Service Provider Console services prior to upgrade
+  ansible.windows.win_service:
+    name: "{{ item }}"
+    state: stopped
+    force_dependent_services: true
+  loop:
+    - VeeamVACService
+    - VeeamVACWebSvc
+  ignore_errors: true
+
+# UPGRADING VEEAM SERVICE PROVIDER CONSOLE
+# Silent upgrade reference: https://helpcenter.veeam.com/docs/vac/deployment/silent_install_server.html?ver=9.2
+- name: Upgrade Veeam Service Provider Console (Windows Authentication)
+  ansible.windows.win_package:
+    path: "{{ source }}ApplicationServer\\VAC.ApplicationServer.x64.msi"
+    state: present
+    arguments: '/L*v "{{ destination }}logs\\VAC.ApplicationServer.x64.log" /qn ACCEPT_EULA="1" ACCEPT_LICENSING_POLICY="1" ACCEPT_THIRDPARTY_LICENSES="1" ACCEPT_REQUIRED_SOFTWARE="1" VAC_LICENSE_FILE="{{ destination }}{{ destination_license_file }}" VSPC_LICENSE_AUTOUPDATE="{{ vspc_license_autoupdate }}" VAC_SERVICE_ACCOUNT_NAME="{{ service_account_username }}" VAC_SERVICE_ACCOUNT_PASSWORD="{{ service_account_password }}" VAC_SQL_SERVER="{{ sql_instance }}" VAC_DATABASE_NAME="{{ sql_database }}" VAC_AUTHENTICATION_MODE="{{ sql_authentication }}" VAC_SERVER_MANAGEMENT_PORT="{{ vspc_server_management_port }}" VAC_CONNECTION_HUB_PORT="{{ vspc_connection_hub_port }}" VAC_SERVER_CERTIFICATE_THUMBPRINT="{{ vspc_server_certificate_thumbprint }}" VSPC_PRODUCT_UPDATES="{{ vspc_product_updates }}"'
+  when: sql_authentication == "0"
+  no_log: true
+- name: Upgrade Veeam Service Provider Console (SQL Authentication)
+  ansible.windows.win_package:
+    path: "{{ source }}ApplicationServer\\VAC.ApplicationServer.x64.msi"
+    state: present
+    arguments: '/L*v "{{ destination }}logs\\VAC.ApplicationServer.x64.log" /qn ACCEPT_EULA="1" ACCEPT_LICENSING_POLICY="1" ACCEPT_THIRDPARTY_LICENSES="1" ACCEPT_REQUIRED_SOFTWARE="1" VAC_LICENSE_FILE="{{ destination }}{{ destination_license_file }}" VSPC_LICENSE_AUTOUPDATE="{{ vspc_license_autoupdate }}" VAC_SERVICE_ACCOUNT_NAME="{{ service_account_username }}" VAC_SERVICE_ACCOUNT_PASSWORD="{{ service_account_password }}" VAC_SQL_SERVER="{{ sql_instance }}" VAC_DATABASE_NAME="{{ sql_database }}" VAC_AUTHENTICATION_MODE="{{ sql_authentication }}" VAC_SQL_USER="{{ sql_username }}" VAC_SQL_USER_PASSWORD="{{ sql_password }}" VAC_SERVER_MANAGEMENT_PORT="{{ vspc_server_management_port }}" VAC_CONNECTION_HUB_PORT="{{ vspc_connection_hub_port }}" VAC_SERVER_CERTIFICATE_THUMBPRINT="{{ vspc_server_certificate_thumbprint }}" VSPC_PRODUCT_UPDATES="{{ vspc_product_updates }}"'
+  when: sql_authentication == "1"
+  no_log: true
+
+# POST-UPGRADE TASKS
+- name: Unmount ISO
+  community.windows.win_disk_image:
+    image_path: "{{ destination }}{{ destination_iso_file }}"
+    state: absent
+- name: Rebooting server now to complete upgrade
+  ansible.windows.win_reboot:
+    msg: Reboot initiated by Ansible to complete VSPC upgrade

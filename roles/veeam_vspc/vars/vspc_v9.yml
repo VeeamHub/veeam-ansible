@@ -1,0 +1,9 @@
+---
+# VSPC v9 vars file for veeamhub.veeam_vspc
+
+iso_url: "https://download2.veeam.com/VSPC/v9/VeeamServiceProviderConsole_9.2.0.33215_20260408.iso"
+iso_checksum: "9d3f44309101b0fa66cd66e6bfb70fb05747e98d"
+destination_iso_file: "vspc.iso"
+destination_license_file: "vspc-license.lic"
+sql_instance: "(local)\\VEEAMSQL2017"
+sql_database: "VSPC"
