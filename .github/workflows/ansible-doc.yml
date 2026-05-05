@@ -1,0 +1,25 @@
+# .github/workflows/ansible-doc.yml
+name: ansible-doc
+on: [push, pull_request]
+jobs:
+  build:
+    name: Ansible Doc
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install ansible-core
+        run: pip install ansible-core
+      - name: Install collection
+        run: ansible-galaxy collection install .
+      - name: Test modules with ansible-doc
+        run: |
+          for f in $(find ./plugins/modules/ -maxdepth 1 -name "*.py" ! -name "__init__.py" | sort); do
+            name=$(basename "$f" .py)
+            ansible-doc "veeamhub.veeam.$name"
+          done
+      - name: Test roles with ansible-doc
+        run: |
+          for d in $(find ./roles/ -maxdepth 1 -mindepth 1 -type d | sort); do
+            name=$(basename "$d")
+            ansible-doc -t role "veeamhub.veeam.$name"
+          done
