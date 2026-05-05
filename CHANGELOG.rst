@@ -6,6 +6,11 @@ veeamhub.veeam Release Notes
 
 This changelog describes changes after version 1.5.0.
 
+v2.3.7
+======
+
+Only changes were updates to GitHub Action workflows.
+
 v2.3.6
 ======
 
