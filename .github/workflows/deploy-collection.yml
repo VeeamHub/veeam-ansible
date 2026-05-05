@@ -12,9 +12,9 @@ jobs:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/master'
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v6
 
       - name: Build and Deploy Collection
-        uses: artis3n/ansible_galaxy_collection@v2
+        uses: artis3n/ansible_galaxy_collection@v3
         with:
           api_key: '${{ secrets.ANSIBLE_GALAXY_TOKEN }}'
