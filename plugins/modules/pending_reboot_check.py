@@ -30,7 +30,7 @@ author:
 
 EXAMPLES = r'''
 - name: Checking to see if there is a pending reboot
-  pending_reboot_check:
+  veeamhub.veeam.pending_reboot_check:
   register: check
 - name: Rebooting if necessary
   ansible.windows.win_reboot:

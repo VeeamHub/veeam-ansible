@@ -52,7 +52,7 @@ options:
 
 EXAMPLES = r'''
 - name: Adding path exclusions to Windows Defender
-  veeam_defender_exclusions:
+  veeamhub.veeam.veeam_defender_exclusions:
     state: present
     exclusion_type: path
     exclusions:
@@ -60,14 +60,14 @@ EXAMPLES = r'''
       - "C:\\VeeamBackup"
 
 - name: Adding process exclusions to Windows Defender
-  veeam_defender_exclusions:
+  veeamhub.veeam.veeam_defender_exclusions:
     state: present
     exclusion_type: process
     exclusions:
       - "veeam.backup.agent.configurationtool.exe"
 
 - name: Removing extension exclusions from Windows Defender
-  veeam_defender_exclusions:
+  veeamhub.veeam.veeam_defender_exclusions:
     state: absent
     exclusion_type: extension
     exclusions:
