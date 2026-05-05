@@ -80,7 +80,8 @@
 - name: Stopping all Veeam services (this may take a while)
   ansible.windows.win_shell: |
     if (-Not (Get-Module -ListAvailable -Name Veeam.Backup.PowerShell)){Add-PSSnapin -PassThru VeeamPSSnapIn -ErrorAction Stop | Out-Null}
-    Get-VBRJob | Stop-VBRJob | Out-Null
+    Get-VBRJob | Where-Object { $_.GetLastState() -eq 'Working' -and $_.TypeToString -ne 'Backup Copy' } | Stop-VBRJob | Out-Null
+    Get-VBRBackupCopyJob | Where-Object { $_.LastState -eq 'Working' } | Stop-VBRBackupCopyJob | Out-Null
     $service = Get-Service veeam* | Where-Object {"Running" -eq $_.Status}
     if ($service) {$service | Stop-Service -Force -ErrorAction SilentlyContinue}
   retries: 3
