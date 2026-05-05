@@ -48,10 +48,17 @@ options:
 
 author:
     - Markus Kraus (@vMarkusK)
+
+notes:
+  - This is an MVP with very limited functionality.
+  - Only vSphere Jobs with a single VM.
+  - Not idempotent.
+  - No Options.
 '''
 
 EXAMPLES = r'''
-- name: End-to-End Create Veeam Job
+# End-to-End Create Veeam Job:
+- name: Test Veeam RestAPI Collection
   hosts: localhost
   gather_facts: false
   vars:
@@ -89,7 +96,8 @@ EXAMPLES = r'''
       ansible.builtin.debug:
         var: create_job
 
-- name: End-to-End Delete Veeam Job
+# End-to-End Delete Veeam Job:
+- name: Test Veeam RestAPI Collection
   hosts: localhost
   gather_facts: false
   vars:
@@ -116,10 +124,6 @@ EXAMPLES = r'''
         server_password: "<VBR Password>"
         state: absent
         id: "{{ job_id[0] }}"
-      register: delete_job
-    - name: Debug VBR Jobs Result
-      ansible.builtin.debug:
-        var: delete_job
 '''
 
 def run_module():
@@ -238,7 +242,7 @@ def run_module():
                 },
                 "retentionPolicy": {
                 "type": "Days",
-                "quantity": retentionDays if retentionDays is not None else 7  
+                "quantity": retentionDays if retentionDays is not None else 7
                 }
             },
             "guestProcessing": {
@@ -416,7 +420,7 @@ def run_module():
                 }
             }
         }
-        
+
         bodyjson = json.dumps(body)
         headers = {
             'x-api-version': apiversion,
@@ -430,7 +434,7 @@ def run_module():
 
         if info['status'] != 201:
             module.fail_json(msg="Fail: %s" % ("Status: " + str(info['status']) + ", Message: " + str(info['msg'])))
-        
+
         # Logout
         headers = {
             'x-api-version': apiversion,
@@ -469,7 +473,7 @@ def run_module():
 
             if info['status'] != 204:
                 module.fail_json(msg="Fail: %s" % ("Status: " + str(info['status']) + ", Message: " + str(info['msg'])))
-            
+
             # Logout
             headers = {
                 'x-api-version': apiversion,

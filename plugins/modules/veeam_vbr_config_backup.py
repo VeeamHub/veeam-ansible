@@ -40,5 +40,9 @@ EXAMPLES = r'''
 '''
 
 RETURN = r'''
--
+changed:
+  description: Whether the VBR configuration backup job state was changed.
+  returned: always
+  type: bool
+  sample: true
 '''
