@@ -42,5 +42,9 @@ EXAMPLES = r'''
 '''
 
 RETURN = r'''
--
+changed:
+  description: Whether the Cloud Connect maintenance mode state was changed.
+  returned: always
+  type: bool
+  sample: true
 '''

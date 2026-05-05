@@ -51,18 +51,19 @@ author:
 '''
 
 EXAMPLES = r'''
-- name: Veeam RestAPI Collection
+- name: Test Veeam RestAPI Collection
   hosts: localhost
+  gather_facts: false
   tasks:
-    - name: Test veeam_vbr_rest_jobs_info
+    - name: Get VBR Jobs
       veeamhub.veeam.veeam_vbr_rest_jobs_info:
-        server_name: "<FQDN/IP>"
-        server_username: "<Username>"
-        server_password: "<Password>"
-      register: testout
-    - name: Debug Result
+        server_name: "<VBR Host>"
+        server_username: "<VBR User>"
+        server_password: "<VBR Password>"
+      register: job_testout
+    - name: Debug VBR Jobs Result
       ansible.builtin.debug:
-        var: testout
+        var: job_testout
 '''
 
 def run_module():
