@@ -62,7 +62,7 @@ EXAMPLES = r'''
   hosts: localhost
   gather_facts: false
   vars:
-    - repo_name: '<Repository Name>'
+    repo_name: '<Repository Name>'
   tasks:
     - name: Get VBR Repos
       veeamhub.veeam.veeam_vbr_rest_repositories_info:
