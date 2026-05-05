@@ -51,15 +51,13 @@ author:
 '''
 
 EXAMPLES = r'''
-# Pass in a message
 - name: Test Veeam RestAPI Collection
   hosts: localhost
+  gather_facts: false
   tasks:
-    - name: Test veeam_vbr_rest_credentials_info
-      veeamhub.veeam.veeam_vbr_rest_credentials_info:
-        server_name: '<FQDN/IP>'
-        server_username: '<Username>'
-        server_password: '<Password>'
+    - name: Test veeam_vbr_servercertificate_info
+      veeamhub.veeam.veeam_vbr_rest_servercertificate_info:
+        server_name: "<VBR Host>"
       register: testout
     - name: Debug Result
       ansible.builtin.debug:

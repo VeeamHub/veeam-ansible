@@ -6,6 +6,14 @@ veeamhub.veeam Release Notes
 
 This changelog describes changes after version 1.5.0.
 
+v2.3.5
+======
+
+Bugfixes
+-------------
+
+- Fixed module documentation (https://github.com/VeeamHub/veeam-ansible/issues/90)
+
 v2.3.4
 ======
 

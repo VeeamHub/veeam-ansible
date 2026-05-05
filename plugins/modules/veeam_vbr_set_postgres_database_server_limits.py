@@ -13,7 +13,7 @@ DOCUMENTATION = r'''
 module: veeam_vbr_set_postgres_database_server_limits
 short_description: Modifies settings of the PostgreSQL instance
 description:
-   - Apply VBR performance tuning to PostgreSQL server 
+   - Apply VBR performance tuning to PostgreSQL server
    - Supports PostgreSQL running on both Linux & Windows
    - Supports local and remote instances
    - Supports PostgreSQL servers not currently serving as a DB for VBR
@@ -67,5 +67,9 @@ EXAMPLES = r'''
 '''
 
 RETURN = r'''
--
+changed:
+  description: Whether the PostgreSQL database server limits were modified.
+  returned: always
+  type: bool
+  sample: true
 '''
