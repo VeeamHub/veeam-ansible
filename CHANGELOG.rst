@@ -13,6 +13,7 @@ Minor Changes
 -------------
 
 - Added new module - `defender_exclusions` - enabling management of Microsoft Defender exclusions including playbook examples of setting Veeam exclusions.
+- Updated documentation of all modules in this collection to use FQCN in all examples.
 
 v2.3.7
 ======
