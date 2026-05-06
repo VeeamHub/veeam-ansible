@@ -129,23 +129,23 @@ EXAMPLES = r'''
     state: present
     exclusion_type: path
     exclusions:
-      - "C:\Program Files\Veeam"
-      - "C:\VeeamBackup"
+      - C:\Program Files\Veeam
+      - C:\VeeamBackup
 
 - name: Adding process exclusions to Windows Defender
   veeamhub.veeam.defender_exclusions:
     state: present
     exclusion_type: process
     exclusions:
-      - "veeam.backup.agent.configurationtool.exe"
+      - veeam.backup.agent.configurationtool.exe
 
 - name: Removing extension exclusions from Windows Defender
   veeamhub.veeam.defender_exclusions:
     state: absent
     exclusion_type: extension
     exclusions:
-      - ".vbk"
-      - ".vib"
+      - .vbk
+      - .vib
 '''
 
 RETURN = r'''
@@ -160,6 +160,6 @@ changes:
   type: list
   elements: str
   sample:
-    - "Added path exclusion: C:\Program Files\Veeam"
-    - "Removed extension exclusion: .vbk"
+    - 'Added path exclusion: C:\Program Files\Veeam'
+    - 'Removed extension exclusion: .vbk'
 '''
