@@ -32,12 +32,12 @@ options:
 
 EXAMPLES = r'''
 - name: Enable Cloud Connect Maintenance Mode
-  veeam_vbr_cloud_connect_maintenance:
+  veeamhub.veeam.veeam_vbr_cloud_connect_maintenance:
     state: enable
 
 
 - name: Disable Cloud Connect Maintenance Mode
-  veeam_vbr_cloud_connect_maintenance:
+  veeamhub.veeam.veeam_vbr_cloud_connect_maintenance:
     state: disable
 '''
 

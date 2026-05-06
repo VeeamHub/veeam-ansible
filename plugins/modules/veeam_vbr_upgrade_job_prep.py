@@ -43,11 +43,11 @@ EXAMPLES = r'''
   ansible.builtin.set_fact:
     jobs_file: "C:\\install\\DisabledJobs{{ ansible_date_time.iso8601_basic_short }}.csv"
 - name: Stopping and disabling all backup jobs
-  veeam_vbr_upgrade_job_prep:
+  veeamhub.veeam.veeam_vbr_upgrade_job_prep:
     state: disable
     jobs_file: "{{ jobs_file }}"
 - name: Enabling all backup jobs in specified file
-  veeam_vbr_upgrade_job_prep:
+  veeamhub.veeam.veeam_vbr_upgrade_job_prep:
     state: enable
     jobs_file: "{{ jobs_file }}"
 '''

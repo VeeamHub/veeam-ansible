@@ -35,7 +35,7 @@ options:
 
 EXAMPLES = r'''
 - name: Start adhoc VBR configuration backup job
-  veeam_vbr_config_backup:
+  veeamhub.veeam.veeam_vbr_config_backup:
     state: adhoc
 '''
 

@@ -42,12 +42,12 @@ options:
 
 EXAMPLES = r'''
 - name: Checking to see if Veeam Backup & Replication Server is installed
-  veeam_software_check:
+  veeamhub.veeam.veeam_software_check:
     name: "Veeam Backup & Replication Server"
 
 
 - name: Checking to see if Veeam software is installed
-  veeam_software_check:
+  veeamhub.veeam.veeam_software_check:
     name: "Veeam*"
     allow_multiple: true
   register: software
