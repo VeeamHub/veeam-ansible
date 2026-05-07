@@ -78,12 +78,6 @@
     groups:
       - Administrators
   when: create_service_account | bool
-- name: Grant service account 'Log on as a service' user right
-  ansible.windows.win_user_right:
-    name: SeServiceLogonRight
-    users:
-      - "{{ service_account_username }}"
-    action: add
 
 # INSTALLING SQL EXPRESS (if required)
 # When sql_express_setup is true, a local SQL Express instance is installed from the ISO redistributables
@@ -197,12 +191,9 @@
     #product_id: "{4105A05C-CBB1-4E3C-8415-BD293085B4BB}"
     state: present
     arguments: '/L*v "{{ destination }}logs\VAC.ApplicationServer.x64.log" /qn ACCEPT_EULA="1" ACCEPT_LICENSING_POLICY="1" ACCEPT_THIRDPARTY_LICENSES="1" ACCEPT_REQUIRED_SOFTWARE="1" VAC_LICENSE_FILE="{{ destination }}{{ destination_license_file }}" VSPC_LICENSE_AUTOUPDATE="{{ vspc_license_autoupdate }}" VAC_SERVICE_ACCOUNT_NAME="{{ service_account_username }}" VAC_SERVICE_ACCOUNT_PASSWORD="{{ service_account_password }}" VAC_SQL_SERVER="{{ sql_instance }}" VAC_DATABASE_NAME="{{ sql_database }}" VAC_AUTHENTICATION_MODE="{{ sql_authentication }}" VAC_SERVER_MANAGEMENT_PORT="{{ vspc_server_management_port }}" VAC_CONNECTION_HUB_PORT="{{ vspc_connection_hub_port }}" VSPC_PRODUCT_UPDATES="{{ vspc_product_updates }}" {{ vspc_cert_arg }}'
-  become: true
-  become_flags: logon_type=interactive
-  vars:
-    ansible_become_method: runas
-    ansible_become_user: "{{ service_account_username }}"
-    ansible_become_pass: "{{ service_account_password }}"
+  async: 3600
+  poll: 0
+  register: vspc_install
   when: sql_authentication == "0"
 - name: Install VSPC Server (SQL Authentication)
   ansible.windows.win_package:
@@ -210,13 +201,17 @@
     #product_id: "{4105A05C-CBB1-4E3C-8415-BD293085B4BB}"
     state: present
     arguments: '/L*v "{{ destination }}logs\VAC.ApplicationServer.x64.log" /qn ACCEPT_EULA="1" ACCEPT_LICENSING_POLICY="1" ACCEPT_THIRDPARTY_LICENSES="1" ACCEPT_REQUIRED_SOFTWARE="1" VAC_LICENSE_FILE="{{ destination }}{{ destination_license_file }}" VSPC_LICENSE_AUTOUPDATE="{{ vspc_license_autoupdate }}" VAC_SERVICE_ACCOUNT_NAME="{{ service_account_username }}" VAC_SERVICE_ACCOUNT_PASSWORD="{{ service_account_password }}" VAC_SQL_SERVER="{{ sql_instance }}" VAC_DATABASE_NAME="{{ sql_database }}" VAC_AUTHENTICATION_MODE="{{ sql_authentication }}" VAC_SQL_USER="{{ sql_username }}" VAC_SQL_USER_PASSWORD="{{ sql_password }}" VAC_SERVER_MANAGEMENT_PORT="{{ vspc_server_management_port }}" VAC_CONNECTION_HUB_PORT="{{ vspc_connection_hub_port }}" VSPC_PRODUCT_UPDATES="{{ vspc_product_updates }}" {{ vspc_cert_arg }}'
-  become: true
-  become_flags: logon_type=interactive
-  vars:
-    ansible_become_method: runas
-    ansible_become_user: "{{ service_account_username }}"
-    ansible_become_pass: "{{ service_account_password }}"
+  async: 3600
+  poll: 0
+  register: vspc_install
   when: sql_authentication == "1"
+- name: Check on VSPC Server install status
+  ansible.builtin.async_status:
+    jid: "{{ vspc_install.ansible_job_id }}"
+  register: async_poll_results
+  until: async_poll_results.finished
+  retries: "{{ veeam_retries | int }}" # see main.yml for more info
+  delay: 60 # 60 retries + 60 seconds = max 1 hour wait time
 
 # INSTALLING CONNECTWISE MANAGE PLUGIN SERVER COMPONENT (if required)
 # Silent install reference: https://helpcenter.veeam.com/docs/vac/deployment/silent_install_cwm.html?ver=9.2
