@@ -98,6 +98,9 @@ Variables are located in two different locations:
 |---|---|---|
 | `vspc_server_name` | `"localhost"` | FQDN or IP address of the VSPC Server. Used when installing the Web UI on a separate host. |
 | `vspc_website_port` | `"1280"` | Port for browser access to the VSPC Web UI. |
+| `vspc_configure_schannel` | `"1"` | Enable high security mode (TLS 1.2, disables weak ciphers). `1` = enabled (default). |
+
+> **Note:** When installing the Web UI component, `service_account_username` and `service_account_password` (defined in [Server Component Variables](#server-component-variables)) are also used by the Web UI to connect to the VSPC Server.
 
 ### ConnectWise Manage Plugin Variables
 
@@ -277,6 +280,9 @@ Please note there are more configurations than the examples shown below. If you 
       vars:
         version: "9"
         iso_download: true
+        service_account_username: "svc_vspc"
+        service_account_password: "ChangeM3!"
+        # https://docs.ansible.com/ansible/latest/vault_guide/vault_encrypting_content.html#creating-encrypted-variables
 ```
 
 ### VSPC Web UI Install (remote Server)
@@ -292,6 +298,9 @@ Please note there are more configurations than the examples shown below. If you 
         version: "9"
         iso_download: true
         vspc_server_name: "vspc-server.contoso.local"
+        service_account_username: "svc_vspc"
+        service_account_password: "ChangeM3!"
+        # https://docs.ansible.com/ansible/latest/vault_guide/vault_encrypting_content.html#creating-encrypted-variables
 ```
 
 ### VSPC Web UI Install with ConnectWise Manage UI Component
@@ -307,7 +316,10 @@ Please note there are more configurations than the examples shown below. If you 
         version: "9"
         iso_download: true
         vspc_server_name: "vspc-server.contoso.local"
+        service_account_username: "svc_vspc"
+        service_account_password: "ChangeM3!"
         vspc_connectwise_plugin: true
+        # https://docs.ansible.com/ansible/latest/vault_guide/vault_encrypting_content.html#creating-encrypted-variables
 ```
 
 ### VSPC Web UI Install with File-Level Restore UI Component
@@ -323,6 +335,8 @@ Please note there are more configurations than the examples shown below. If you 
         version: "9"
         iso_download: true
         vspc_server_name: "vspc-server.contoso.local"
+        service_account_username: "svc_vspc"
+        service_account_password: "ChangeM3!"
         vspc_flr_restore_plugin: true
         vspc_flr_hub_host_name: "vspc-webui.contoso.local"
         vspc_flr_hub_account_name: "Administrator"

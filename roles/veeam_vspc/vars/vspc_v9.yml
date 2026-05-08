@@ -5,5 +5,3 @@ iso_url: "https://download2.veeam.com/VSPC/v9/VeeamServiceProviderConsole_9.2.0.
 iso_checksum: "9d3f44309101b0fa66cd66e6bfb70fb05747e98d"
 destination_iso_file: "vspc.iso"
 destination_license_file: "vspc-license.lic"
-sql_instance: "(local)\\VEEAMSQL2017"
-sql_database: "VSPC"

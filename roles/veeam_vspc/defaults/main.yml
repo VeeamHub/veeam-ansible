@@ -20,7 +20,7 @@ destination: "C:\\install\\"
 # NOTE: VSPC v9 supports Microsoft SQL Server only (no PostgreSQL support)
 sql_express_setup: true # Install SQL Express locally; set false for remote SQL Server
 sql_instance: "(local)\\VEEAMSQL2017"
-sql_database: "VeeamVSPC"
+sql_database: "VSPC"
 sql_authentication: "0" # 0-Windows Authentication 1-SQL Server Authentication
 
 # VSPC Server component ports
@@ -28,10 +28,12 @@ vspc_server_management_port: "1989" # Port for Web UI -> Server communication (V
 vspc_connection_hub_port: "9999"    # Port for cloud agent/VCC connections and FLR plugin (VAC_CONNECTION_HUB_PORT)
 
 # VSPC Web UI component settings
-vspc_server_name: "localhost"       # FQDN or IP of the VSPC Server (used when installing the Web UI on a separate host)
+vspc_server_name: "localhost"  # FQDN or IP of the VSPC Server (used when installing the Web UI on a separate host)
 vspc_website_port: "1280"           # Port for browser access to the Web UI (VAC_WEBSITE_PORT)
+vspc_configure_schannel: "1"  # 1-Enable High security mode (TLS 1.2, disables weak ciphers). Default: 1 (VAC_CONFIGURE_SCHANNEL)
 
 # VSPC service account - account under which VSPC services run (also used for Windows auth DB access)
+# When installing the Web UI component, this account is also used by the Web UI to connect to the VSPC Server
 # Set create_service_account to true to create this account as a local Windows user before installation
 # service_account_username and service_account_password are always required
 create_service_account: false

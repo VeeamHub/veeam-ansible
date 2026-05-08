@@ -136,40 +136,11 @@
     path: "{{ source }}Redistr\\x64\\aspnetcore-runtime-8.0.25-win-x64.exe"
     state: present
     arguments: '/install /quiet /norestart /log "{{ destination }}logs\\aspnetcore-runtime.log"'
-
-
-
-# - name: Install .NET Hosting Bundle 8
-#   ansible.windows.win_package:
-#     path: "{{ source }}Redistr\\x64\\dotnet-hosting-8.0.25-win.exe"
-#     state: present
-#     arguments: '/install /quiet /norestart /log "{{ destination }}logs\\dotnet-hosting.log"'
-# - name: Install Visual C++ Redistributable
-#   ansible.windows.win_package:
-#     path: "{{ source }}Redistr\\x64\\VC_redist.x64.exe"
-#     product_id: Install C++ Framework
-#     state: present
-#     arguments: '/install /quiet /norestart /log "{{ destination }}logs\\vc_redist.x64.log"'
-#   ignore_errors: true
-
-
-
 - name: Install Microsoft SQL Server CLR Types
   ansible.windows.win_package:
     path: "{{ source }}Redistr\\x64\\SQLSysClrTypes.msi"
     state: present
     arguments: '/L*v "{{ destination }}logs\\SQLSysClrTypes.log" /qn /norestart'
-
-
-
-# - name: Install Microsoft SQL Server Shared Management Objects
-#   ansible.windows.win_package:
-#     path: "{{ source }}Redistr\\x64\\SharedManagementObjects.msi"
-#     state: present
-#     arguments: '/L*v "{{ destination }}logs\\SharedManagementObjects.log" /qn /norestart'
-
-
-
 - name: Install Microsoft OLE DB Driver for SQL Server
   ansible.windows.win_package:
     path: "{{ source }}Redistr\\x64\\msoledbsql.msi"
@@ -191,9 +162,9 @@
     #product_id: "{4105A05C-CBB1-4E3C-8415-BD293085B4BB}"
     state: present
     arguments: '/L*v "{{ destination }}logs\VAC.ApplicationServer.x64.log" /qn ACCEPT_EULA="1" ACCEPT_LICENSING_POLICY="1" ACCEPT_THIRDPARTY_LICENSES="1" ACCEPT_REQUIRED_SOFTWARE="1" VAC_LICENSE_FILE="{{ destination }}{{ destination_license_file }}" VSPC_LICENSE_AUTOUPDATE="{{ vspc_license_autoupdate }}" VAC_SERVICE_ACCOUNT_NAME="{{ service_account_username }}" VAC_SERVICE_ACCOUNT_PASSWORD="{{ service_account_password }}" VAC_SQL_SERVER="{{ sql_instance }}" VAC_DATABASE_NAME="{{ sql_database }}" VAC_AUTHENTICATION_MODE="{{ sql_authentication }}" VAC_SERVER_MANAGEMENT_PORT="{{ vspc_server_management_port }}" VAC_CONNECTION_HUB_PORT="{{ vspc_connection_hub_port }}" VSPC_PRODUCT_UPDATES="{{ vspc_product_updates }}" {{ vspc_cert_arg }}'
-  async: 3600
+  async: "{{ veeam_retries * 60 | int }}" # see main.yml for more info
   poll: 0
-  register: vspc_install
+  register: vspc_install_win_auth
   when: sql_authentication == "0"
 - name: Install VSPC Server (SQL Authentication)
   ansible.windows.win_package:
@@ -201,19 +172,19 @@
     #product_id: "{4105A05C-CBB1-4E3C-8415-BD293085B4BB}"
     state: present
     arguments: '/L*v "{{ destination }}logs\VAC.ApplicationServer.x64.log" /qn ACCEPT_EULA="1" ACCEPT_LICENSING_POLICY="1" ACCEPT_THIRDPARTY_LICENSES="1" ACCEPT_REQUIRED_SOFTWARE="1" VAC_LICENSE_FILE="{{ destination }}{{ destination_license_file }}" VSPC_LICENSE_AUTOUPDATE="{{ vspc_license_autoupdate }}" VAC_SERVICE_ACCOUNT_NAME="{{ service_account_username }}" VAC_SERVICE_ACCOUNT_PASSWORD="{{ service_account_password }}" VAC_SQL_SERVER="{{ sql_instance }}" VAC_DATABASE_NAME="{{ sql_database }}" VAC_AUTHENTICATION_MODE="{{ sql_authentication }}" VAC_SQL_USER="{{ sql_username }}" VAC_SQL_USER_PASSWORD="{{ sql_password }}" VAC_SERVER_MANAGEMENT_PORT="{{ vspc_server_management_port }}" VAC_CONNECTION_HUB_PORT="{{ vspc_connection_hub_port }}" VSPC_PRODUCT_UPDATES="{{ vspc_product_updates }}" {{ vspc_cert_arg }}'
-  async: 3600
+  async: "{{ veeam_retries * 60 | int }}" # see main.yml for more info
   poll: 0
-  register: vspc_install
+  register: vspc_install_sql_auth
   when: sql_authentication == "1"
 - name: Check on VSPC Server install status
   ansible.builtin.async_status:
-    jid: "{{ vspc_install.ansible_job_id }}"
+    jid: "{{ (vspc_install_win_auth if sql_authentication == '0' else vspc_install_sql_auth).ansible_job_id }}"
   register: async_poll_results
   until: async_poll_results.finished
   retries: "{{ veeam_retries | int }}" # see main.yml for more info
   delay: 60 # 60 retries + 60 seconds = max 1 hour wait time
 
-# INSTALLING CONNECTWISE MANAGE PLUGIN SERVER COMPONENT (if required)
+# INSTALLING CONNECTWISE MANAGE PLUGIN SERVER COMPONENT (if specified)
 # Silent install reference: https://helpcenter.veeam.com/docs/vac/deployment/silent_install_cwm.html?ver=9.2
 - name: Install ConnectWise Manage Plugin Server Component
   ansible.windows.win_package:
@@ -222,7 +193,7 @@
     arguments: '/L*v "{{ destination }}logs\\VAC.ConnectorService.x64.log" /qn ACCEPT_EULA="1" ACCEPT_LICENSING_POLICY="1" ACCEPT_THIRDPARTY_LICENSES="1" ACCEPT_REQUIRED_SOFTWARE="1" USERNAME="{{ vspc_cwm_username }}" PASSWORD="{{ vspc_cwm_password }}" SERVER_ACCOUNT_NAME="{{ vspc_cwm_server_account_name }}" SERVER_ACCOUNT_PASSWORD="{{ vspc_cwm_server_account_password }}" SERVER_NAME="{{ vspc_cwm_server_name }}" VAC_SERVER_MANAGEMENT_PORT="{{ vspc_server_management_port }}"'
   when: vspc_connectwise_plugin | bool
 
-# INSTALLING FILE-LEVEL RESTORE PLUGIN SERVER COMPONENT (if required)
+# INSTALLING FILE-LEVEL RESTORE PLUGIN SERVER COMPONENT (if specified)
 # Silent install reference: https://helpcenter.veeam.com/docs/vac/deployment/silent_install_flr.html?ver=9.2
 - name: Install File-Level Restore Plugin Server Component
   ansible.windows.win_package:

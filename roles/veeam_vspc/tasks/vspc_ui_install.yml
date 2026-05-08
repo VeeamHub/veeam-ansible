@@ -35,6 +35,8 @@
       - "VSPC Server Name: {{ vspc_server_name }}"
       - "VSPC Server Management Port: {{ vspc_server_management_port }}"
       - "VSPC Website Port: {{ vspc_website_port }}"
+      - "VSPC Web UI Server Account: {{ service_account_username }}"
+      - "VSPC Configure SChannel (TLS 1.2): {{ vspc_configure_schannel }}"
       - "Install ConnectWise Manage UI Component?: {{ vspc_connectwise_plugin }}"
       - "Install File-Level Restore UI Component?: {{ vspc_flr_restore_plugin }}"
 
@@ -51,6 +53,34 @@
       - Web-Server
       - Web-Mgmt-Tools
     state: present
+- name: Install ASP.NET 4.5
+  ansible.windows.win_feature:
+    name:
+      - Web-Asp-Net45
+      - Web-Net-Ext45
+    state: present
+- name: Enable WebSocket Protocol
+  ansible.windows.win_feature:
+    name: Web-WebSockets
+    state: present
+# .NET Hosting Bundle 8 MUST be installed after IIS and ASP.NET 4.5
+- name: Install .NET Hosting Bundle 8
+  ansible.windows.win_package:
+    path: "{{ source }}Redistr\\x64\\dotnet-hosting-8.0.25-win.exe"
+    state: present
+    arguments: '/install /quiet /norestart /log "{{ destination }}logs\\dotnet-hosting.log"'
+- name: Install Visual C++ Redistributable
+  ansible.windows.win_package:
+    path: "{{ source }}Redistr\\x64\\VC_redist.x64.exe"
+    product_id: Install C++ Framework
+    state: present
+    arguments: '/install /quiet /norestart /log "{{ destination }}logs\\vc_redist.x64.log"'
+  ignore_errors: true
+- name: Install Microsoft SQL Server Shared Management Objects
+  ansible.windows.win_package:
+    path: "{{ source }}Redistr\\x64\\SharedManagementObjects.msi"
+    state: present
+    arguments: '/L*v "{{ destination }}logs\\SharedManagementObjects.log" /qn /norestart'
 - name: Install IIS URL Rewrite Module
   ansible.windows.win_package:
     path: "{{ source }}Redistr\\x64\\rewrite_amd64_en-US.msi"
@@ -68,9 +98,19 @@
   ansible.windows.win_package:
     path: "{{ source }}WebUI\\VAC.WebUI.x64.msi"
     state: present
-    arguments: '/L*v "{{ destination }}logs\\VAC.WebUI.x64.log" /qn ACCEPT_EULA="1" ACCEPT_LICENSING_POLICY="1" ACCEPT_THIRDPARTY_LICENSES="1" ACCEPT_REQUIRED_SOFTWARE="1" VAC_SERVER_NAME="{{ vspc_server_name }}" VAC_SERVER_PORT="{{ vspc_server_management_port }}" VAC_WEBSITE_PORT="{{ vspc_website_port }}"'
+    arguments: '/L*v "{{ destination }}logs\\VAC.WebUI.x64.log" /qn ACCEPT_EULA="1" ACCEPT_LICENSING_POLICY="1" ACCEPT_THIRDPARTY_LICENSES="1" ACCEPT_REQUIRED_SOFTWARE="1" VAC_SERVER_NAME="{{ vspc_server_name }}" VAC_SERVER_PORT="{{ vspc_server_management_port }}" VAC_WEBSITE_PORT="{{ vspc_website_port }}" VAC_CONFIGURE_SCHANNEL="{{ vspc_configure_schannel }}" VAC_SERVER_ACCOUNT_NAME="{{ service_account_username }}" VAC_SERVER_ACCOUNT_PASSWORD="{{ service_account_password }}"'
+  async: "{{ veeam_retries * 60 | int }}" # see main.yml for more info
+  poll: 0
+  register: vspc_ui_install
+- name: Check on VSPC Web UI install status
+  ansible.builtin.async_status:
+    jid: "{{ vspc_ui_install.ansible_job_id }}"
+  register: async_poll_results
+  until: async_poll_results.finished
+  retries: "{{ veeam_retries | int }}" # see main.yml for more info
+  delay: 60 # 60 retries + 60 seconds = max 1 hour wait time
 
-# INSTALLING CONNECTWISE MANAGE PLUGIN WEB UI COMPONENT (if required)
+# INSTALLING CONNECTWISE MANAGE PLUGIN WEB UI COMPONENT (if specified)
 # Silent install reference: https://helpcenter.veeam.com/docs/vac/deployment/silent_install_cwm.html?ver=9.2
 - name: Install ConnectWise Manage Plugin Web UI Component
   ansible.windows.win_package:
@@ -79,7 +119,7 @@
     arguments: '/L*v "{{ destination }}logs\\VAC.ConnectorWebUI.x64.log" /qn ACCEPT_EULA="1" ACCEPT_LICENSING_POLICY="1" ACCEPT_THIRDPARTY_LICENSES="1" ACCEPT_REQUIRED_SOFTWARE="1" VAC_CW_COMMUNICATION_PORT="{{ vspc_cwm_communication_port }}"'
   when: vspc_connectwise_plugin | bool
 
-# INSTALLING FILE-LEVEL RESTORE PLUGIN WEB UI COMPONENT (if required)
+# INSTALLING FILE-LEVEL RESTORE PLUGIN WEB UI COMPONENT (if specified)
 # Silent install reference: https://helpcenter.veeam.com/docs/vac/deployment/silent_install_flr.html?ver=9.2
 - name: Install File-Level Restore Plugin Web UI Component
   ansible.windows.win_package:
@@ -87,7 +127,6 @@
     state: present
     arguments: '/L*v "{{ destination }}logs\\VSPC.VeeamAgentsSelfServicePortalWebUI.x64.log" /qn ACCEPT_EULA="1" ACCEPT_LICENSING_POLICY="1" ACCEPT_THIRDPARTY_LICENSES="1" ACCEPT_REQUIRED_SOFTWARE="1" VAC_FLR_WEBAPI_CONNECTION_HUB_HOST_NAME="{{ vspc_flr_hub_host_name }}" VAC_FLR_WEBAPI_CONNECTION_HUB_PORT="{{ vspc_connection_hub_port }}" VAC_FLR_WEBAPI_CONNECTION_HUB_ACCOUNT_NAME="{{ vspc_flr_hub_account_name }}" VAC_FLR_WEBAPI_CONNECTION_HUB_ACCOUNT_PASSWORD="{{ vspc_flr_hub_account_password }}"'
   when: vspc_flr_restore_plugin | bool
-  no_log: true
 
 # POST-INSTALL TASKS
 - name: Unmount ISO
