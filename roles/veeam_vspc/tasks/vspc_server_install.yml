@@ -153,13 +153,11 @@
   ansible.builtin.set_fact:
     vspc_cert_arg: >-
       {%- if vspc_server_certificate_thumbprint is defined and vspc_server_certificate_thumbprint != '' -%}
-      VAC_SERVER_CERTIFICATE_THUMBPRINT="{{ vspc_server_certificate_thumbprint }}"
-      {%- else -%}
+      VAC_SERVER_CERTIFICATE_THUMBPRINT="{{ vspc_server_certificate_thumbprint }}"{%- else -%}
       {%- endif -%}
 - name: Install VSPC Server (Windows Authentication)
   ansible.windows.win_package:
     path: "{{ source }}ApplicationServer\\VAC.ApplicationServer.x64.msi"
-    #product_id: "{4105A05C-CBB1-4E3C-8415-BD293085B4BB}"
     state: present
     arguments: '/L*v "{{ destination }}logs\VAC.ApplicationServer.x64.log" /qn ACCEPT_EULA="1" ACCEPT_LICENSING_POLICY="1" ACCEPT_THIRDPARTY_LICENSES="1" ACCEPT_REQUIRED_SOFTWARE="1" VAC_LICENSE_FILE="{{ destination }}{{ destination_license_file }}" VSPC_LICENSE_AUTOUPDATE="{{ vspc_license_autoupdate }}" VAC_SERVICE_ACCOUNT_NAME="{{ service_account_username }}" VAC_SERVICE_ACCOUNT_PASSWORD="{{ service_account_password }}" VAC_SQL_SERVER="{{ sql_instance }}" VAC_DATABASE_NAME="{{ sql_database }}" VAC_AUTHENTICATION_MODE="{{ sql_authentication }}" VAC_SERVER_MANAGEMENT_PORT="{{ vspc_server_management_port }}" VAC_CONNECTION_HUB_PORT="{{ vspc_connection_hub_port }}" VSPC_PRODUCT_UPDATES="{{ vspc_product_updates }}" {{ vspc_cert_arg }}'
   async: "{{ veeam_retries * 60 | int }}" # see main.yml for more info
@@ -169,7 +167,6 @@
 - name: Install VSPC Server (SQL Authentication)
   ansible.windows.win_package:
     path: "{{ source }}ApplicationServer\\VAC.ApplicationServer.x64.msi"
-    #product_id: "{4105A05C-CBB1-4E3C-8415-BD293085B4BB}"
     state: present
     arguments: '/L*v "{{ destination }}logs\VAC.ApplicationServer.x64.log" /qn ACCEPT_EULA="1" ACCEPT_LICENSING_POLICY="1" ACCEPT_THIRDPARTY_LICENSES="1" ACCEPT_REQUIRED_SOFTWARE="1" VAC_LICENSE_FILE="{{ destination }}{{ destination_license_file }}" VSPC_LICENSE_AUTOUPDATE="{{ vspc_license_autoupdate }}" VAC_SERVICE_ACCOUNT_NAME="{{ service_account_username }}" VAC_SERVICE_ACCOUNT_PASSWORD="{{ service_account_password }}" VAC_SQL_SERVER="{{ sql_instance }}" VAC_DATABASE_NAME="{{ sql_database }}" VAC_AUTHENTICATION_MODE="{{ sql_authentication }}" VAC_SQL_USER="{{ sql_username }}" VAC_SQL_USER_PASSWORD="{{ sql_password }}" VAC_SERVER_MANAGEMENT_PORT="{{ vspc_server_management_port }}" VAC_CONNECTION_HUB_PORT="{{ vspc_connection_hub_port }}" VSPC_PRODUCT_UPDATES="{{ vspc_product_updates }}" {{ vspc_cert_arg }}'
   async: "{{ veeam_retries * 60 | int }}" # see main.yml for more info

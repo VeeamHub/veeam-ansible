@@ -47,7 +47,7 @@ vspc_product_updates: "1"     # 1-Enable automatic update check for managed Veea
 # VSPC server certificate thumbprint
 # Leave empty to have the installer generate a self-signed certificate (default)
 # Specify a thumbprint to use an existing certificate: e.g. "C4CCFEE30EFBD201749DEE3D0DBFCA50155342CD"
-#vspc_server_certificate_thumbprint: ""
+# vspc_server_certificate_thumbprint: ""
 
 # ConnectWise Manage Plugin
 # Reference: https://helpcenter.veeam.com/docs/vac/deployment/silent_install_cwm.html?ver=9.2

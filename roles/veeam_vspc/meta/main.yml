@@ -14,7 +14,8 @@ galaxy_info:
     - veeam
     - vspc
     - vac
-    - service_provider
+    - service
+    - provider
     - console
     - availability
 dependencies: []
