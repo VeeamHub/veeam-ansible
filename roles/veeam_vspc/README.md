@@ -8,17 +8,17 @@ An Ansible Role to install and upgrade [Veeam Service Provider Console](https://
     - [Ansible](#ansible)
     - [OS](#os)
     - [Veeam Software](#veeam-software)
+  - [Available Task Files](#available-task-files)
   - [Role Variables](#role-variables)
     - [Common Variables](#common-variables)
     - [Server Component Variables](#server-component-variables)
+    - [Additional Server Component Variables](#additional-server-component-variables)
     - [Web UI Component Variables](#web-ui-component-variables)
     - [ConnectWise Manage Plugin Variables](#connectwise-manage-plugin-variables)
     - [File-Level Restore Plugin Variables](#file-level-restore-plugin-variables)
   - [Known Issues](#known-issues)
   - [Example Playbooks](#example-playbooks)
-    - [VSPC Server Install with ISO Download (Local SQL Express)](#vspc-server-install-with-iso-download-local-sql-express)
     - [VSPC Server Install with Remote SQL Server (Windows Authentication)](#vspc-server-install-with-remote-sql-server-windows-authentication)
-    - [VSPC Server Install with Local SQL Express (Windows Authentication)](#vspc-server-install-with-local-sql-express-windows-authentication)
     - [VSPC Server Install with Remote SQL Server (SQL Authentication)](#vspc-server-install-with-remote-sql-server-sql-authentication)
     - [VSPC Server Install with ConnectWise Manage Plugin](#vspc-server-install-with-connectwise-manage-plugin)
     - [VSPC Server Install with File-Level Restore Plugin](#vspc-server-install-with-file-level-restore-plugin)
@@ -26,7 +26,6 @@ An Ansible Role to install and upgrade [Veeam Service Provider Console](https://
     - [VSPC Web UI Install (remote Server)](#vspc-web-ui-install-remote-server)
     - [VSPC Web UI Install with ConnectWise Manage UI Component](#vspc-web-ui-install-with-connectwise-manage-ui-component)
     - [VSPC Web UI Install with File-Level Restore UI Component](#vspc-web-ui-install-with-file-level-restore-ui-component)
-    - [VSPC Server Upgrade](#vspc-server-upgrade)
 
 ## How to use this Role
 
@@ -52,10 +51,23 @@ This collection depends on Windows modules (`ansible.windows` & `community.windo
 - Microsoft Windows Server 2022
 - Microsoft Windows Server 2019
 
+> **Important:** This role does **not** support installing VSPC using SQL Express. A pre-existing Microsoft SQL Server instance (local or remote) must be available before running this role. SQL Express provisioning is not performed by any task in this role.
+
 ### Veeam Software
 
 - Veeam Service Provider Console
-  - 9
+  - v9
+
+## Available Task Files
+
+This role does **not** run any tasks from `tasks/main.yml` by default. All functionality is invoked via `tasks_from` in `include_role`. The following task files are available:
+
+| Task File | Description |
+|---|---|
+| `vspc_server_install` | Installs the VSPC Server component and optionally the ConnectWise Manage and/or File-Level Restore plugin server components. |
+| `vspc_ui_install` | Installs the VSPC Web UI component and optionally the ConnectWise Manage and/or File-Level Restore plugin Web UI components. |
+
+> **Note:** Upgrade task files (`vspc_server_upgrade`, `vspc_ui_upgrade`) are not yet implemented in this role. Upgrade support is planned for a future release.
 
 ## Role Variables
 
@@ -73,24 +85,31 @@ Variables are located in two different locations:
 | `skip_iso_check` | `false` | Skip the ISO version verification check. |
 | `iso_download` | `false` | Download the ISO from the internet. Set to `true` to download automatically. |
 | `iso_checksum_algorithm` | `"sha1"` | Checksum algorithm used when verifying the downloaded ISO. |
-| `source_license` | _(not set)_ | Path on the Ansible controller to the VSPC license file. **Required** for both install and upgrade. |
+| `source_license` | `""` | Path on the Ansible controller to the VSPC license file. **Required** for install. |
 | `destination` | `"C:\\install\\"` | Working directory on the target Windows server for ISO and log files. |
 
 ### Server Component Variables
 
 | Variable | Default | Description |
 |---|---|---|
-| `sql_express_setup` | `true` | Install a local SQL Express instance from the ISO redistributables. Set to `false` to use an existing SQL Server. |
-| `sql_instance` | `"(local)\\VEEAMSQL2016"` | SQL Server instance to use for the VSPC database. |
-| `sql_database` | `"VeeamVSPC"` | Name of the VSPC SQL database. |
+| `sql_instance` | `"(local)\\VEEAMSQL2017"` | SQL Server instance to use for the VSPC database. |
+| `sql_database` | `"VSPC"` | Name of the VSPC SQL database. |
 | `sql_authentication` | `"0"` | SQL authentication mode. `0` = Windows Authentication, `1` = SQL Server Authentication. |
-| `sql_username` | _(not set)_ | SQL user name. Required when `sql_express_setup: false` and `sql_authentication: "1"`. Use Ansible Vault for sensitive values. |
-| `sql_password` | _(not set)_ | SQL user password. Required when `sql_express_setup: false` and `sql_authentication: "1"`. Use Ansible Vault for sensitive values. |
+| `sql_username` | `""` | SQL user name. Required when `sql_authentication: "1"`. Use Ansible Vault for sensitive values. |
+| `sql_password` | `""` | SQL user password. **Required** when `sql_authentication: "1"`. Use Ansible Vault for sensitive values. |
 | `vspc_server_management_port` | `"1989"` | Port for Web UI to Server communication. Used by both `vspc_server_install` and `vspc_ui_install`. |
 | `vspc_connection_hub_port` | `"9999"` | Port for cloud agent and VCC connections to the VSPC Server. Also used by the FLR Web UI component. |
 | `create_service_account` | `false` | Create a local Windows user account to run the VSPC service. |
-| `service_account_username` | _(required)_ | Windows account under which VSPC services run. Must not be `LocalSystem`. Use Ansible Vault for the password. |
-| `service_account_password` | _(required)_ | Password for the service account. Use Ansible Vault. |
+| `service_account_username` | `""` | Windows account under which VSPC services run. Must not be `LocalSystem`. **Required** — the installer will fail if left empty. Use Ansible Vault for sensitive values. |
+| `service_account_password` | `""` | Password for the service account. **Required** — the installer will fail if left empty. Use Ansible Vault. |
+
+### Additional Server Component Variables
+
+| Variable | Default | Description |
+|---|---|---|
+| `vspc_license_autoupdate` | `"1"` | Enable automatic license update and usage reporting. Required for NFR and Evaluation licenses. `1` = enabled (default). |
+| `vspc_product_updates` | `"1"` | Enable automatic update check for managed Veeam products. `1` = enabled (default). |
+| `vspc_server_certificate_thumbprint` | _(not set)_ | Thumbprint of an existing certificate to use for the VSPC server TLS endpoint. If not set, the installer generates a self-signed certificate. Example: `"C4CCFEE30EFBD201749DEE3D0DBFCA50155342CD"`. |
 
 ### Web UI Component Variables
 
@@ -131,8 +150,8 @@ The `vspc_flr_restore_plugin` flag controls installation of both the server comp
 
 ## Known Issues
 
-- VSPC v9 supports **Microsoft SQL Server only**. PostgreSQL is not supported.
-- If `sql_express_setup: true`, the SQL Express installer must be present in the `Redistr\` directory of the mounted ISO.
+- **SQL Express is not supported.** This role does not install or configure SQL Express. A pre-existing Microsoft SQL Server instance (local or remote) must be present before running `vspc_server_install`. VSPC v9 supports Microsoft SQL Server only — PostgreSQL is not supported.
+- **Upgrade tasks are not yet implemented.** The task files `vspc_server_upgrade` and `vspc_ui_upgrade` do not currently exist in this role. If VSPC is already installed, the install tasks (`vspc_server_install`, `vspc_ui_install`) will halt with an error directing you to use the upgrade task. Upgrade support is planned for a future release.
 - The `iso_checksum` variable in `vars/vspc_v9.yml` should be verified against the downloaded ISO before use. It is strongly recommended to confirm the checksum from the [Veeam download page](https://www.veeam.com/downloads.html).
 - Sensitive values such as `sql_password`, `service_account_password`, `vspc_cwm_password`, `vspc_flr_service_account_password`, and `vspc_flr_hub_account_password` should be encrypted using [Ansible Vault](https://docs.ansible.com/ansible/latest/vault_guide/vault_encrypting_content.html#creating-encrypted-variables).
 - The VSPC Server and Web UI can be installed on the same host or on separate hosts. When installing on separate hosts, set `vspc_server_name` to the FQDN or IP of the VSPC Server host before running `vspc_ui_install`.
@@ -141,24 +160,6 @@ The `vspc_flr_restore_plugin` flag controls installation of both the server comp
 ## Example Playbooks
 
 Please note there are more configurations than the examples shown below. If you have any questions, please feel free to create an [issue](https://github.com/VeeamHub/veeam-ansible/issues/new/choose).
-
-### VSPC Server Install with ISO Download (Local SQL Express)
-
-```yaml
-- name: Veeam Service Provider Console Server Install
-  hosts: vspc
-  tasks:
-    - include_role:
-        name: veeamhub.veeam.veeam_vspc
-        tasks_from: vspc_server_install
-      vars:
-        version: "9"
-        iso_download: true
-        source_license: "/root/ansible/vspc-license.lic"
-        service_account_username: "svc_vspc"
-        service_account_password: "ChangeM3!"
-        # https://docs.ansible.com/ansible/latest/vault_guide/vault_encrypting_content.html#creating-encrypted-variables
-```
 
 ### VSPC Server Install with Remote SQL Server (Windows Authentication)
 
@@ -173,28 +174,8 @@ Please note there are more configurations than the examples shown below. If you 
         version: "9"
         iso_download: true
         source_license: "/root/ansible/vspc-license.lic"
-        sql_express_setup: false
         sql_authentication: "0"
         sql_instance: "sql.contoso.local"
-        service_account_username: "svc_vspc"
-        service_account_password: "ChangeM3!"
-        # https://docs.ansible.com/ansible/latest/vault_guide/vault_encrypting_content.html#creating-encrypted-variables
-```
-
-### VSPC Server Install with Local SQL Express (Windows Authentication)
-
-```yaml
-- name: Veeam Service Provider Console Server Install with Local SQL Express
-  hosts: vspc
-  tasks:
-    - include_role:
-        name: veeamhub.veeam.veeam_vspc
-        tasks_from: vspc_server_install
-      vars:
-        version: "9"
-        iso_download: true
-        source_license: "/root/ansible/vspc-license.lic"
-        sql_authentication: "0"
         service_account_username: "svc_vspc"
         service_account_password: "ChangeM3!"
         # https://docs.ansible.com/ansible/latest/vault_guide/vault_encrypting_content.html#creating-encrypted-variables
@@ -213,7 +194,6 @@ Please note there are more configurations than the examples shown below. If you 
         version: "9"
         iso_download: true
         source_license: "/root/ansible/vspc-license.lic"
-        sql_express_setup: false
         sql_authentication: "1"
         sql_instance: "sql.contoso.local"
         sql_username: "svc_vspc"
@@ -342,19 +322,4 @@ Please note there are more configurations than the examples shown below. If you 
         vspc_flr_hub_account_name: "Administrator"
         vspc_flr_hub_account_password: "ChangeM3!"
         # https://docs.ansible.com/ansible/latest/vault_guide/vault_encrypting_content.html#creating-encrypted-variables
-```
-
-### VSPC Server Upgrade
-
-```yaml
-- name: Veeam Service Provider Console Server Upgrade
-  hosts: vspc
-  tasks:
-    - include_role:
-        name: veeamhub.veeam.veeam_vspc
-        tasks_from: vspc_upgrade
-      vars:
-        version: "9"
-        iso_download: true
-        source_license: "/root/ansible/vspc-license.lic"
 ```

@@ -23,11 +23,10 @@
   when:
     - service_account_username is not defined or service_account_username == ""
       or service_account_password is not defined or service_account_password == ""
-- name: If using remote SQL with SQL authentication, were sql_username and sql_password specified?
+- name: If using SQL authentication, were sql_username and sql_password specified?
   ansible.builtin.fail:
-    msg: "sql_username and sql_password must be specified when using SQL authentication with a remote SQL server."
+    msg: "sql_username and sql_password must be specified when using SQL authentication."
   when:
-    - not sql_express_setup | bool
     - sql_authentication == "1"
     - sql_username is not defined or sql_password is not defined
 - name: Including version-specific variables
@@ -48,7 +47,6 @@
       - "License Source: {{ source_license }}"
       - "License File Destination: {{ destination }}{{ destination_license_file }}"
       - "License Auto-Update: {{ vspc_license_autoupdate }}"
-      - "Install SQL Express?: {{ sql_express_setup }}"
       - "SQL Instance: {{ sql_instance }}"
       - "SQL Database: {{ sql_database }}"
       - "SQL Authentication Mode: {{ sql_authentication }}"
@@ -78,42 +76,6 @@
     groups:
       - Administrators
   when: create_service_account | bool
-
-# INSTALLING SQL EXPRESS (if required)
-# When sql_express_setup is true, a local SQL Express instance is installed from the ISO redistributables
-- name: Looking for SQL Express installer in Veeam ISO
-  ansible.windows.win_find:
-    paths: "{{ source }}Redistr\\x64\\SqlExpress"
-    patterns: "SQLEXPR*.exe"
-    recurse: false
-    file_type: file
-    use_regex: false
-  register: sql_express_file
-  when: sql_express_setup | bool
-- name: Install SQL Express
-  ansible.windows.win_package:
-    path: "{{ sql_express_file.files[0].path }}"
-    creates_service: MSSQL$VEEAMSQL2017
-    arguments:
-      - "/q"
-      - "/ACTION=Install"
-      - "/IACCEPTSQLSERVERLICENSETERMS"
-      - "/FEATURES=SQL"
-      - "/INSTANCENAME=VEEAMSQL2017"
-      - "/SQLSVCACCOUNT=NT AUTHORITY\\Network Service"
-      - "/SQLSYSADMINACCOUNTS={{ service_account_username }}"
-      - "/UPDATEENABLED=1"
-      - "/TCPENABLED=1"
-      - "/NPENABLED=1"
-  become: true
-  become_flags: logon_type=batch
-  vars:
-    ansible_become_method: runas
-    ansible_become_user: "{{ service_account_username }}"
-    ansible_become_pass: "{{ service_account_password }}"
-  when:
-    - sql_express_setup | bool
-    - sql_express_file.matched > 0
 
 # INSTALLING PREREQUISITES
 - name: Install Microsoft Report Viewer 2015 Runtime

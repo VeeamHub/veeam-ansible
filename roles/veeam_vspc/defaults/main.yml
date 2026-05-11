@@ -18,9 +18,10 @@ destination: "C:\\install\\"
 
 # Database settings
 # NOTE: VSPC v9 supports Microsoft SQL Server only (no PostgreSQL support)
-sql_express_setup: true # Install SQL Express locally; set false for remote SQL Server
 sql_instance: "(local)\\VEEAMSQL2017"
 sql_database: "VSPC"
+sql_username: ""
+sql_password: "" # Required - use Ansible Vault for the password
 sql_authentication: "0" # 0-Windows Authentication 1-SQL Server Authentication
 
 # VSPC Server component ports
