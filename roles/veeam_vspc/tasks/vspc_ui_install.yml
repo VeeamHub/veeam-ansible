@@ -76,6 +76,11 @@
     state: present
     arguments: '/install /quiet /norestart /log "{{ destination }}logs\\vc_redist.x64.log"'
   ignore_errors: true
+- name: Install Microsoft SQL Server CLR Types
+  ansible.windows.win_package:
+    path: "{{ source }}Redistr\\x64\\SQLSysClrTypes.msi"
+    state: present
+    arguments: '/L*v "{{ destination }}logs\\SQLSysClrTypes.log" /qn /norestart'
 - name: Install Microsoft SQL Server Shared Management Objects
   ansible.windows.win_package:
     path: "{{ source }}Redistr\\x64\\SharedManagementObjects.msi"
