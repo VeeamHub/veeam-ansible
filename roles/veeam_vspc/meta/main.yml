@@ -1,0 +1,21 @@
+---
+galaxy_info:
+  author: Chris Arceneaux
+  description: Install Veeam Service Provider Console
+  company: VeeamHub
+  license: GPL-3.0-only
+  min_ansible_version: '2.16.0'
+  platforms:
+    - name: Windows
+      versions:
+        - '2025'
+        - '2022'
+  galaxy_tags:
+    - veeam
+    - vspc
+    - vac
+    - service
+    - provider
+    - console
+    - availability
+dependencies: []

@@ -6,6 +6,14 @@ veeamhub.veeam Release Notes
 
 This changelog describes changes after version 1.5.0.
 
+v2.4.0
+======
+
+Major Changes
+-------------
+
+- Added new role - `veeam_vspc` - enabling installation of Veeam Service Provider Console. It supports both Windows & SQL auth to the MSSQL database including a distributed scenario where the VSPC Server & Web UI are installed on separate machines. (https://github.com/VeeamHub/veeam-ansible/issues/11)
+
 v2.3.8
 ======
 

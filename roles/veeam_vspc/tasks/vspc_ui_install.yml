@@ -1,0 +1,147 @@
+---
+# vspc_ui_install tasks file for veeamhub.veeam_vspc
+# Reference: https://helpcenter.veeam.com/docs/vac/deployment/silent_install_ui.html?ver=9.2
+- name: Checking OS for pending reboots
+  pending_reboot_check:
+  register: precheck
+- name: Is there an existing pending reboot?
+  ansible.builtin.fail:
+    msg: "This Windows server requires a reboot prior to beginning the Veeam Service Provider Console Web UI install. After rebooting this server, you can proceed with the installation."
+  when:
+    - precheck.pending_reboot | bool
+- name: Checking to see if VSPC Web UI is already installed
+  veeam_software_check:
+    name: "Veeam Service Provider Console Web UI"
+  register: software
+- name: Is VSPC Web UI already installed?
+  ansible.builtin.fail:
+    msg: "Veeam Service Provider Console Web UI is already installed on this server." # Please use the upgrade task (vspc_ui_upgrade) instead."
+  when: software.installed | bool
+- name: Including version-specific variables
+  ansible.builtin.include_vars:
+    file: "vars/vspc_v{{ version }}.yml"
+- name: VSPC ISO Tasks
+  ansible.builtin.include_tasks: mount_iso.yml
+
+# Print Installation Configuration
+- name: Print Installation Configuration
+  ansible.builtin.debug:
+    msg:
+      - "ISO Drive Letter: '{{ source }}'"
+      - "Installation Logs Folder: '{{ destination }}logs'"
+      - "Version: {{ version }}"
+      - "Download ISO?: {{ iso_download }}"
+      - "ISO File Destination: {{ destination }}{{ destination_iso_file }}"
+      - "VSPC Server Name: {{ vspc_server_name }}"
+      - "VSPC Server Management Port: {{ vspc_server_management_port }}"
+      - "VSPC Website Port: {{ vspc_website_port }}"
+      - "VSPC Web UI Server Account: {{ vspc_server_account_name }}"
+      - "VSPC Configure SChannel (TLS 1.2): {{ vspc_configure_schannel }}"
+      - "Install ConnectWise Manage UI Component?: {{ vspc_connectwise_plugin }}"
+      - "Install File-Level Restore UI Component?: {{ vspc_flr_restore_plugin }}"
+
+# PRE-INSTALL TASKS
+- name: Create logs directory
+  ansible.windows.win_file:
+    path: "{{ destination }}logs"
+    state: directory
+
+# INSTALLING PREREQUISITES
+- name: Install IIS Web Server role
+  ansible.windows.win_feature:
+    name:
+      - Web-Server
+      - Web-Mgmt-Tools
+    state: present
+- name: Install ASP.NET 4.5
+  ansible.windows.win_feature:
+    name:
+      - Web-Asp-Net45
+      - Web-Net-Ext45
+    state: present
+- name: Enable WebSocket Protocol
+  ansible.windows.win_feature:
+    name: Web-WebSockets
+    state: present
+# .NET Hosting Bundle 8 MUST be installed after IIS and ASP.NET 4.5
+- name: Install .NET Hosting Bundle 8
+  ansible.windows.win_package:
+    path: "{{ source }}Redistr\\x64\\dotnet-hosting-8.0.25-win.exe"
+    state: present
+    arguments: '/install /quiet /norestart /log "{{ destination }}logs\\dotnet-hosting.log"'
+- name: Install Visual C++ Redistributable
+  ansible.windows.win_package:
+    path: "{{ source }}Redistr\\x64\\VC_redist.x64.exe"
+    product_id: Install C++ Framework
+    state: present
+    arguments: '/install /quiet /norestart /log "{{ destination }}logs\\vc_redist.x64.log"'
+  ignore_errors: true
+- name: Install Microsoft SQL Server CLR Types
+  ansible.windows.win_package:
+    path: "{{ source }}Redistr\\x64\\SQLSysClrTypes.msi"
+    state: present
+    arguments: '/L*v "{{ destination }}logs\\SQLSysClrTypes.log" /qn /norestart'
+- name: Install Microsoft SQL Server Shared Management Objects
+  ansible.windows.win_package:
+    path: "{{ source }}Redistr\\x64\\SharedManagementObjects.msi"
+    state: present
+    arguments: '/L*v "{{ destination }}logs\\SharedManagementObjects.log" /qn /norestart'
+- name: Install IIS URL Rewrite Module
+  ansible.windows.win_package:
+    path: "{{ source }}Redistr\\x64\\rewrite_amd64_en-US.msi"
+    state: present
+    arguments: '/L*v "{{ destination }}logs\\rewrite_amd64_en-US.log" /qn /norestart'
+- name: Install IIS Application Request Routing
+  ansible.windows.win_package:
+    path: "{{ source }}Redistr\\x64\\requestRouter_amd64.msi"
+    state: present
+    arguments: '/L*v "{{ destination }}logs\\requestRouter_amd64.log" /qn /norestart'
+
+# INSTALLING VEEAM SERVICE PROVIDER CONSOLE WEB UI
+# Silent install reference: https://helpcenter.veeam.com/docs/vac/deployment/silent_install_ui.html?ver=9.2
+- name: Install VSPC Web UI
+  ansible.windows.win_package:
+    path: "{{ source }}WebUI\\VAC.WebUI.x64.msi"
+    state: present
+    arguments: '/L*v "{{ destination }}logs\\VAC.WebUI.x64.log" /qn ACCEPT_EULA="1" ACCEPT_LICENSING_POLICY="1" ACCEPT_THIRDPARTY_LICENSES="1" ACCEPT_REQUIRED_SOFTWARE="1" VAC_SERVER_NAME="{{ vspc_server_name }}" VAC_SERVER_PORT="{{ vspc_server_management_port }}" VAC_WEBSITE_PORT="{{ vspc_website_port }}" VAC_CONFIGURE_SCHANNEL="{{ vspc_configure_schannel }}" VAC_SERVER_ACCOUNT_NAME="{{ vspc_server_account_name }}" VAC_SERVER_ACCOUNT_PASSWORD="{{ vspc_server_account_password }}"'
+  async: "{{ veeam_retries * 60 | int }}" # see main.yml for more info
+  poll: 0
+  register: vspc_ui_install
+- name: Check on VSPC Web UI install status
+  ansible.builtin.async_status:
+    jid: "{{ vspc_ui_install.ansible_job_id }}"
+  register: async_poll_results
+  until: async_poll_results.finished
+  retries: "{{ veeam_retries | int }}" # see main.yml for more info
+  delay: 60 # 60 retries + 60 seconds = max 1 hour wait time
+
+# INSTALLING CONNECTWISE MANAGE PLUGIN WEB UI COMPONENT (if specified)
+# Silent install reference: https://helpcenter.veeam.com/docs/vac/deployment/silent_install_cwm.html?ver=9.2
+- name: Install ConnectWise Manage Plugin Web UI Component
+  ansible.windows.win_package:
+    path: "{{ source }}Plugins\\ConnectWise\\Manage\\VAC.ConnectorWebUI.x64.msi"
+    state: present
+    arguments: '/L*v "{{ destination }}logs\\VAC.ConnectorWebUI.x64.log" /qn ACCEPT_EULA="1" ACCEPT_LICENSING_POLICY="1" ACCEPT_THIRDPARTY_LICENSES="1" ACCEPT_REQUIRED_SOFTWARE="1" VAC_CW_COMMUNICATION_PORT="{{ vspc_cwm_communication_port }}"'
+  when: vspc_connectwise_plugin | bool
+
+# INSTALLING FILE-LEVEL RESTORE PLUGIN WEB UI COMPONENT (if specified)
+# Silent install reference: https://helpcenter.veeam.com/docs/vac/deployment/silent_install_flr.html?ver=9.2
+- name: Install File-Level Restore Plugin Web UI Component
+  ansible.windows.win_package:
+    path: "{{ source }}Plugins\\VeeamAgent\\FLRPortal\\VSPC.VeeamAgentsSelfServicePortalWebUI.x64.msi"
+    state: present
+    arguments: '/L*v "{{ destination }}logs\\VSPC.VeeamAgentsSelfServicePortalWebUI.x64.log" /qn ACCEPT_EULA="1" ACCEPT_LICENSING_POLICY="1" ACCEPT_THIRDPARTY_LICENSES="1" ACCEPT_REQUIRED_SOFTWARE="1" VAC_FLR_WEBAPI_CONNECTION_HUB_HOST_NAME="{{ vspc_flr_hub_host_name }}" VAC_FLR_WEBAPI_CONNECTION_HUB_PORT="{{ vspc_connection_hub_port }}" VAC_FLR_WEBAPI_CONNECTION_HUB_ACCOUNT_NAME="{{ vspc_flr_hub_account_name }}" VAC_FLR_WEBAPI_CONNECTION_HUB_ACCOUNT_PASSWORD="{{ vspc_flr_hub_account_password }}"'
+  when: vspc_flr_restore_plugin | bool
+
+# POST-INSTALL TASKS
+- name: Unmount ISO
+  community.windows.win_disk_image:
+    image_path: "{{ destination }}{{ destination_iso_file }}"
+    state: absent
+- name: Installation Complete! Checking OS for pending reboots
+  pending_reboot_check:
+  register: postcheck
+- name: Rebooting server if necessary
+  ansible.windows.win_reboot:
+    msg: Reboot initiated by Ansible to complete VSPC Web UI install
+  when: postcheck.pending_reboot | bool

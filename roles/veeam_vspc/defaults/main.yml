@@ -1,0 +1,75 @@
+---
+# defaults file for veeamhub.veeam_vspc
+
+# Major version of Veeam Service Provider Console being installed
+version: "9" # only "9" is currently supported
+
+# Retries allowed for long-running Veeam operations (ISO download, install, upgrade)
+# Each retry is 60 seconds apart, so 60 retries = max 1 hour wait time
+veeam_retries: 60
+
+# ISO & License files
+# NOTE: A license file is required for VSPC installation and upgrade
+skip_iso_check: false
+iso_download: false
+iso_checksum_algorithm: "sha1"
+source_license: ""  # Path on the Ansible controller to the VSPC license file (required)
+destination: "C:\\install\\"
+
+# Database settings
+# NOTE: VSPC v9 supports Microsoft SQL Server only (no PostgreSQL support)
+sql_instance: "(local)\\VEEAMSQL2017"
+sql_database: "VSPC"
+sql_username: ""
+sql_password: "" # Required - use Ansible Vault for the password
+sql_authentication: "0" # 0-Windows Authentication 1-SQL Server Authentication
+
+# VSPC Server component ports
+vspc_server_management_port: "1989" # Port for Web UI -> Server communication (VAC_SERVER_MANAGEMENT_PORT / VAC_SERVER_PORT)
+vspc_connection_hub_port: "9999"    # Port for cloud agent/VCC connections and FLR plugin (VAC_CONNECTION_HUB_PORT)
+
+# VSPC Web UI component settings
+vspc_server_name: "localhost"  # FQDN or IP of the VSPC Server (used when installing the Web UI on a separate host)
+vspc_website_port: "1280"           # Port for browser access to the Web UI (VAC_WEBSITE_PORT)
+vspc_configure_schannel: "1"  # 1-Enable High security mode (TLS 1.2, disables weak ciphers). Default: 1 (VAC_CONFIGURE_SCHANNEL)
+vspc_server_account_name: "{{ service_account_username }}"
+vspc_server_account_password: "{{ service_account_password }}"
+
+# VSPC service account - account under which VSPC services run (also used for Windows auth DB access)
+# When installing the Web UI component, this account is also used by the Web UI to connect to the VSPC Server
+# Set create_service_account to true to create this account as a local Windows user before installation
+# service_account_username and service_account_password are always required
+create_service_account: false
+service_account_username: ""  # Required - use Ansible Vault for the password
+service_account_password: ""  # Required - use Ansible Vault
+
+# VSPC licensing and update settings
+vspc_license_autoupdate: "1"  # 1-Enable automatic license update and usage reporting (required for NFR and Evaluation licenses)
+vspc_product_updates: "1"     # 1-Enable automatic update check for managed Veeam products
+
+# VSPC server certificate thumbprint
+# Leave empty to have the installer generate a self-signed certificate (default)
+# Specify a thumbprint to use an existing certificate: e.g. "C4CCFEE30EFBD201749DEE3D0DBFCA50155342CD"
+# vspc_server_certificate_thumbprint: ""
+
+# ConnectWise Manage Plugin
+# Reference: https://helpcenter.veeam.com/docs/vac/deployment/silent_install_cwm.html?ver=9.2
+vspc_connectwise_plugin: true           # Set to false to skip installation of both the CWM Plugin server and Web UI components
+vspc_cwm_server_name: "{{ vspc_server_name }}"       # FQDN or IP of the VSPC Server the CWM plugin server component connects to
+vspc_cwm_communication_port: "9996"    # Port used by the CWM plugin to communicate with VSPC (VAC_CW_COMMUNICATION_PORT)
+# The following variables are used when vspc_connectwise_plugin is true (server component):
+vspc_cwm_username: "{{ service_account_username }}"               # Account under which the CWM plugin service runs (must have local Admin)
+vspc_cwm_password: "{{ service_account_password }}"               # Password for vspc_cwm_username - use Ansible Vault
+vspc_cwm_server_account_name: "{{ service_account_username }}"    # Account used by CWM plugin to connect to VSPC server (must have local Admin)
+vspc_cwm_server_account_password: "{{ service_account_password }}" # Password for vspc_cwm_server_account_name - use Ansible Vault
+
+# File-Level Restore Plugin
+# Reference: https://helpcenter.veeam.com/docs/vac/deployment/silent_install_flr.html?ver=9.2
+vspc_flr_restore_plugin: true           # Set to false to skip installation of both the FLR Plugin server and Web UI components
+vspc_flr_hub_host_name: "{{ vspc_server_name }}"     # FQDN or IP of the VSPC Web UI server the FLR Web UI component connects to (VAC_FLR_WEBAPI_CONNECTION_HUB_HOST_NAME)
+# The following variables are used when vspc_flr_restore_plugin is true (server component):
+vspc_flr_service_account_name: "{{ service_account_username }}"    # Account under which the FLR service runs (must have local Admin)
+vspc_flr_service_account_password: "{{ service_account_password }}" # Password for vspc_flr_service_account_name - use Ansible Vault
+# The following variables are used when vspc_flr_restore_plugin is true (Web UI component):
+vspc_flr_hub_account_name: "{{ service_account_username }}"        # Account used by the FLR Web UI to connect to VSPC (must have local Admin)
+vspc_flr_hub_account_password: "{{ service_account_password }}"    # Password for vspc_flr_hub_account_name - use Ansible Vault
