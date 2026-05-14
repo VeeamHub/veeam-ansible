@@ -43,15 +43,34 @@ EXAMPLES = r'''
   ansible.builtin.set_fact:
     jobs_file: "C:\\install\\DisabledJobs{{ ansible_date_time.iso8601_basic_short }}.csv"
 - name: Stopping and disabling all backup jobs
-  veeam_vbr_upgrade_job_prep:
+  veeamhub.veeam.veeam_vbr_upgrade_job_prep:
     state: disable
     jobs_file: "{{ jobs_file }}"
 - name: Enabling all backup jobs in specified file
-  veeam_vbr_upgrade_job_prep:
+  veeamhub.veeam.veeam_vbr_upgrade_job_prep:
     state: enable
     jobs_file: "{{ jobs_file }}"
 '''
 
 RETURN = r'''
--
+msg:
+  description:
+    - Status message describing the result of the operation.
+    - When C(state=disable), reports that job names were saved.
+    - When C(state=enable), reports that jobs were re-enabled.
+  returned: always
+  type: str
+  sample: "Backup Job names of all disabled jobs have been saved."
+file:
+  description: Full path to the CSV file used to store or retrieve the list of backup job names.
+  returned: always
+  type: str
+  sample: "C:\\install\\DisabledJobs20230101T120000.csv"
+output:
+  description:
+    - JSON-encoded list of backup jobs that were enabled, each containing Id, Name, and Enabled fields.
+    - Only returned when C(state=enable).
+  returned: when state is enable
+  type: str
+  sample: '[{"Id": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx", "Name": "BackupJob1", "Enabled": true}]'
 '''

@@ -78,30 +78,35 @@ options:
 
 author:
     - Markus Kraus (@vMarkusK)
+
+notes:
+  - This is an MVP with very limited functionality.
+  - Not idempotent.
 '''
 
 EXAMPLES = r'''
 - name: Test Veeam RestAPI Collection
   hosts: localhost
+  gather_facts: false
   tasks:
     - name: Test veeam_vbr_rest_credentials Create
       veeamhub.veeam.veeam_vbr_rest_credentials:
-        server_name: "<FQDN/IP>"
-        server_username: "<Username>"
-        server_password: "<Password>"
+        server_name: "<VBR Host>"
+        server_username: "<VBR User>"
+        server_password: "<VBR Password>"
         type: "Linux"
-        username: "<Username>"
+        username: "root"
         password: "<Password>"
         description: "Created by Ansible RestAPI Module"
       register: create_cred
     - name: Debug Result
       ansible.builtin.debug:
         var: create_cred
-    - name: Test veeam_vbr_credentials Delete
+    - name: Test veeam_vbr_rest_credentials Delete
       veeamhub.veeam.veeam_vbr_rest_credentials:
-        server_name: "<FQDN/IP>"
-        server_username: "<Username>"
-        server_password: "<Password>"
+        server_name: "<VBR Host>"
+        server_username: "<VBR User>"
+        server_password: "<VBR Password>"
         id: "{{ create_cred.msg.id }}"
         state: absent
       register: delete_cred
@@ -210,7 +215,7 @@ def run_module():
 
         if info['status'] != 201:
             module.fail_json(msg="Fail: %s" % ("Status: " + str(info['status']) + ", Message: " + str(info['msg'])))
-        
+
         # Logout
         headers = {
             'x-api-version': apiversion,
@@ -249,7 +254,7 @@ def run_module():
 
             if info['status'] != 204:
                 module.fail_json(msg="Fail: %s" % ("Status: " + str(info['status']) + ", Message: " + str(info['msg'])))
-            
+
             # Logout
             headers = {
                 'x-api-version': apiversion,

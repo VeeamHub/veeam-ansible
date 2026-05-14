@@ -51,14 +51,15 @@ author:
 '''
 
 EXAMPLES = r'''
-- name: Veeam RestAPI Collection
+- name: Test Veeam RestAPI Collection
   hosts: localhost
+  gather_facts: false
   tasks:
     - name: Test veeam_vbr_rest_managedservers_info
       veeamhub.veeam.veeam_vbr_rest_managedservers_info:
-        server_name: "<FQDN/IP>"
-        server_username: "<Username>"
-        server_password: "<Password>"
+        server_name: "<VBR Host>"
+        server_username: "<VBR User>"
+        server_password: "<VBR Password>"
       register: testout
     - name: Debug Result
       ansible.builtin.debug:

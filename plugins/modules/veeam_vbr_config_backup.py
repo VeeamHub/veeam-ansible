@@ -35,10 +35,14 @@ options:
 
 EXAMPLES = r'''
 - name: Start adhoc VBR configuration backup job
-  veeam_vbr_config_backup:
+  veeamhub.veeam.veeam_vbr_config_backup:
     state: adhoc
 '''
 
 RETURN = r'''
--
+changed:
+  description: Whether the VBR configuration backup job state was changed.
+  returned: always
+  type: bool
+  sample: true
 '''

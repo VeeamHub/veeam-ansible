@@ -20,6 +20,7 @@ description:
 requirements:
    - Windows Server 2019
    - Windows Server 2022
+   - Windows Server 2025
 notes:
   - Function taken from U(https://helpcenter.veeam.com/docs/backup/powershell/getting_started.html)
   - Values are pulled from the registry
@@ -41,12 +42,12 @@ options:
 
 EXAMPLES = r'''
 - name: Checking to see if Veeam Backup & Replication Server is installed
-  veeam_software_check:
+  veeamhub.veeam.veeam_software_check:
     name: "Veeam Backup & Replication Server"
 
 
 - name: Checking to see if Veeam software is installed
-  veeam_software_check:
+  veeamhub.veeam.veeam_software_check:
     name: "Veeam*"
     allow_multiple: true
   register: software
@@ -55,5 +56,23 @@ EXAMPLES = r'''
 '''
 
 RETURN = r'''
--
+installed:
+  description: Whether the specified software is installed on the target system.
+  returned: always
+  type: bool
+  sample: true
+version:
+  description:
+    - Version string of the installed software.
+    - Only returned when a single match is found.
+  returned: when installed is true and only one software entry is matched
+  type: str
+  sample: "11.0.1.1261"
+output:
+  description:
+    - JSON-encoded list of matching software entries, each containing DisplayName and Version.
+    - Only returned when C(allow_multiple=true) and more than one match is found.
+  returned: when installed is true, allow_multiple is true, and multiple matches are found
+  type: str
+  sample: '[{"DisplayName": "Veeam Backup & Replication Server", "Version": "11.0.1.1261"}]'
 '''

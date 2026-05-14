@@ -6,6 +6,36 @@ veeamhub.veeam Release Notes
 
 This changelog describes changes after version 1.5.0.
 
+v2.3.8
+======
+
+Minor Changes
+-------------
+
+- Added new module - `defender_exclusions` - enabling management of Microsoft Defender exclusions including playbook examples of setting Veeam exclusions.
+- Updated documentation of all modules in this collection to use FQCN in all examples.
+
+v2.3.7
+======
+
+Only changes were updates to GitHub Action workflows.
+
+v2.3.6
+======
+
+Bugfixes
+-------------
+
+- Fixed issue with Veeam Backup & Replication stopping Backup Copy Jobs (https://github.com/VeeamHub/veeam-ansible/issues/88)
+
+v2.3.5
+======
+
+Bugfixes
+-------------
+
+- Fixed module documentation (https://github.com/VeeamHub/veeam-ansible/issues/90)
+
 v2.3.4
 ======
 

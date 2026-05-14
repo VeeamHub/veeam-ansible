@@ -20,6 +20,7 @@ description:
 requirements:
    - Windows Server 2019
    - Windows Server 2022
+   - Windows Server 2025
 notes:
   - Base code taken from U(https://github.com/bcwilhite/PendingReboot/)
   - Values are pulled from the registry
@@ -29,7 +30,7 @@ author:
 
 EXAMPLES = r'''
 - name: Checking to see if there is a pending reboot
-  pending_reboot_check:
+  veeamhub.veeam.pending_reboot_check:
   register: check
 - name: Rebooting if necessary
   ansible.windows.win_reboot:
@@ -37,5 +38,9 @@ EXAMPLES = r'''
 '''
 
 RETURN = r'''
--
+pending_reboot:
+  description: Whether a pending reboot has been detected.
+  returned: always
+  type: bool
+  sample: true
 '''
