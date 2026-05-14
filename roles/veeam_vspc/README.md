@@ -1,6 +1,6 @@
 # veeamhub.veeam.veeam_vspc
 
-An Ansible Role to install and upgrade [Veeam Service Provider Console](https://www.veeam.com/service-provider-console.html) (VSPC).
+An Ansible Role to install [Veeam Service Provider Console](https://www.veeam.com/service-provider-console.html) (VSPC).
 
 - [veeamhub.veeam.veeam\_vspc](#veeamhubveeamveeam_vspc)
   - [How to use this Role](#how-to-use-this-role)
@@ -20,12 +20,13 @@ An Ansible Role to install and upgrade [Veeam Service Provider Console](https://
   - [Example Playbooks](#example-playbooks)
     - [VSPC Server Install with Remote SQL Server (Windows Authentication)](#vspc-server-install-with-remote-sql-server-windows-authentication)
     - [VSPC Server Install with Remote SQL Server (SQL Authentication)](#vspc-server-install-with-remote-sql-server-sql-authentication)
-    - [VSPC Server Install with ConnectWise Manage Plugin](#vspc-server-install-with-connectwise-manage-plugin)
-    - [VSPC Server Install with File-Level Restore Plugin](#vspc-server-install-with-file-level-restore-plugin)
     - [VSPC Web UI Install (co-located with Server)](#vspc-web-ui-install-co-located-with-server)
     - [VSPC Web UI Install (remote Server)](#vspc-web-ui-install-remote-server)
-    - [VSPC Web UI Install with ConnectWise Manage UI Component](#vspc-web-ui-install-with-connectwise-manage-ui-component)
-    - [VSPC Web UI Install with File-Level Restore UI Component](#vspc-web-ui-install-with-file-level-restore-ui-component)
+    - [VSPC Server Install with Advanced ConnectWise Manage Plugin Configuration](#vspc-server-install-with-advanced-connectwise-manage-plugin-configuration)
+    - [VSPC Server Install with Advanced File-Level Restore Plugin Configuration](#vspc-server-install-with-advanced-file-level-restore-plugin-configuration)
+    - [VSPC Web UI Install with Advanced File-Level Restore UI Component Configuration](#vspc-web-ui-install-with-advanced-file-level-restore-ui-component-configuration)
+    - [VSPC Server Install without Plugins](#vspc-server-install-without-plugins)
+    - [VSPC Web UI Install without Plugins](#vspc-web-ui-install-without-plugins)
 
 ## How to use this Role
 
@@ -118,8 +119,8 @@ Variables are located in two different locations:
 | `vspc_server_name` | `"localhost"` | FQDN or IP address of the VSPC Server. Used when installing the Web UI on a separate host. |
 | `vspc_website_port` | `"1280"` | Port for browser access to the VSPC Web UI. |
 | `vspc_configure_schannel` | `"1"` | Enable high security mode (TLS 1.2, disables weak ciphers). `1` = enabled (default). |
-
-> **Note:** When installing the Web UI component, `service_account_username` and `service_account_password` (defined in [Server Component Variables](#server-component-variables)) are also used by the Web UI to connect to the VSPC Server.
+| `vspc_server_account_name` | `"{{ service_account_username }}"` | Windows account the Web UI service uses to authenticate to the VSPC Server. Defaults to `service_account_username`. Must not be `LocalSystem`. **Required** — the installer will fail if left empty. Use Ansible Vault for sensitive values. |
+| `vspc_server_account_password` | `"{{ service_account_password }}"` | Password for `vspc_server_account_name`. Defaults to `service_account_password`. **Required** — the installer will fail if left empty. Use Ansible Vault. |
 
 ### ConnectWise Manage Plugin Variables
 
@@ -127,13 +128,13 @@ The `vspc_connectwise_plugin` flag controls installation of both the server comp
 
 | Variable | Default | Description |
 |---|---|---|
-| `vspc_connectwise_plugin` | `false` | Set to `true` to install the ConnectWise Manage Plugin components. |
-| `vspc_cwm_server_name` | `"localhost"` | FQDN or IP of the VSPC Server the CWM plugin server component connects to. |
+| `vspc_connectwise_plugin` | `true` | Set to `false` to skip installation of the ConnectWise Manage Plugin components. |
+| `vspc_cwm_server_name` | `"{{ vspc_server_name }}"` | FQDN or IP of the VSPC Server the CWM plugin server component connects to. |
 | `vspc_cwm_communication_port` | `"9996"` | Port the CWM plugin uses to communicate with VSPC. |
-| `vspc_cwm_username` | _(not set)_ | Account under which the CWM plugin service runs (must have local Admin). Required when `vspc_connectwise_plugin: true`. Use Ansible Vault. |
-| `vspc_cwm_password` | _(not set)_ | Password for `vspc_cwm_username`. Required when `vspc_connectwise_plugin: true`. Use Ansible Vault. |
-| `vspc_cwm_server_account_name` | _(not set)_ | Account used by the CWM plugin to connect to the VSPC server (must have local Admin). Required when `vspc_connectwise_plugin: true`. |
-| `vspc_cwm_server_account_password` | _(not set)_ | Password for `vspc_cwm_server_account_name`. Required when `vspc_connectwise_plugin: true`. Use Ansible Vault. |
+| `vspc_cwm_username` | `"{{ service_account_username }}"` | Account under which the CWM plugin service runs (must have local Admin). Defaults to `service_account_username`. Use Ansible Vault. |
+| `vspc_cwm_password` | `"{{ service_account_password }}"` | Password for `vspc_cwm_username`. Defaults to `service_account_password`. Use Ansible Vault. |
+| `vspc_cwm_server_account_name` | `"{{ service_account_username }}"` | Account used by the CWM plugin to connect to the VSPC server (must have local Admin). Defaults to `service_account_username`. |
+| `vspc_cwm_server_account_password` | `"{{ service_account_password }}"` | Password for `vspc_cwm_server_account_name`. Defaults to `service_account_password`. Use Ansible Vault. |
 
 ### File-Level Restore Plugin Variables
 
@@ -141,19 +142,19 @@ The `vspc_flr_restore_plugin` flag controls installation of both the server comp
 
 | Variable | Default | Description |
 |---|---|---|
-| `vspc_flr_restore_plugin` | `false` | Set to `true` to install the File-Level Restore Plugin components. |
-| `vspc_flr_hub_host_name` | `"localhost"` | FQDN or IP of the VSPC Web UI server. Used by the FLR Web UI component to connect to VSPC. |
-| `vspc_flr_service_account_name` | _(not set)_ | Account under which the FLR server service runs (must have local Admin). Required when `vspc_flr_restore_plugin: true`. |
-| `vspc_flr_service_account_password` | _(not set)_ | Password for `vspc_flr_service_account_name`. Required when `vspc_flr_restore_plugin: true`. Use Ansible Vault. |
-| `vspc_flr_hub_account_name` | _(not set)_ | Account used by the FLR Web UI component to connect to VSPC (must have local Admin). Required when `vspc_flr_restore_plugin: true`. |
-| `vspc_flr_hub_account_password` | _(not set)_ | Password for `vspc_flr_hub_account_name`. Required when `vspc_flr_restore_plugin: true`. Use Ansible Vault. |
+| `vspc_flr_restore_plugin` | `true` | Set to `false` to skip installation of the File-Level Restore Plugin components. |
+| `vspc_flr_hub_host_name` | `"{{ vspc_server_name }}"` | FQDN or IP of the VSPC Web UI server. Used by the FLR Web UI component to connect to VSPC. |
+| `vspc_flr_service_account_name` | `"{{ service_account_username }}"` | Account under which the FLR server service runs (must have local Admin). Defaults to `service_account_username`. |
+| `vspc_flr_service_account_password` | `"{{ service_account_password }}"` | Password for `vspc_flr_service_account_name`. Defaults to `service_account_password`. Use Ansible Vault. |
+| `vspc_flr_hub_account_name` | `"{{ service_account_username }}"` | Account used by the FLR Web UI component to connect to VSPC (must have local Admin). Defaults to `service_account_username`. |
+| `vspc_flr_hub_account_password` | `"{{ service_account_password }}"` | Password for `vspc_flr_hub_account_name`. Defaults to `service_account_password`. Use Ansible Vault. |
 
 ## Known Issues
 
 - **SQL Express is not supported.** This role does not install or configure SQL Express. A pre-existing Microsoft SQL Server instance (local or remote) must be present before running `vspc_server_install`. VSPC v9 supports Microsoft SQL Server only — PostgreSQL is not supported.
 - **Upgrade tasks are not yet implemented.** The task files `vspc_server_upgrade` and `vspc_ui_upgrade` do not currently exist in this role. If VSPC is already installed, the install tasks (`vspc_server_install`, `vspc_ui_install`) will halt with an error directing you to use the upgrade task. Upgrade support is planned for a future release.
 - The `iso_checksum` variable in `vars/vspc_v9.yml` should be verified against the downloaded ISO before use. It is strongly recommended to confirm the checksum from the [Veeam download page](https://www.veeam.com/downloads.html).
-- Sensitive values such as `sql_password`, `service_account_password`, `vspc_cwm_password`, `vspc_flr_service_account_password`, and `vspc_flr_hub_account_password` should be encrypted using [Ansible Vault](https://docs.ansible.com/ansible/latest/vault_guide/vault_encrypting_content.html#creating-encrypted-variables).
+- Sensitive values such as `sql_password`, `service_account_password`, `vspc_server_account_password`, `vspc_cwm_password`, `vspc_flr_service_account_password`, and `vspc_flr_hub_account_password` should be encrypted using [Ansible Vault](https://docs.ansible.com/ansible/latest/vault_guide/vault_encrypting_content.html#creating-encrypted-variables).
 - The VSPC Server and Web UI can be installed on the same host or on separate hosts. When installing on separate hosts, set `vspc_server_name` to the FQDN or IP of the VSPC Server host before running `vspc_ui_install`.
 - The `vspc_connectwise_plugin` and `vspc_flr_restore_plugin` flags apply to both the server and Web UI install task files. Run `vspc_server_install` first (server components), then `vspc_ui_install` (Web UI components) using the same flag values.
 
@@ -203,51 +204,6 @@ Please note there are more configurations than the examples shown below. If you 
         # https://docs.ansible.com/ansible/latest/vault_guide/vault_encrypting_content.html#creating-encrypted-variables
 ```
 
-### VSPC Server Install with ConnectWise Manage Plugin
-
-```yaml
-- name: Veeam Service Provider Console Server Install with ConnectWise Manage Plugin
-  hosts: vspc
-  tasks:
-    - include_role:
-        name: veeamhub.veeam.veeam_vspc
-        tasks_from: vspc_server_install
-      vars:
-        version: "9"
-        iso_download: true
-        source_license: "/root/ansible/vspc-license.lic"
-        service_account_username: "svc_vspc"
-        service_account_password: "ChangeM3!"
-        vspc_connectwise_plugin: true
-        vspc_cwm_server_name: "vspc.contoso.local"
-        vspc_cwm_username: "CONTOSO\\cwm.svc"
-        vspc_cwm_password: "ChangeM3!"
-        vspc_cwm_server_account_name: "Administrator"
-        vspc_cwm_server_account_password: "ChangeM3!"
-        # https://docs.ansible.com/ansible/latest/vault_guide/vault_encrypting_content.html#creating-encrypted-variables
-```
-
-### VSPC Server Install with File-Level Restore Plugin
-
-```yaml
-- name: Veeam Service Provider Console Server Install with File-Level Restore Plugin
-  hosts: vspc
-  tasks:
-    - include_role:
-        name: veeamhub.veeam.veeam_vspc
-        tasks_from: vspc_server_install
-      vars:
-        version: "9"
-        iso_download: true
-        source_license: "/root/ansible/vspc-license.lic"
-        service_account_username: "svc_vspc"
-        service_account_password: "ChangeM3!"
-        vspc_flr_restore_plugin: true
-        vspc_flr_service_account_name: "CONTOSO\\flr.svc"
-        vspc_flr_service_account_password: "ChangeM3!"
-        # https://docs.ansible.com/ansible/latest/vault_guide/vault_encrypting_content.html#creating-encrypted-variables
-```
-
 ### VSPC Web UI Install (co-located with Server)
 
 ```yaml
@@ -283,26 +239,50 @@ Please note there are more configurations than the examples shown below. If you 
         # https://docs.ansible.com/ansible/latest/vault_guide/vault_encrypting_content.html#creating-encrypted-variables
 ```
 
-### VSPC Web UI Install with ConnectWise Manage UI Component
+### VSPC Server Install with Advanced ConnectWise Manage Plugin Configuration
 
 ```yaml
-- name: Veeam Service Provider Console Web UI Install with ConnectWise Manage UI Component
-  hosts: vspc_webui
+- name: Veeam Service Provider Console Server Install with ConnectWise Manage Plugin
+  hosts: vspc
   tasks:
     - include_role:
         name: veeamhub.veeam.veeam_vspc
-        tasks_from: vspc_ui_install
+        tasks_from: vspc_server_install
       vars:
         version: "9"
         iso_download: true
-        vspc_server_name: "vspc-server.contoso.local"
+        source_license: "/root/ansible/vspc-license.lic"
         service_account_username: "svc_vspc"
         service_account_password: "ChangeM3!"
-        vspc_connectwise_plugin: true
+        vspc_cwm_server_name: "vspc.contoso.local"
+        vspc_cwm_username: "CONTOSO\\cwm.svc"
+        vspc_cwm_password: "ChangeM3!"
+        vspc_cwm_server_account_name: "Administrator"
+        vspc_cwm_server_account_password: "ChangeM3!"
         # https://docs.ansible.com/ansible/latest/vault_guide/vault_encrypting_content.html#creating-encrypted-variables
 ```
 
-### VSPC Web UI Install with File-Level Restore UI Component
+### VSPC Server Install with Advanced File-Level Restore Plugin Configuration
+
+```yaml
+- name: Veeam Service Provider Console Server Install with File-Level Restore Plugin
+  hosts: vspc
+  tasks:
+    - include_role:
+        name: veeamhub.veeam.veeam_vspc
+        tasks_from: vspc_server_install
+      vars:
+        version: "9"
+        iso_download: true
+        source_license: "/root/ansible/vspc-license.lic"
+        service_account_username: "svc_vspc"
+        service_account_password: "ChangeM3!"
+        vspc_flr_service_account_name: "CONTOSO\\flr.svc"
+        vspc_flr_service_account_password: "ChangeM3!"
+        # https://docs.ansible.com/ansible/latest/vault_guide/vault_encrypting_content.html#creating-encrypted-variables
+```
+
+### VSPC Web UI Install with Advanced File-Level Restore UI Component Configuration
 
 ```yaml
 - name: Veeam Service Provider Console Web UI Install with File-Level Restore UI Component
@@ -317,9 +297,47 @@ Please note there are more configurations than the examples shown below. If you 
         vspc_server_name: "vspc-server.contoso.local"
         service_account_username: "svc_vspc"
         service_account_password: "ChangeM3!"
-        vspc_flr_restore_plugin: true
         vspc_flr_hub_host_name: "vspc-webui.contoso.local"
         vspc_flr_hub_account_name: "Administrator"
         vspc_flr_hub_account_password: "ChangeM3!"
+        # https://docs.ansible.com/ansible/latest/vault_guide/vault_encrypting_content.html#creating-encrypted-variables
+```
+
+### VSPC Server Install without Plugins
+
+```yaml
+- name: Veeam Service Provider Console Server Install without Plugins
+  hosts: vspc
+  tasks:
+    - include_role:
+        name: veeamhub.veeam.veeam_vspc
+        tasks_from: vspc_server_install
+      vars:
+        version: "9"
+        iso_download: true
+        source_license: "/root/ansible/vspc-license.lic"
+        service_account_username: "svc_vspc"
+        service_account_password: "ChangeM3!"
+        vspc_connectwise_plugin: false
+        vspc_flr_restore_plugin: false
+        # https://docs.ansible.com/ansible/latest/vault_guide/vault_encrypting_content.html#creating-encrypted-variables
+```
+
+### VSPC Web UI Install without Plugins
+
+```yaml
+- name: Veeam Service Provider Console Web UI Install without Plugins
+  hosts: vspc
+  tasks:
+    - include_role:
+        name: veeamhub.veeam.veeam_vspc
+        tasks_from: vspc_ui_install
+      vars:
+        version: "9"
+        iso_download: true
+        service_account_username: "svc_vspc"
+        service_account_password: "ChangeM3!"
+        vspc_connectwise_plugin: false
+        vspc_flr_restore_plugin: false
         # https://docs.ansible.com/ansible/latest/vault_guide/vault_encrypting_content.html#creating-encrypted-variables
 ```

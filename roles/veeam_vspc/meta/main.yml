@@ -1,7 +1,7 @@
 ---
 galaxy_info:
   author: Chris Arceneaux
-  description: Install and upgrade Veeam Service Provider Console
+  description: Install Veeam Service Provider Console
   company: VeeamHub
   license: GPL-3.0-only
   min_ansible_version: '2.16.0'

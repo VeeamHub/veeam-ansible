@@ -15,7 +15,7 @@
   register: software
 - name: Is Veeam Service Provider Console Server already installed?
   ansible.builtin.fail:
-    msg: "Veeam Service Provider Console Server is already installed on this server. Please use the upgrade task (vspc_server_upgrade) instead."
+    msg: "Veeam Service Provider Console Server is already installed on this server." # Please use the upgrade task (vspc_server_upgrade) instead."
   when: software.installed | bool
 - name: Is a valid service account specified?
   ansible.builtin.fail:
@@ -147,7 +147,7 @@
 # Silent install reference: https://helpcenter.veeam.com/docs/vac/deployment/silent_install_cwm.html?ver=9.2
 - name: Install ConnectWise Manage Plugin Server Component
   ansible.windows.win_package:
-    path: "{{ source }}Plugins\\ConnectWiseManage\\VAC.ConnectorService.x64.msi"
+    path: "{{ source }}Plugins\\ConnectWise\\Manage\\VAC.ConnectorService.x64.msi"
     state: present
     arguments: '/L*v "{{ destination }}logs\\VAC.ConnectorService.x64.log" /qn ACCEPT_EULA="1" ACCEPT_LICENSING_POLICY="1" ACCEPT_THIRDPARTY_LICENSES="1" ACCEPT_REQUIRED_SOFTWARE="1" USERNAME="{{ vspc_cwm_username }}" PASSWORD="{{ vspc_cwm_password }}" SERVER_ACCOUNT_NAME="{{ vspc_cwm_server_account_name }}" SERVER_ACCOUNT_PASSWORD="{{ vspc_cwm_server_account_password }}" SERVER_NAME="{{ vspc_cwm_server_name }}" VAC_SERVER_MANAGEMENT_PORT="{{ vspc_server_management_port }}"'
   when: vspc_connectwise_plugin | bool
@@ -156,7 +156,7 @@
 # Silent install reference: https://helpcenter.veeam.com/docs/vac/deployment/silent_install_flr.html?ver=9.2
 - name: Install File-Level Restore Plugin Server Component
   ansible.windows.win_package:
-    path: "{{ source }}Plugins\\FileLevelRestore\\VSPC.VeeamAgentsSelfServicePortal.x64.msi"
+    path: "{{ source }}Plugins\\VeeamAgent\\FLRPortal\\VSPC.VeeamAgentsSelfServicePortal.x64.msi"
     state: present
     arguments: '/L*v "{{ destination }}logs\\VSPC.VeeamAgentsSelfServicePortal.x64.log" /qn ACCEPT_EULA="1" ACCEPT_LICENSING_POLICY="1" ACCEPT_THIRDPARTY_LICENSES="1" ACCEPT_REQUIRED_SOFTWARE="1" VAC_FLR_SERVICE_ACCOUNT_NAME="{{ vspc_flr_service_account_name }}" VAC_FLR_SERVICE_ACCOUNT_PASSWORD="{{ vspc_flr_service_account_password }}"'
   when: vspc_flr_restore_plugin | bool
